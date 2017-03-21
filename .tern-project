@@ -1,0 +1,11 @@
+{
+  "ecmaVersion": 6,
+  "loadEagerly": [
+    "node_modules/react-dom/dist/react-dom.js",
+    "node_modules/react/dist/react.js"
+  ],
+  "plugins": {
+    "node": {},
+    "es_modules": {}
+  }
+}
