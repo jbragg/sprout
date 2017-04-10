@@ -86,28 +86,26 @@ function receiveExperiment(json) {
   return {type: RECEIVE_EXPERIMENT, payload: json};
 }
 
-function stringAnswerToInt(answer) {
+const answerKey = [
+  'Definitely No',
+  'Probably No',
+  'No preference for Yes or No',
+  'Probably Yes',
+  'Definitely Yes',
+];
+
+function formatAnswerData(answerData) {
   // TODO: Do this server-side.
-  switch (answer) {
-    case 'Definitely Yes': {
-      return 1;
-    }
-    case 'Probably Yes': {
-      return 2;
-    }
-    case 'No preference for Yes or No': {
-      return 3;
-    }
-    case 'Probably No': {
-      return 4;
-    }
-    case 'Definitely No': {
-      return 5;
-    }
-    default: {
-      return Number(answer);
-    }
-  }
+  const answerKeyIndex = answerKey.indexOf(answerData.answer);
+  let answerValue = (answerKeyIndex >= 0) ? answerKeyIndex + 1 : Number(answerData.answer);
+  // Answers on the server go from Definitely Yes to Definitely No, but we reverse that.
+  answerValue = (answerValue - 3) * -1 + 3;
+  return {
+    ...answerData,
+    answer: answerValue,
+    answerString: answerKey[answerValue - 1],
+    unclearReasonString: (answerData.unclear_type || answerData.unclear_reason) ? `Questions about ${answerData.unclear_type || '[MISSING]'} may be unclear because ${answerData.unclear_reason || '[MISSING]'}` : null,
+  };
 }
 
 export function fetchExperiment() {
@@ -126,7 +124,7 @@ export function fetchExperiment() {
           item.data.path = `${rootDirPrefix}/${item.data.path}`;
         }
         for (let answer of answers) {
-          answer.data.answer = stringAnswerToInt(answer.data.answer);
+          answer.data = formatAnswerData(answer.data);
         }
         dispatch(receiveExperiment({
           items: experiment.data.data,

@@ -8,7 +8,14 @@ const propTypes = {
 
 const ItemList = ({ itemIds }) => (
   <div className="form-group itemlist">
-    {itemIds.map(itemId => (<ItemContainer itemId={itemId} key={itemId} version="button" />))}
+    {itemIds.map(itemId => (
+      <ItemContainer
+        itemId={itemId}
+        key={itemId}
+        version="button"
+        color="confusion"
+      />
+    ))}
   </div>
 );
 
