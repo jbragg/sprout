@@ -59,11 +59,20 @@ const Instructions = ({ finalLabels, groups, onGroupEdit, onEditGeneralInstructi
               </div>
             ))}
             <div className="form-group">
-              <label>General Instructions</label>
+              <label>General Instructions:</label>
+              <span className="pull-right">
+                <span>Supports </span>
+                <a
+                  href="http://commonmark.org/help/"
+                  target="_blank"
+                >
+                  Markdown
+                </a>
+              </span>
               <textarea
                 className="form-control"
                 rows="3"
-                placeholder="Free-form instructions"
+                placeholder="Use this space for instructions that don't fit in any single group, or to call attention to common mistakes."
                 value={generalInstructions || ''}
                 onChange={(e) => { onEditGeneralInstructions(e.target.value); }}
               />
