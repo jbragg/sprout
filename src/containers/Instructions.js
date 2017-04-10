@@ -31,7 +31,7 @@ const Instructions = ({ finalLabels, groups, onGroupEdit, onEditGeneralInstructi
                       <span className="input-group-addon">
                         <input
                           type="checkbox"
-                          value={group.inInstructions}
+                          checked={group.inInstructions}
                           onChange={(e) => {
                             onGroupEdit(
                               group.id,

@@ -26,6 +26,7 @@ class LabelSection extends React.Component {
     this.props.onGroupCreate({
       label: this.props.label,
       name: this.state.newGroupName,
+      inInstructions: true,
     });
     this.setState({newGroupName: ''});
   }
