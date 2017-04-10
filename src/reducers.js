@@ -1,4 +1,4 @@
-import { EDIT_LABEL_FORM, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
+import { EDIT_LABEL_FORM, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
 
 const initialState = {
   labels: ['yes', 'maybe', 'no'],
@@ -13,6 +13,7 @@ const initialState = {
     answers: { byId: new Map() },
   },
   drillDownForm: {},
+  generalInstructions: '',
 };
 
 
@@ -25,6 +26,12 @@ function InstructionsApp(state = initialState, action) {
           ...state.drillDownForm,
           ...action.keyValues,
         },
+      };
+    }
+    case EDIT_GENERAL_INSTRUCTIONS: {
+      return {
+        ...state,
+      generalInstructions: action.markdown,
       };
     }
     case SET_CURRENT_ITEM: {

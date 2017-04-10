@@ -1,15 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { editGroup } from '../actions';
+import ReactMarkdown from 'react-markdown';
+import { editGroup, editGeneralInstructions } from '../actions';
 
 const propTypes = {
   onGroupEdit: PropTypes.func.isRequired,
+  onEditGeneralInstructions: PropTypes.func.isRequired,
   initialInstructions: PropTypes.string.isRequired,
+  generalInstructions: PropTypes.string.isRequired,
   finalLabels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
 };
 
-const Instructions = ({ finalLabels, groups, onGroupEdit, initialInstructions }) => (
+const Instructions = ({ finalLabels, groups, onGroupEdit, onEditGeneralInstructions, initialInstructions, generalInstructions }) => (
   <div className="row">
     <div className="col-sm-6">
       <div className="panel panel-default">
@@ -55,6 +58,16 @@ const Instructions = ({ finalLabels, groups, onGroupEdit, initialInstructions })
                 ))}
               </div>
             ))}
+            <div className="form-group">
+              <label>General Instructions</label>
+              <textarea
+                className="form-control"
+                rows="3"
+                placeholder="Free-form instructions"
+                value={generalInstructions || ''}
+                onChange={(e) => { onEditGeneralInstructions(e.target.value); }}
+              />
+            </div>
           </form>
         </div>
       </div>
@@ -77,6 +90,7 @@ const Instructions = ({ finalLabels, groups, onGroupEdit, initialInstructions })
               </ul>
             </div>
           ))}
+          <ReactMarkdown source={generalInstructions} />
         </div>
       </div>
     </div>
@@ -89,11 +103,15 @@ const mapStateToProps = state => ({
   finalLabels: state.finalLabels,
   groups: [...state.entities.groups.byId.values()],
   initialInstructions: state.initialInstructions,
+  generalInstructions: state.generalInstructions,
 });
 
 const mapDispatchToProps = dispatch => ({
   onGroupEdit: (groupId, keyValues) => {
     dispatch(editGroup(groupId, keyValues));
+  },
+  onEditGeneralInstructions: (markdown) => {
+    dispatch(editGeneralInstructions(markdown));
   },
 });
 

@@ -10,6 +10,7 @@ export const ASSIGN_ITEM = 'ASSIGN_ITEM';
 export const CREATE_GROUP = 'CREATE_GROUP';
 export const MERGE_GROUP = 'MERGE_GROUP';
 export const EDIT_GROUP = 'EDIT_GROUP';
+export const EDIT_GENERAL_INSTRUCTIONS = 'EDIT_GENERAL_INSTRUCTIONS';
 export const REQUEST_EXPERIMENT = 'REQUEST_EXPERIMENT';
 export const RECEIVE_EXPERIMENT = 'RECEIVE_EXPERIMENT';
 export const FETCH_EXPERIMENT = 'FETCH_EXPERIMENT';
@@ -67,6 +68,13 @@ export function mergeGroup(groupId, target) {
     type: MERGE_GROUP,
     groupId,
     target,  // {label: labelName} or {group: groupId}
+  };
+}
+
+export function editGeneralInstructions(markdown) {
+  return {
+    type: EDIT_GENERAL_INSTRUCTIONS,
+    markdown,
   };
 }
 
