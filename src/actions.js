@@ -14,6 +14,7 @@ export const EDIT_GENERAL_INSTRUCTIONS = 'EDIT_GENERAL_INSTRUCTIONS';
 export const REQUEST_EXPERIMENT = 'REQUEST_EXPERIMENT';
 export const RECEIVE_EXPERIMENT = 'RECEIVE_EXPERIMENT';
 export const FETCH_EXPERIMENT = 'FETCH_EXPERIMENT';
+export const EDIT_COLOR_UNREVIEWED = 'EDIT_COLOR_UNREVIEWED';
 
 /*
  * action creators
@@ -23,6 +24,13 @@ export function editLabelForm(keyValues) {
   return {
     type: EDIT_LABEL_FORM,
     keyValues,
+  };
+}
+
+export function editColorUnreviewed(metric) {
+  return {
+    type: EDIT_COLOR_UNREVIEWED,
+    metric,
   };
 }
 

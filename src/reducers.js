@@ -1,4 +1,4 @@
-import { EDIT_LABEL_FORM, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
+import { EDIT_LABEL_FORM, EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
 
 const initialState = {
   labels: ['yes', 'maybe', 'no'],
@@ -14,6 +14,7 @@ const initialState = {
   },
   drillDownForm: {},
   generalInstructions: '',
+  colorUnreviewedBy: 'answer',
 };
 
 
@@ -32,6 +33,12 @@ function InstructionsApp(state = initialState, action) {
       return {
         ...state,
       generalInstructions: action.markdown,
+      };
+    }
+    case EDIT_COLOR_UNREVIEWED: {
+      return {
+        ...state,
+        colorUnreviewedBy: action.metric
       };
     }
     case SET_CURRENT_ITEM: {
