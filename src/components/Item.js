@@ -3,6 +3,13 @@ import PropTypes from 'prop-types';
 import { scaleLinear } from 'd3-scale';
 import { interpolateRdYlGn, interpolateReds } from 'd3-scale-chromatic';
 
+// from https://24ways.org/2010/calculating-color-contrast/
+const getContrastColor = (rgbColor) => {
+  const [r, g, b] = rgbColor.split('(')[1].split(')')[0].split(',');
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return (yiq >= 128) ? 'black' : 'white';
+};
+
 const answerScore = vals => (
   scaleLinear().domain([1, 5]).range([1, 0])(
     vals.reduce((a, b) => a + b, 0) / vals.length)
@@ -34,21 +41,26 @@ const propTypes = {
   version: PropTypes.string.isRequired,
 };
 
-const ButtonItem = ({ currentItemId, item, answers, onClick, color }) => (
-  <div className="item">
-    <button
-      className={`btn btn-default btn-block ${currentItemId === item.id ? 'active' : ''}`}
-      onClick={onClick}
-      style={{
-        color: 'white',
-        backgroundColor: (color !== 'confusion' ? (x) => confusionColor(
-          confusionScore(x)) : (x) => answerColor(answerScore(x)))(answers.map(answer => answer.data.answer)),
-      }}
-    >
-      {item.id}
-    </button>
-  </div>
-);
+const ButtonItem = ({ currentItemId, item, answers, onClick, color }) => {
+  const backgroundColor = (color !== 'confusion'
+    ? x => confusionColor(confusionScore(x))
+    : x => answerColor(answerScore(x)))(answers.map(answer => answer.data.answer));
+  const textColor = getContrastColor(backgroundColor);
+  return (
+    <div className="item">
+      <button
+        className={`btn btn-default btn-block ${currentItemId === item.id ? 'active' : ''}`}
+        onClick={onClick}
+        style={{
+          color: textColor,
+          backgroundColor,
+        }}
+      >
+        {item.id}
+      </button>
+    </div>
+  );
+};
 
 const LargeItem = ({ item, answers, onLoad }) => (
   <div className="item-large">
