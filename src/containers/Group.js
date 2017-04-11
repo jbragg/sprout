@@ -82,6 +82,7 @@ class Group extends React.Component {
                 }
               </select>
             </div>
+            {' '}
             <div className="form-group">
               <label className="sr-only">Merge Group</label>
               <select
