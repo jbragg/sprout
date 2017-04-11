@@ -40,7 +40,7 @@ const App = ({ labels, experimentState, initialInstructions, currentItemId, colo
                 value={colorUnreviewedBy}
                 onChange={ (e) => {onEditColorUnreviewed(e.target.value);} }
               >
-                {['confusion', 'answer'].map(metric => (
+                {['answer', 'agreement', 'confusion'].map(metric => (
                   <option value={metric} key={metric}>{metric}</option>
                 ))}
               </select>

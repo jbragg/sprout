@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 import PropTypes from 'prop-types';
-import { interpolateRdYlGn, interpolateReds } from 'd3-scale-chromatic';
+import { interpolateRdYlGn, interpolateReds, interpolateGreens } from 'd3-scale-chromatic';
 import getScore from '../score';
 
 // from https://24ways.org/2010/calculating-color-contrast/
@@ -11,11 +11,14 @@ const getContrastColor = (rgbColor) => {
   return (yiq >= 128) ? 'black' : 'white';
 };
 
-const answerColor = interpolateRdYlGn;
-const confusionColor = interpolateReds;
-const getColor = color => (
-  color !== 'confusion' ? answerColor : confusionColor
-);
+const getColor = (color) => {
+  if (color === 'confusion') {
+    return interpolateReds;
+  } else if (color === 'agreement') {
+    return interpolateGreens;
+  }
+  return interpolateRdYlGn;  // color === 'answer'
+};
 
 const propTypes = {
   currentItemId: PropTypes.number,
