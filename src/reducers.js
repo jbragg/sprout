@@ -68,14 +68,15 @@ function InstructionsApp(state = initialState, action) {
         // Move to next similarItem.
         currentItemId = state.similarItemIds[0];
       } else if (action.itemId == null) {
-        // No more similarItems
+        // No more similarItems.
         currentItemId = primaryItemId;
-      } else if (action.itemId === currentItemId || similarItemIds.indexOf(action.itemId) >= 0) {
-        currentItemId = action.itemId;
-      } else {
+      } else if (getUnlabeledItemIds(state).indexOf(action.itemId) >= 0 && action.itemId !== primaryItemId && similarItemIds.indexOf(action.itemId) < 0) {
+        // New unlabeled item selected.
         primaryItemId = action.itemId;
         currentItemId = primaryItemId;
         similarItemIds = getSimilarItemIds(primaryItemId, getUnlabeledItemIds(state), 5);
+      } else {
+        currentItemId = action.itemId;
       }
       return {
         ...state,
@@ -94,6 +95,7 @@ function InstructionsApp(state = initialState, action) {
       return {
         ...state,
         currentItemId: action.itemId === state.currentItemId ? null : state.currentItemId,
+        primaryItemId: action.itemId === state.primaryItemId ? null : state.primaryItemId,
         similarItemIds: [...state.similarItemIds].filter(id => id !== action.itemId),
         entities: {
           ...state.entities,

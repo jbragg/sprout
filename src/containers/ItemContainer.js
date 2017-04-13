@@ -1,5 +1,7 @@
 import { connect } from 'react-redux';
-import Item from '../components/Item';
+import ItemLarge from '../components/ItemLarge';
+import ItemThumb from '../components/ItemThumb';
+import ItemBtn from '../components/ItemBtn';
 import { setCurrentItem } from '../actions';
 
 const mapStateToProps = (state, { itemId } ) => ({
@@ -15,9 +17,12 @@ const mapDispatchToProps = (dispatch, { itemId }) => ({
   },
 });
 
-const ItemContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(Item);
+const makeItemContainer = x => (
+  connect(mapStateToProps, mapDispatchToProps)(x)
+);
 
-export default ItemContainer;
+const ItemLargeContainer = makeItemContainer(ItemLarge);
+const ItemThumbContainer = makeItemContainer(ItemThumb);
+const ItemBtnContainer = makeItemContainer(ItemBtn);
+
+export { ItemLargeContainer, ItemThumbContainer, ItemBtnContainer };

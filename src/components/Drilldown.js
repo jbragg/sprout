@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ItemContainer from '../containers/ItemContainer';
+import { ItemLargeContainer } from '../containers/ItemContainer';
 
 const propTypes = {
   item: PropTypes.shape({
@@ -134,10 +134,9 @@ class DrillDown extends React.Component {
       <div className="drilldown-container panel panel-default">
         <div className="panel-body">
           <div className={this.state.imageStatus === 'loaded' ? '' : 'hidden'}>
-            <ItemContainer
+            <ItemLargeContainer
               itemId={this.props.item.id}
               onLoad={this.handleImageLoaded}
-              version="drilldown"
             />
           </div>
           {this.state.imageStatus === 'loaded'

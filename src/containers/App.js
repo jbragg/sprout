@@ -6,6 +6,7 @@ import DrillDownContainer from '../containers/DrillDownContainer';
 import SectionItemList from '../containers/SectionItemList';
 import LabelSection from '../containers/LabelSection';
 import Instructions from '../containers/Instructions';
+import SimilarItemList from '../containers/SimilarItemList';
 import { editColorUnreviewed } from '../actions';
 
 const propTypes = {
@@ -66,6 +67,7 @@ const App = ({ labels, experimentState, initialInstructions, currentItemId, colo
           </div>
         </div>
         {currentItemId == null ? null : <DrillDownContainer />}
+        {currentItemId == null ? null : <SimilarItemList />}
       </div>
       <div className="col-sm-6">
         {labels.map(label => <LabelSection label={label} key={label} />)}

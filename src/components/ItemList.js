@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ItemContainer from '../containers/ItemContainer';
+import { ItemBtnContainer } from '../containers/ItemContainer';
 import getScore from '../score';
 
 const propTypes = {
@@ -11,11 +11,10 @@ const propTypes = {
 const ItemList = ({ itemIds, metric }) => (
   <div className="form-group itemlist">
     {itemIds.map(itemId => (
-      <ItemContainer
+      <ItemBtnContainer
         itemId={itemId}
         key={itemId}
-        version="button"
-        color={metric}
+        metric={metric}
       />
     ))}
   </div>

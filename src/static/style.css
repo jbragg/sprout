@@ -13,7 +13,11 @@
     to { -webkit-transform: rotate(360deg); }
 }
 
-.item {
-  display: inline-block;
-  min-width: 3em;
+.item-btn {
+  width: 3em;
+}
+
+.item-thumb {
+  max-width: 6em;
+  padding: 0.5em;
 }
