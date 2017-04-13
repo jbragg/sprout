@@ -37,7 +37,7 @@ export function editColorUnreviewed(metric) {
 export function setCurrentItem(itemId = null) {
   return {
     type: SET_CURRENT_ITEM,
-    newItemId: itemId,
+    itemId,
   };
 }
 

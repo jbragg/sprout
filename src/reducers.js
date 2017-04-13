@@ -1,11 +1,14 @@
 import { EDIT_LABEL_FORM, EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
 
 const initialState = {
+  suggestSimilar: true,  // TODO: Handle false case.
   labels: ['yes', 'maybe', 'no'],
   finalLabels: ['yes', 'no'],
   uncertainLabel: 'maybe',
   experimentState: null,
   currentItemId: null,
+  primaryItemId: null,
+  similarItemIds: [],
   initialInstructions: null,
   entities: {
     groups: { byId: new Map() },
@@ -17,6 +20,17 @@ const initialState = {
   colorUnreviewedBy: 'answer',
 };
 
+const getUnlabeledItemIds = state => (
+  [...state.entities.items.byId.keys()].filter(key =>
+    state.entities.items.byId.get(key).group == null &&
+    state.entities.items.byId.get(key).label == null)
+);
+
+
+// TODO: Return items that are actually similar.
+const getSimilarItemIds = (primaryItemId, unlabeledItemIds, max) => (
+  [...unlabeledItemIds].filter(x => x !== primaryItemId).filter((_, i) => i < max)
+);
 
 function InstructionsApp(state = initialState, action) {
   switch (action.type) {
@@ -32,34 +46,55 @@ function InstructionsApp(state = initialState, action) {
     case EDIT_GENERAL_INSTRUCTIONS: {
       return {
         ...state,
-      generalInstructions: action.markdown,
+        generalInstructions: action.markdown,
       };
     }
     case EDIT_COLOR_UNREVIEWED: {
       return {
         ...state,
-        colorUnreviewedBy: action.metric
+        colorUnreviewedBy: action.metric,
       };
     }
     case SET_CURRENT_ITEM: {
-      const itemId = action.newItemId != null ? action.newItemId :
-        Math.min(...[...state.entities.items.byId.keys()].filter(key =>
-          state.entities.items.byId.get(key).group == null &&
-          state.entities.items.byId.get(key).label == null));
+      let currentItemId = state.currentItemId;
+      let primaryItemId = state.primaryItemId;
+      let similarItemIds = state.similarItemIds;
+      if (action.itemId == null && state.primaryItemId == null) {
+        // Choose next primaryItem.
+        primaryItemId = Math.min(...getUnlabeledItemIds(state));
+        currentItemId = primaryItemId;
+        similarItemIds = getSimilarItemIds(primaryItemId, getUnlabeledItemIds(state), 5);
+      } else if (action.itemId == null && state.similarItemIds.length > 0) {
+        // Move to next similarItem.
+        currentItemId = state.similarItemIds[0];
+      } else if (action.itemId == null) {
+        // No more similarItems
+        currentItemId = primaryItemId;
+      } else if (action.itemId === currentItemId || similarItemIds.indexOf(action.itemId) >= 0) {
+        currentItemId = action.itemId;
+      } else {
+        primaryItemId = action.itemId;
+        currentItemId = primaryItemId;
+        similarItemIds = getSimilarItemIds(primaryItemId, getUnlabeledItemIds(state), 5);
+      }
       return {
         ...state,
-        currentItemId: itemId,
+        currentItemId,
+        primaryItemId,
+        similarItemIds,
         drillDownForm: {
           ...state.drillDownForm,
           hasSubmitted: false,
-          groupId: itemId == null ? null : state.entities.items.byId.get(itemId).group,
-          label: itemId == null ? null : state.entities.items.byId.get(itemId).label,
+          groupId: currentItemId == null ? null : state.entities.items.byId.get(currentItemId).group,
+          label: currentItemId == null ? null : state.entities.items.byId.get(currentItemId).label,
         },
       };
     }
     case ASSIGN_ITEM: {
       return {
         ...state,
+        currentItemId: action.itemId === state.currentItemId ? null : state.currentItemId,
+        similarItemIds: [...state.similarItemIds].filter(id => id !== action.itemId),
         entities: {
           ...state.entities,
           items: {
