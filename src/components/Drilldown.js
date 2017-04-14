@@ -83,7 +83,7 @@ class DrillDown extends React.Component {
       : null
     );
     const form = (
-      <form onSubmit={this.handleSubmit}>
+      <form className="panel panel-default panel-body" onSubmit={this.handleSubmit}>
         <div className="form-group">
           <label>Existing group:</label>
           <select
@@ -133,6 +133,8 @@ class DrillDown extends React.Component {
     return (
       <div className="drilldown-container panel panel-default">
         <div className="panel-body">
+          <p>Assign the item to either an existing group or a general label.</p>
+          {form}
           <div className={this.state.imageStatus === 'loaded' ? '' : 'hidden'}>
             <ItemLargeContainer
               itemId={this.props.item.id}
@@ -143,8 +145,6 @@ class DrillDown extends React.Component {
               ? null
               : <span className="glyphicon glyphicon-refresh spinning" />
           }
-          <p>Assign the item to either an existing group or a general label.</p>
-          {form}
           <div className="panel panel-default panel-body">
             <button
               className="btn btn-primary"
