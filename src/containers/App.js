@@ -29,52 +29,48 @@ const App = ({ labels, experimentState, initialInstructions, currentItemId, colo
   experimentState !== 'loaded' ? <span>Loading...</span> :
   <div id="app">
     <div className="row">
-      <div className="col-sm-12">
+      <div className="col-sm-6">
         <div className="panel panel-default">
           <div className="panel-heading"><strong>Initial Instructions</strong></div>
           <div className="panel-body">
             <p>{initialInstructions}</p>
           </div>
         </div>
-      </div>
-    </div>
-    <div className="row">
-      <div className="col-sm-6">
-        <div className="panel panel-default">
-          <div className="panel-heading"><strong>unreviewed</strong></div>
-          <div className="panel-body">
-            <div className="form-inline form-group">
-              <label>Color by:</label>
-              {' '}
-              <OverlayTrigger
-                overlay={<Popover id="popover" title="Help">{colorByHelp}</Popover>}
-                placement="bottom"
-              >
-                <span className="glyphicon glyphicon-question-sign" />
-              </OverlayTrigger>
-              {' '}
-              <select
-                className="form-control"
-                value={colorUnreviewedBy}
-                onChange={(e) => { onEditColorUnreviewed(e.target.value); }}
-              >
-                {['answer', 'agreement', 'confusion'].map(metric => (
-                  <option value={metric} key={metric}>{metric}</option>
-                ))}
-              </select>
-            </div>
-            <SectionItemList />
-          </div>
-        </div>
         {currentItemId == null ? null : <DrillDownContainer />}
         {currentItemId == null ? null : <SimilarItemList />}
       </div>
-      <div className="col-sm-6">
-        {labels.map(label => <LabelSection label={label} key={label} />)}
+      <div className="col-sm-3">
+        <div className="panel-group">
+          <div className="panel panel-default">
+            <div className="panel-heading"><strong>unreviewed</strong></div>
+            <div className="panel-body">
+              <div className="form-inline form-group">
+                <label>Color by:</label>
+                {' '}
+                <OverlayTrigger
+                  overlay={<Popover id="popover" title="Help">{colorByHelp}</Popover>}
+                  placement="bottom"
+                >
+                  <span className="glyphicon glyphicon-question-sign" />
+                </OverlayTrigger>
+                {' '}
+                <select
+                  className="form-control"
+                  value={colorUnreviewedBy}
+                  onChange={(e) => { onEditColorUnreviewed(e.target.value); }}
+                >
+                  {['answer', 'agreement', 'confusion'].map(metric => (
+                    <option value={metric} key={metric}>{metric}</option>
+                  ))}
+                </select>
+              </div>
+              <SectionItemList />
+            </div>
+          </div>
+          {labels.map(label => <LabelSection label={label} key={label} />)}
+        </div>
       </div>
-    </div>
-    <div className="row">
-      <div className="col-sm-12">
+      <div className="col-sm-3">
         <Instructions />
       </div>
     </div>
