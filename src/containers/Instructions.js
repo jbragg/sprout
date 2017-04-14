@@ -10,9 +10,10 @@ const propTypes = {
   initialInstructions: PropTypes.string.isRequired,
   generalInstructions: PropTypes.string.isRequired,
   finalLabels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+  labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
 };
 
-const Instructions = ({ finalLabels, groups, onGroupEdit, onEditGeneralInstructions, initialInstructions, generalInstructions }) => (
+const Instructions = ({ finalLabels, labels, groups, onGroupEdit, onEditGeneralInstructions, initialInstructions, generalInstructions }) => (
   <div className="row">
     <div className="col-sm-6">
       <div className="panel panel-default">
@@ -22,7 +23,7 @@ const Instructions = ({ finalLabels, groups, onGroupEdit, onEditGeneralInstructi
             className="form"
             onSubmit={(e) => { e.preventDefault(); }}
           >
-            {finalLabels.map(label => (
+            {labels.map(label => (
               <div key={label}>
                 <h2>{label}:</h2>
                 {groups.filter(group => group.label === label).map(group => (
@@ -110,6 +111,7 @@ Instructions.propTypes = propTypes;
 
 const mapStateToProps = state => ({
   finalLabels: state.finalLabels,
+  labels: state.labels,
   groups: [...state.entities.groups.byId.values()],
   initialInstructions: state.initialInstructions,
   generalInstructions: state.generalInstructions,
