@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import SectionItemList from '../containers/SectionItemList';
 import { editGroup, mergeGroup } from '../actions';
+import { groupAnswers } from '../reducers';
 
 const propTypes = {
   groupId: PropTypes.number.isRequired,
@@ -16,6 +17,7 @@ const propTypes = {
   labels: PropTypes.arrayOf(PropTypes.string).isRequired,
   onGroupMerge: PropTypes.func.isRequired,
   onGroupEdit: PropTypes.func.isRequired,
+  summary: PropTypes.string.isRequired,
 };
 
 class Group extends React.Component {
@@ -25,10 +27,7 @@ class Group extends React.Component {
   }
 
   handleChange(event) {
-    this.props.onGroupEdit(
-      this.props.groupId,
-      { [event.target.name]: event.target.value },
-    );
+    this.props.onGroupEdit({ [event.target.name]: event.target.value });
     event.preventDefault();
   }
 
@@ -41,9 +40,7 @@ class Group extends React.Component {
             <button
               className="btn btn-danger"
               onClick={() => {
-                this.props.onGroupMerge(
-                  this.props.groupId,
-                  { label: thisGroup.label });
+                this.props.onGroupMerge({ label: thisGroup.label });
               }}
             >
               Delete
@@ -89,10 +86,7 @@ class Group extends React.Component {
                 className="form-control"
                 value="default"
                 onChange={(e) => {
-                  this.props.onGroupMerge(
-                    this.props.groupId,
-                    { group: Number(e.target.value) },
-                  );
+                  this.props.onGroupMerge({ group: Number(e.target.value) });
                 }}
               >
                 <option value="default" disabled>-merge into-</option>
@@ -112,6 +106,7 @@ class Group extends React.Component {
           </form>
         </div>
         <div className="panel-body">
+          <p><strong>Summary: </strong>{this.props.summary}</p>
           <SectionItemList group={thisGroup.id} />
         </div>
       </div>
@@ -121,16 +116,17 @@ class Group extends React.Component {
 
 Group.propTypes = propTypes;
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state, { groupId }) => ({
   labels: state.labels,
   groups: state.entities.groups.byId,
+  summary: groupAnswers(state, groupId).map(answer => answer.data.unclear_type).filter(s => s.length > 0).join(', '),
 });
 
-const mapDispatchToProps = dispatch => ({
-  onGroupMerge: (groupId, target) => {
+const mapDispatchToProps = (dispatch, { groupId }) => ({
+  onGroupMerge: (target) => {
     dispatch(mergeGroup(groupId, target));
   },
-  onGroupEdit: (groupId, keyValues) => {
+  onGroupEdit: (keyValues) => {
     dispatch(editGroup(groupId, keyValues));
   },
 });

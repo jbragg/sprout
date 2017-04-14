@@ -284,3 +284,13 @@ function InstructionsApp(state = initialState, action) {
 }
 
 export default InstructionsApp;
+
+export const itemAnswers = (state, itemId) => (
+  [...state.entities.answers.byId.values()].filter(answer => (
+    answer.data.questionid === itemId))
+);
+
+export const groupAnswers = (state, groupId) => (
+  [...state.entities.answers.byId.values()].filter(answer => (
+    state.entities.groups.byId.get(groupId).itemIds.has(answer.data.questionid)))
+);
