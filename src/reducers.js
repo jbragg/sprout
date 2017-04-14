@@ -14,6 +14,11 @@ const initialState = {
     groups: { byId: new Map() },
     items: { byId: new Map() },
     answers: { byId: new Map() },
+    labels: new Map([
+      ['yes', { itemIds: new Set() }],
+      ['maybe', { itemIds: new Set() }],
+      ['no', { itemIds: new Set() }],
+    ]),
   },
   drillDownForm: {},
   generalInstructions: '',
@@ -111,6 +116,49 @@ function InstructionsApp(state = initialState, action) {
               }],
             ]),
           },
+          groups: {
+            ...state.entities.groups,
+            byId: action.assignment.group == null
+            ? state.entities.groups.byId
+            : new Map(
+              [...state.entities.groups.byId.entries()].map(
+                ([key, value]) => [
+                  key,
+                  key === action.assignment.group
+                  ? {
+                    ...value,
+                    itemIds: new Set([
+                      ...value.itemIds.values(),
+                      action.itemId]),
+                  }
+                  : {
+                    ...value,
+                    itemIds: new Set(
+                      [...value.itemIds.values()].filter(id => id !== action.itemId)),
+                  },
+                ],
+              ),
+            ),
+          },
+          labels: new Map(
+            [...state.entities.labels.entries()].map(
+              ([key, value]) => [
+                key,
+                key === action.assignment.label
+                ? {
+                  ...value,
+                  itemIds: new Set([
+                    ...value.itemIds.values(),
+                    action.itemId]),
+                }
+                : {
+                  ...value,
+                  itemIds: new Set(
+                    [...value.itemIds.values()].filter(id => id !== action.itemId)),
+                },
+              ],
+            ),
+          ),
         },
       };
     }
@@ -146,6 +194,7 @@ function InstructionsApp(state = initialState, action) {
               [nextGroupId, {
                 name: '',
                 description: '',
+                itemIds: new Set(),
                 ...action.keyValues,
                 id: nextGroupId,
               }],
@@ -174,10 +223,35 @@ function InstructionsApp(state = initialState, action) {
           groups: {
             ...state.entities.groups,
             byId: new Map(
-              [...state.entities.groups.byId].filter(
-                ([key]) => key !== action.groupId),
+              [...state.entities.groups.byId.entries()]
+              .filter(([key]) => key !== action.groupId)
+              .map(
+                ([key, value]) => (
+                  [key, key === action.target.group
+                    ? {
+                      ...value,
+                      itemIds: new Set([
+                        ...value.itemIds.values(),
+                        ...state.entities.groups.byId.get(action.groupId).itemIds.values()]),
+                    }
+                    : value]
+                )),
             ),
           },
+          labels: new Map(
+            [...state.entities.labels.entries()]
+            .map(
+              ([key, value]) => (
+                [key, key === action.target.label
+                  ? {
+                    ...value,
+                    itemIds: new Set([
+                      ...value.itemIds.values(),
+                      ...state.entities.groups.byId.get(action.groupId).itemIds.values()]),
+                  }
+                  : value]
+              )),
+          ),
         },
       };
     }
