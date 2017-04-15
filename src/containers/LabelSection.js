@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
-import { createGroup, assignAndSetCurrentItem } from '../actions';
+import { editGroup, createGroup, assignAndSetCurrentItem } from '../actions';
 import Group from './Group';
 import SectionItemList from './SectionItemList';
 import { ItemTypes } from '../dragConstants';
@@ -90,8 +90,10 @@ LabelSection.propTypes = propTypes;
 
 const labelSectionTarget = {
   drop(props, monitor) {
-    if (monitor.isOver()) {
+    if (monitor.isOver() && monitor.getItemType() === ItemTypes.ITEM) {
       props.onAssign(monitor.getItem().id);
+    } else if (monitor.isOver()) {
+      props.onGroupMove(monitor.getItem().id);
     }
   }
 };
@@ -116,8 +118,11 @@ const mapDispatchToProps = (dispatch, { label }) => ({
   onAssign: (itemId) => {
     dispatch(assignAndSetCurrentItem(itemId, {label: label}));
   },
+  onGroupMove: (groupId) => {
+    dispatch(editGroup(groupId, { label: label }));
+  },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(
-  DropTarget(ItemTypes.ITEM, labelSectionTarget, collect)(LabelSection)
+  DropTarget([ItemTypes.ITEM, ItemTypes.GROUP], labelSectionTarget, collect)(LabelSection)
 );

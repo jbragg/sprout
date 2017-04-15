@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { DropTarget } from 'react-dnd';
+import { DragSource, DropTarget } from 'react-dnd';
 import SectionItemList from '../containers/SectionItemList';
 import { editGroup, mergeGroup, assignAndSetCurrentItem } from '../actions';
 import { groupAnswers } from '../reducers';
@@ -17,11 +17,12 @@ const propTypes = {
       label: PropTypes.string.isRequired,
     })).isRequired,
   labels: PropTypes.arrayOf(PropTypes.string).isRequired,
-  onGroupMerge: PropTypes.func.isRequired,
+  onGroupMergeOut: PropTypes.func.isRequired,
   onGroupEdit: PropTypes.func.isRequired,
   summary: PropTypes.string.isRequired,
   isOver: PropTypes.bool.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
+  connectDragSource: PropTypes.func.isRequired,
 };
 
 class Group extends React.Component {
@@ -36,10 +37,15 @@ class Group extends React.Component {
   }
 
   render() {
-    const { labels, groupId, connectDropTarget, isOver, groups, onGroupMerge, summary } = this.props;
+    const { labels, groupId, connectDropTarget, connectDragSource, isOver, isDragging, groups, onGroupMergeOut, summary } = this.props;
     const thisGroup = groups.get(groupId);
-    return connectDropTarget(
-      <div className="class-container panel panel-default">
+    return connectDragSource(connectDropTarget(
+      <div
+        className="class-container panel panel-default"
+        style={{
+          opacity: isDragging ? 0.5 : 1,
+        }}
+      >
         <div
           className="panel-heading"
           style={{
@@ -50,7 +56,7 @@ class Group extends React.Component {
             <button
               className="btn btn-danger"
               onClick={() => {
-                onGroupMerge({ label: thisGroup.label });
+                onGroupMergeOut({ label: thisGroup.label });
               }}
             >
               Delete
@@ -96,7 +102,7 @@ class Group extends React.Component {
                 className="form-control"
                 value="default"
                 onChange={(e) => {
-                  onGroupMerge({ group: Number(e.target.value) });
+                  onGroupMergeOut({ group: Number(e.target.value) });
                 }}
               >
                 <option value="default" disabled>-merge into-</option>
@@ -120,7 +126,7 @@ class Group extends React.Component {
           <SectionItemList group={thisGroup.id} />
         </div>
       </div>
-    );
+    ));
   }
 }
 
@@ -130,13 +136,28 @@ Group.propTypes = propTypes;
  * react-dnd
  */
 
-const groupTarget = {
-  drop(props, monitor) {
-    props.onAssign(monitor.getItem().id)
+const groupSource = {
+  beginDrag(props) {
+    return { id: props.groupId };
   }
 };
 
-const collect = (connect, monitor) => ({
+const collectSource = (connect, monitor) => ({
+  connectDragSource: connect.dragSource(),
+  isDragging: monitor.isDragging(),
+});
+
+const groupTarget = {
+  drop(props, monitor) {
+    if (monitor.getItemType() === ItemTypes.ITEM) {
+      props.onAssign(monitor.getItem().id);
+    } else {
+      props.onGroupMergeIn(monitor.getItem().id);
+    }
+  }
+};
+
+const collectTarget = (connect, monitor) => ({
   connectDropTarget: connect.dropTarget(),
   isOver: monitor.isOver(),
 });
@@ -152,7 +173,7 @@ const mapStateToProps = (state, { groupId }) => ({
 });
 
 const mapDispatchToProps = (dispatch, { groupId }) => ({
-  onGroupMerge: (target) => {
+  onGroupMergeOut: (target) => {
     dispatch(mergeGroup(groupId, target));
   },
   onGroupEdit: (keyValues) => {
@@ -161,8 +182,13 @@ const mapDispatchToProps = (dispatch, { groupId }) => ({
   onAssign: (itemId) => {
     dispatch(assignAndSetCurrentItem(itemId, { group: groupId }));
   },
+  onGroupMergeIn: (sourceGroupId) => {
+    dispatch(mergeGroup(sourceGroupId, { group: groupId }));
+  },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(
-  DropTarget(ItemTypes.ITEM, groupTarget, collect)(Group)
+  DragSource(ItemTypes.GROUP, groupSource, collectSource)(
+    DropTarget([ItemTypes.ITEM, ItemTypes.GROUP], groupTarget, collectTarget)(Group)
+  )
 );
