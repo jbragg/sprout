@@ -6,7 +6,7 @@ import { setCurrentItem } from '../actions';
 import { itemAnswers } from '../reducers';
 
 const mapStateToProps = (state, { itemId } ) => ({
-  currentItemId: state.currentItemId,
+  selected: state.currentItemId === itemId,
   item: state.entities.items.byId.get(itemId),
   answers: itemAnswers(state, itemId),
 });

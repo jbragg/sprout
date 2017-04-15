@@ -5,7 +5,7 @@ import getScore from '../score';
 import { getColor, getContrastColor } from '../color';
 
 const propTypes = {
-  currentItemId: PropTypes.number,
+  selected: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
   answers: PropTypes.arrayOf(
     PropTypes.shape({
@@ -27,7 +27,7 @@ const defaultProps = {
   currentItemId: null,
 }
 
-const ItemBtn = ({ currentItemId, item, answers, onClick, metric }) => {
+const ItemBtn = ({ selected, item, answers, onClick, metric }) => {
   const answerValues = answers.map(answer => answer.data.answer);
   const score = getScore(metric)(answerValues);
   const backgroundColor = getColor(metric)(score);
@@ -38,11 +38,12 @@ const ItemBtn = ({ currentItemId, item, answers, onClick, metric }) => {
       placement="bottom"
     >
       <button
-        className={`item-btn btn btn-default ${currentItemId === item.id ? 'active' : ''}`}
+        className={`item-btn btn btn-default ${selected ? 'active' : ''}`}
         onClick={(e) => { onClick(); e.preventDefault(); }}
         style={{
           color: textColor,
           backgroundColor,
+          border: selected ? `2px ${textColor} solid` : '',
         }}
       >
         {item.id}

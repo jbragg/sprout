@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const propTypes = {
-  currentItemId: PropTypes.number.isRequired,
+  selected: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
   answers: PropTypes.arrayOf(
     PropTypes.shape({
@@ -22,9 +22,10 @@ const propTypes = {
   }).isRequired,
 };
 
-const ItemThumb = ({ item, onClick }) => (
+const ItemThumb = ({ item, selected, onClick }) => (
+
   <button
-    className="item-thumb btn btn-default"
+    className={`item-thumb btn btn-default ${selected ? 'active' : ''}`}
     onClick={(e) => { onClick(); e.preventDefault(); }}
   >
     <img
