@@ -40,30 +40,30 @@ const App = ({ labels, experimentState, initialInstructions, currentItemId, colo
         {currentItemId == null ? null : <SimilarItemList />}
       </div>
       <div className="col-sm-3">
+        <div className="form-inline form-group">
+          <label>Color by:</label>
+          {' '}
+          <OverlayTrigger
+            overlay={<Popover id="popover" title="Help">{colorByHelp}</Popover>}
+            placement="bottom"
+          >
+            <span className="glyphicon glyphicon-question-sign" />
+          </OverlayTrigger>
+          {' '}
+          <select
+            className="form-control"
+            value={colorUnreviewedBy}
+            onChange={(e) => { onEditColorUnreviewed(e.target.value); }}
+          >
+            {['answer', 'agreement', 'confusion'].map(metric => (
+              <option value={metric} key={metric}>{metric}</option>
+            ))}
+          </select>
+        </div>
         <div className="panel-group">
           <div className="panel panel-default">
             <div className="panel-heading"><strong>unreviewed</strong></div>
             <div className="panel-body">
-              <div className="form-inline form-group">
-                <label>Color by:</label>
-                {' '}
-                <OverlayTrigger
-                  overlay={<Popover id="popover" title="Help">{colorByHelp}</Popover>}
-                  placement="bottom"
-                >
-                  <span className="glyphicon glyphicon-question-sign" />
-                </OverlayTrigger>
-                {' '}
-                <select
-                  className="form-control"
-                  value={colorUnreviewedBy}
-                  onChange={(e) => { onEditColorUnreviewed(e.target.value); }}
-                >
-                  {['answer', 'agreement', 'confusion'].map(metric => (
-                    <option value={metric} key={metric}>{metric}</option>
-                  ))}
-                </select>
-              </div>
               <SectionItemList />
             </div>
           </div>
