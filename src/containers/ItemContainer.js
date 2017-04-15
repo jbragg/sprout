@@ -12,13 +12,11 @@ import { ItemTypes } from '../dragConstants';
  */
 
 const itemSource = {
-  beginDrag(props) {
-    return { id: props.itemId };
-  }
+  beginDrag: props => ({ id: props.itemId }),
 };
 
-const collect = (connect, monitor) => ({
-  connectDragSource: connect.dragSource(),
+const collect = (dndConnect, monitor) => ({
+  connectDragSource: dndConnect.dragSource(),
   isDragging: monitor.isDragging(),
 });
 

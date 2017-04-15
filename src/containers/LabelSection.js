@@ -10,6 +10,7 @@ import { ItemTypes } from '../dragConstants';
 const propTypes = {
   groupIds: PropTypes.arrayOf(PropTypes.number).isRequired,
   isOver: PropTypes.bool.isRequired,
+  canDrop: PropTypes.bool.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
 };
 
@@ -36,13 +37,13 @@ class LabelSection extends React.Component {
   }
 
   render() {
-    const {groupIds, label, onGroupCreate, connectDropTarget, isOver} = this.props;
+    const { groupIds, label, onGroupCreate, connectDropTarget, isOver, canDrop } = this.props;
     return connectDropTarget(
       <div className="class-container panel panel-default">
         <div
           className="panel-heading"
           style={{
-            backgroundColor: isOver ? 'yellow' : '',
+            backgroundColor: (isOver && canDrop) ? 'yellow' : '',
           }}
         >
           <strong>{label}</strong>
@@ -89,18 +90,32 @@ LabelSection.propTypes = propTypes;
  */
 
 const labelSectionTarget = {
-  drop(props, monitor) {
+  drop: (props, monitor) => {
     if (monitor.isOver() && monitor.getItemType() === ItemTypes.ITEM) {
       props.onAssign(monitor.getItem().id);
     } else if (monitor.isOver()) {
       props.onGroupMove(monitor.getItem().id);
     }
-  }
+  },
+  canDrop: (props, monitor) => {
+    if (!monitor.isOver({ shallow: true })) {
+      return false;
+    }
+    switch (monitor.getItemType()) {
+      case ItemTypes.ITEM: {
+        return !props.itemIds.has(monitor.getItem().id);
+      }
+      default: {
+        return props.groupIds.indexOf(monitor.getItem().id) < 0;
+      }
+    }
+  },
 };
 
 const collect = (connect, monitor) => ({
   connectDropTarget: connect.dropTarget(),
   isOver: monitor.isOver({ shallow: true }),
+  canDrop: monitor.canDrop(),
 });
 
 /*
@@ -109,6 +124,7 @@ const collect = (connect, monitor) => ({
 
 const mapStateToProps = (state, { label }) => ({
   groupIds: [...state.entities.groups.byId.values()].filter(group => group.label === label).map(group => group.id),
+  itemIds: state.entities.labels.get(label).itemIds,
 });
 
 const mapDispatchToProps = (dispatch, { label }) => ({
@@ -116,10 +132,10 @@ const mapDispatchToProps = (dispatch, { label }) => ({
     dispatch(createGroup(keyValues));
   },
   onAssign: (itemId) => {
-    dispatch(assignAndSetCurrentItem(itemId, {label: label}));
+    dispatch(assignAndSetCurrentItem(itemId, { label }));
   },
   onGroupMove: (groupId) => {
-    dispatch(editGroup(groupId, { label: label }));
+    dispatch(editGroup(groupId, { label }));
   },
 });
 

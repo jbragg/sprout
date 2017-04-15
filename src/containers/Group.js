@@ -9,15 +9,16 @@ import { ItemTypes } from '../dragConstants';
 
 const propTypes = {
   group: PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      name: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
-    }).isRequired,
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+  }).isRequired,
   onGroupMergeOut: PropTypes.func.isRequired,
   onGroupEdit: PropTypes.func.isRequired,
   summary: PropTypes.string.isRequired,
   isOver: PropTypes.bool.isRequired,
+  canDrop: PropTypes.bool.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
   connectDragSource: PropTypes.func.isRequired,
 };
@@ -34,7 +35,7 @@ class Group extends React.Component {
   }
 
   render() {
-    const { group, connectDropTarget, connectDragSource, isOver, isDragging, onGroupMergeOut, summary } = this.props;
+    const { group, connectDropTarget, connectDragSource, isOver, canDrop, isDragging, onGroupMergeOut, summary } = this.props;
     return connectDragSource(connectDropTarget(
       <div
         className="class-container panel panel-default"
@@ -45,7 +46,7 @@ class Group extends React.Component {
         <div
           className="panel-heading"
           style={{
-            backgroundColor: isOver ? 'yellow' : '',
+            backgroundColor: (isOver && canDrop) ? 'yellow' : '',
           }}
         >
           <div className="pull-right">
@@ -91,29 +92,38 @@ Group.propTypes = propTypes;
  */
 
 const groupSource = {
-  beginDrag(props) {
-    return { id: props.groupId };
-  }
+  beginDrag: props => ({ id: props.groupId }),
 };
 
-const collectSource = (connect, monitor) => ({
-  connectDragSource: connect.dragSource(),
+const collectSource = (dndConnect, monitor) => ({
+  connectDragSource: dndConnect.dragSource(),
   isDragging: monitor.isDragging(),
 });
 
 const groupTarget = {
-  drop(props, monitor) {
+  drop: (props, monitor) => {
     if (monitor.getItemType() === ItemTypes.ITEM) {
       props.onAssign(monitor.getItem().id);
     } else {
       props.onGroupMergeIn(monitor.getItem().id);
     }
-  }
+  },
+  canDrop: (props, monitor) => {
+    switch (monitor.getItemType()) {
+      case ItemTypes.ITEM: {
+        return !props.group.itemIds.has(monitor.getItem().id);
+      }
+      default: {
+        return props.groupId !== monitor.getItem().id;
+      }
+    }
+  },
 };
 
-const collectTarget = (connect, monitor) => ({
-  connectDropTarget: connect.dropTarget(),
+const collectTarget = (dndConnect, monitor) => ({
+  connectDropTarget: dndConnect.dropTarget(),
   isOver: monitor.isOver(),
+  canDrop: monitor.canDrop(),
 });
 
 /*
