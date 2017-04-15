@@ -21,38 +21,42 @@ const propTypes = {
   item: PropTypes.shape({
     id: PropTypes.number }).isRequired,
   metric: PropTypes.string.isRequired,
+  connectDragSource: PropTypes.func.isRequired,
+  isDragging: PropTypes.bool.isRequired,
 };
 
-const defaultProps = {
-  currentItemId: null,
-}
-
-const ItemBtn = ({ selected, item, answers, onClick, metric }) => {
+const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, isDragging }) => {
   const answerValues = answers.map(answer => answer.data.answer);
   const score = getScore(metric)(answerValues);
   const backgroundColor = getColor(metric)(score);
   const textColor = getContrastColor(backgroundColor);
-  return (
-    <OverlayTrigger
-      overlay={<Tooltip id="tooltip">{score}</Tooltip>}
-      placement="bottom"
+  return connectDragSource(
+    <div
+      className="item-btn"
+      style={{
+        opacity: isDragging ? 0.5 : 1,
+      }}
     >
-      <button
-        className={`item-btn btn btn-default ${selected ? 'active' : ''}`}
-        onClick={(e) => { onClick(); e.preventDefault(); }}
-        style={{
-          color: textColor,
-          backgroundColor,
-          border: selected ? `2px ${textColor} solid` : '',
-        }}
+      <OverlayTrigger
+        overlay={<Tooltip id="tooltip">{score}</Tooltip>}
+        placement="bottom"
       >
-        {item.id}
-      </button>
-    </OverlayTrigger>
+        <button
+          className={`item-btn btn btn-default ${selected ? 'active' : ''}`}
+          onClick={(e) => { onClick(); e.preventDefault(); }}
+          style={{
+            color: textColor,
+            backgroundColor,
+            border: selected ? `2px ${textColor} solid` : '',
+          }}
+        >
+          {item.id}
+        </button>
+      </OverlayTrigger>
+    </div>
   );
 };
 
 ItemBtn.propTypes = propTypes;
-ItemBtn.defaultProps = defaultProps;
 
 export default ItemBtn;

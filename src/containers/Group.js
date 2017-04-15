@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { DropTarget } from 'react-dnd';
 import SectionItemList from '../containers/SectionItemList';
-import { editGroup, mergeGroup } from '../actions';
+import { editGroup, mergeGroup, assignAndSetCurrentItem } from '../actions';
 import { groupAnswers } from '../reducers';
+import { ItemTypes } from '../dragConstants';
 
 const propTypes = {
   groupId: PropTypes.number.isRequired,
@@ -18,6 +20,8 @@ const propTypes = {
   onGroupMerge: PropTypes.func.isRequired,
   onGroupEdit: PropTypes.func.isRequired,
   summary: PropTypes.string.isRequired,
+  isOver: PropTypes.bool.isRequired,
+  connectDropTarget: PropTypes.func.isRequired,
 };
 
 class Group extends React.Component {
@@ -32,15 +36,21 @@ class Group extends React.Component {
   }
 
   render() {
-    const thisGroup = this.props.groups.get(this.props.groupId);
-    return (
+    const { labels, groupId, connectDropTarget, isOver, groups, onGroupMerge, summary } = this.props;
+    const thisGroup = groups.get(groupId);
+    return connectDropTarget(
       <div className="class-container panel panel-default">
-        <div className="panel-heading">
+        <div
+          className="panel-heading"
+          style={{
+            backgroundColor: isOver ? 'yellow' : '',
+          }}
+        >
           <div className="pull-right">
             <button
               className="btn btn-danger"
               onClick={() => {
-                this.props.onGroupMerge({ label: thisGroup.label });
+                onGroupMerge({ label: thisGroup.label });
               }}
             >
               Delete
@@ -71,7 +81,7 @@ class Group extends React.Component {
                 onChange={this.handleChange}
               >
                 <option value="default" disabled>-change label-</option>
-                {this.props.labels
+                {labels
                     .filter(value => value !== thisGroup.label)
                     .map(value => (
                       <option value={value} key={value}>{value}</option>
@@ -86,12 +96,12 @@ class Group extends React.Component {
                 className="form-control"
                 value="default"
                 onChange={(e) => {
-                  this.props.onGroupMerge({ group: Number(e.target.value) });
+                  onGroupMerge({ group: Number(e.target.value) });
                 }}
               >
                 <option value="default" disabled>-merge into-</option>
-                {[...this.props.groups.values()]
-                    .filter(group => group.id !== this.props.groupId)
+                {[...groups.values()]
+                    .filter(group => group.id !== groupId)
                     .map(group => (
                       <option
                         value={group.id}
@@ -106,7 +116,7 @@ class Group extends React.Component {
           </form>
         </div>
         <div className="panel-body">
-          <p><strong>Summary: </strong>{this.props.summary}</p>
+          <p><strong>Summary: </strong>{summary}</p>
           <SectionItemList group={thisGroup.id} />
         </div>
       </div>
@@ -115,6 +125,25 @@ class Group extends React.Component {
 }
 
 Group.propTypes = propTypes;
+
+/*
+ * react-dnd
+ */
+
+const groupTarget = {
+  drop(props, monitor) {
+    props.onAssign(monitor.getItem().id)
+  }
+};
+
+const collect = (connect, monitor) => ({
+  connectDropTarget: connect.dropTarget(),
+  isOver: monitor.isOver(),
+});
+
+/*
+ * react-redux
+ */
 
 const mapStateToProps = (state, { groupId }) => ({
   labels: state.labels,
@@ -129,6 +158,11 @@ const mapDispatchToProps = (dispatch, { groupId }) => ({
   onGroupEdit: (keyValues) => {
     dispatch(editGroup(groupId, keyValues));
   },
+  onAssign: (itemId) => {
+    dispatch(assignAndSetCurrentItem(itemId, { group: groupId }));
+  },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Group);
+export default connect(mapStateToProps, mapDispatchToProps)(
+  DropTarget(ItemTypes.ITEM, groupTarget, collect)(Group)
+);

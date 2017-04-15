@@ -20,10 +20,17 @@ const propTypes = {
       path: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
+  connectDragSource: PropTypes.func.isRequired,
+  isDragging: PropTypes.bool.isRequired,
 };
 
-const ItemLarge = ({ item, answers, onLoad }) => (
-  <div className="item-large">
+const ItemLarge = ({ item, answers, onLoad, connectDragSource, isDragging }) => connectDragSource(
+  <div
+    className="item-large"
+    style={{
+      opacity: isDragging ? 0.5 : 1,
+    }}
+  >
     <div className="panel panel-default panel-body">
       <img
         className="img-responsive"

@@ -1,12 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { createGroup } from '../actions';
+import { DropTarget } from 'react-dnd';
+import { createGroup, assignAndSetCurrentItem } from '../actions';
 import Group from './Group';
 import SectionItemList from './SectionItemList';
+import { ItemTypes } from '../dragConstants';
 
 const propTypes = {
   groupIds: PropTypes.arrayOf(PropTypes.number).isRequired,
+  isOver: PropTypes.bool.isRequired,
+  connectDropTarget: PropTypes.func.isRequired,
 };
 
 class LabelSection extends React.Component {
@@ -32,10 +36,15 @@ class LabelSection extends React.Component {
   }
 
   render() {
-    const {groupIds, label, onGroupCreate} = this.props;
-    return (
+    const {groupIds, label, onGroupCreate, connectDropTarget, isOver} = this.props;
+    return connectDropTarget(
       <div className="class-container panel panel-default">
-        <div className="panel-heading">
+        <div
+          className="panel-heading"
+          style={{
+            backgroundColor: isOver ? 'yellow' : '',
+          }}
+        >
           <strong>{label}</strong>
         </div>
         <div className="panel-body">
@@ -75,14 +84,40 @@ class LabelSection extends React.Component {
 
 LabelSection.propTypes = propTypes;
 
+/*
+ * react-dnd
+ */
+
+const labelSectionTarget = {
+  drop(props, monitor) {
+    if (monitor.isOver()) {
+      props.onAssign(monitor.getItem().id);
+    }
+  }
+};
+
+const collect = (connect, monitor) => ({
+  connectDropTarget: connect.dropTarget(),
+  isOver: monitor.isOver({ shallow: true }),
+});
+
+/*
+ * react-redux
+ */
+
 const mapStateToProps = (state, { label }) => ({
   groupIds: [...state.entities.groups.byId.values()].filter(group => group.label === label).map(group => group.id),
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch, { label }) => ({
   onGroupCreate: (keyValues) => {
     dispatch(createGroup(keyValues));
   },
+  onAssign: (itemId) => {
+    dispatch(assignAndSetCurrentItem(itemId, {label: label}));
+  },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(LabelSection);
+export default connect(mapStateToProps, mapDispatchToProps)(
+  DropTarget(ItemTypes.ITEM, labelSectionTarget, collect)(LabelSection)
+);

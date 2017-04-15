@@ -1,9 +1,30 @@
 import { connect } from 'react-redux';
+import { DragSource } from 'react-dnd';
 import ItemLarge from '../components/ItemLarge';
 import ItemThumb from '../components/ItemThumb';
 import ItemBtn from '../components/ItemBtn';
 import { setCurrentItem } from '../actions';
 import { itemAnswers } from '../reducers';
+import { ItemTypes } from '../dragConstants';
+
+/*
+ * react-dnd
+ */
+
+const itemSource = {
+  beginDrag(props) {
+    return { id: props.itemId };
+  }
+};
+
+const collect = (connect, monitor) => ({
+  connectDragSource: connect.dragSource(),
+  isDragging: monitor.isDragging(),
+});
+
+/*
+ * redux
+ */
 
 const mapStateToProps = (state, { itemId } ) => ({
   selected: state.currentItemId === itemId,
@@ -18,7 +39,8 @@ const mapDispatchToProps = (dispatch, { itemId }) => ({
 });
 
 const makeItemContainer = x => (
-  connect(mapStateToProps, mapDispatchToProps)(x)
+  DragSource(ItemTypes.ITEM, itemSource, collect)(
+    connect(mapStateToProps, mapDispatchToProps)(x))
 );
 
 const ItemLargeContainer = makeItemContainer(ItemLarge);

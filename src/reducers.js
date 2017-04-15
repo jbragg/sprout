@@ -118,9 +118,7 @@ function InstructionsApp(state = initialState, action) {
           },
           groups: {
             ...state.entities.groups,
-            byId: action.assignment.group == null
-            ? state.entities.groups.byId
-            : new Map(
+            byId: new Map(
               [...state.entities.groups.byId.entries()].map(
                 ([key, value]) => [
                   key,

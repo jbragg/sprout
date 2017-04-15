@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
 import DrillDownContainer from '../containers/DrillDownContainer';
@@ -93,4 +95,4 @@ const mapDispatchToProps = dispatch => ({
   },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default DragDropContext(HTML5Backend)(connect(mapStateToProps, mapDispatchToProps)(App));
