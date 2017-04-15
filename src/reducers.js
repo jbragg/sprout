@@ -1,4 +1,4 @@
-import { EDIT_LABEL_FORM, EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
+import { EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
 
 const initialState = {
   suggestSimilar: true,  // TODO: Handle false case.
@@ -20,7 +20,6 @@ const initialState = {
       ['no', { itemIds: new Set() }],
     ]),
   },
-  drillDownForm: {},
   generalInstructions: '',
   colorUnreviewedBy: 'answer',
 };
@@ -39,15 +38,6 @@ const getSimilarItemIds = (primaryItemId, unlabeledItemIds, max) => (
 
 function InstructionsApp(state = initialState, action) {
   switch (action.type) {
-    case EDIT_LABEL_FORM: {
-      return {
-        ...state,
-        drillDownForm: {
-          ...state.drillDownForm,
-          ...action.keyValues,
-        },
-      };
-    }
     case EDIT_GENERAL_INSTRUCTIONS: {
       return {
         ...state,
@@ -88,12 +78,6 @@ function InstructionsApp(state = initialState, action) {
         currentItemId,
         primaryItemId,
         similarItemIds,
-        drillDownForm: {
-          ...state.drillDownForm,
-          hasSubmitted: false,
-          groupId: currentItemId == null ? null : state.entities.items.byId.get(currentItemId).group,
-          label: currentItemId == null ? null : state.entities.items.byId.get(currentItemId).label,
-        },
       };
     }
     case ASSIGN_ITEM: {

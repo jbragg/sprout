@@ -4,7 +4,6 @@ import fetch from 'isomorphic-fetch';
  * action types
  */
 
-export const EDIT_LABEL_FORM = 'EDIT_LABEL_FORM';
 export const SET_CURRENT_ITEM = 'SET_CURRENT_ITEM';
 export const ASSIGN_ITEM = 'ASSIGN_ITEM';
 export const CREATE_GROUP = 'CREATE_GROUP';
@@ -19,13 +18,6 @@ export const EDIT_COLOR_UNREVIEWED = 'EDIT_COLOR_UNREVIEWED';
 /*
  * action creators
  */
-
-export function editLabelForm(keyValues) {
-  return {
-    type: EDIT_LABEL_FORM,
-    keyValues,
-  };
-}
 
 export function editColorUnreviewed(metric) {
   return {
