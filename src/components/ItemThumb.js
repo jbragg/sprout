@@ -25,11 +25,11 @@ const propTypes = {
 const ItemThumb = ({ item, onClick }) => (
   <button
     className="item-thumb btn btn-default"
+    onClick={(e) => { onClick(); e.preventDefault(); }}
   >
     <img
       className="img-responsive"
       src={item.data.path}
-      onClick={onClick}
     />
   </button>
 );

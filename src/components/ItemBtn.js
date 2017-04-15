@@ -39,7 +39,7 @@ const ItemBtn = ({ currentItemId, item, answers, onClick, metric }) => {
     >
       <button
         className={`item-btn btn btn-default ${currentItemId === item.id ? 'active' : ''}`}
-        onClick={onClick}
+        onClick={(e) => { onClick(); e.preventDefault(); }}
         style={{
           color: textColor,
           backgroundColor,
