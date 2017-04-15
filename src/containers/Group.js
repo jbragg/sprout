@@ -8,15 +8,12 @@ import { groupAnswers } from '../reducers';
 import { ItemTypes } from '../dragConstants';
 
 const propTypes = {
-  groupId: PropTypes.number.isRequired,
-  groups: PropTypes.objectOf(
-    PropTypes.shape({
+  group: PropTypes.shape({
       id: PropTypes.number.isRequired,
       name: PropTypes.string.isRequired,
       description: PropTypes.string.isRequired,
       label: PropTypes.string.isRequired,
-    })).isRequired,
-  labels: PropTypes.arrayOf(PropTypes.string).isRequired,
+    }).isRequired,
   onGroupMergeOut: PropTypes.func.isRequired,
   onGroupEdit: PropTypes.func.isRequired,
   summary: PropTypes.string.isRequired,
@@ -37,8 +34,7 @@ class Group extends React.Component {
   }
 
   render() {
-    const { labels, groupId, connectDropTarget, connectDragSource, isOver, isDragging, groups, onGroupMergeOut, summary } = this.props;
-    const thisGroup = groups.get(groupId);
+    const { group, connectDropTarget, connectDragSource, isOver, isDragging, onGroupMergeOut, summary } = this.props;
     return connectDragSource(connectDropTarget(
       <div
         className="class-container panel panel-default"
@@ -56,7 +52,7 @@ class Group extends React.Component {
             <button
               className="btn btn-danger"
               onClick={() => {
-                onGroupMergeOut({ label: thisGroup.label });
+                onGroupMergeOut({ label: group.label });
               }}
             >
               Delete
@@ -72,58 +68,16 @@ class Group extends React.Component {
                 className="form-control"
                 type="text"
                 name="name"
-                value={thisGroup.name}
+                value={group.name}
                 onChange={this.handleChange}
                 placeholder="Group name"
               />
-            </div>
-            {' '}
-            <div className="form-group">
-              <label className="sr-only">Group Label</label>
-              <select
-                className="form-control"
-                name="label"
-                value="default"
-                onChange={this.handleChange}
-              >
-                <option value="default" disabled>-change label-</option>
-                {labels
-                    .filter(value => value !== thisGroup.label)
-                    .map(value => (
-                      <option value={value} key={value}>{value}</option>
-                    ))
-                }
-              </select>
-            </div>
-            {' '}
-            <div className="form-group">
-              <label className="sr-only">Merge Group</label>
-              <select
-                className="form-control"
-                value="default"
-                onChange={(e) => {
-                  onGroupMergeOut({ group: Number(e.target.value) });
-                }}
-              >
-                <option value="default" disabled>-merge into-</option>
-                {[...groups.values()]
-                    .filter(group => group.id !== groupId)
-                    .map(group => (
-                      <option
-                        value={group.id}
-                        key={group.id}
-                      >
-                        {group.name}
-                      </option>
-                    ))
-                }
-              </select>
             </div>
           </form>
         </div>
         <div className="panel-body">
           <p><strong>Summary: </strong>{summary}</p>
-          <SectionItemList group={thisGroup.id} />
+          <SectionItemList group={group.id} />
         </div>
       </div>
     ));
@@ -167,8 +121,7 @@ const collectTarget = (connect, monitor) => ({
  */
 
 const mapStateToProps = (state, { groupId }) => ({
-  labels: state.labels,
-  groups: state.entities.groups.byId,
+  group: state.entities.groups.byId.get(groupId),
   summary: groupAnswers(state, groupId).map(answer => answer.data.unclear_type).filter(s => s.length > 0).join(', '),
 });
 
