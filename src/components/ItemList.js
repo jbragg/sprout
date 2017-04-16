@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ItemBtnContainer } from '../containers/ItemContainer';
+import { ItemBtnDraggableContainer } from '../containers/ItemContainer';
 import getScore from '../score';
 
 const propTypes = {
@@ -10,7 +10,7 @@ const propTypes = {
 const ItemList = ({ itemIds }) => (
   <div className="form-group itemlist">
     {itemIds.map(itemId => (
-      <ItemBtnContainer
+      <ItemBtnDraggableContainer
         itemId={itemId}
         key={itemId}
       />

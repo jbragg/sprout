@@ -17,6 +17,7 @@ const itemSource = {
 
 const collect = (dndConnect, monitor) => ({
   connectDragSource: dndConnect.dragSource(),
+  connectDragPreview: dndConnect.dragPreview(),
   isDragging: monitor.isDragging(),
 });
 
@@ -37,13 +38,21 @@ const mapDispatchToProps = (dispatch, { itemId }) => ({
   },
 });
 
-const makeItemContainer = x => (
-  DragSource(ItemTypes.ITEM, itemSource, collect)(
-    connect(mapStateToProps, mapDispatchToProps)(x))
+const connectItem = x => (
+  connect(mapStateToProps, mapDispatchToProps)(x)
 );
 
-const ItemLargeContainer = makeItemContainer(ItemLarge);
-const ItemThumbContainer = makeItemContainer(ItemThumb);
-const ItemBtnContainer = makeItemContainer(ItemBtn);
+const makeItemDraggable = x => (
+  DragSource(ItemTypes.ITEM, itemSource, collect)(x)
+);
 
-export { ItemLargeContainer, ItemThumbContainer, ItemBtnContainer };
+const ItemThumbContainer = connectItem(ItemThumb);
+const ItemLargeDraggableContainer = makeItemDraggable(connectItem(ItemLarge));
+const ItemBtnDraggableContainer = makeItemDraggable(connectItem(ItemBtn));
+
+
+export {
+  ItemThumbContainer,
+  ItemLargeDraggableContainer,
+  ItemBtnDraggableContainer,
+};

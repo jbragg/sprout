@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 
 const propTypes = {
   onLoad: PropTypes.func.isRequired,
@@ -21,55 +22,72 @@ const propTypes = {
     }).isRequired,
   }).isRequired,
   connectDragSource: PropTypes.func.isRequired,
+  connectDragPreview: PropTypes.func.isRequired,
   isDragging: PropTypes.bool.isRequired,
 };
 
-const ItemLarge = ({ item, answers, onLoad, connectDragSource, isDragging }) => connectDragSource(
-  <div
-    className="item-large"
-    style={{
-      opacity: isDragging ? 0.5 : 1,
-    }}
-  >
-    <div className="panel panel-default panel-body">
-      <img
-        className="img-responsive"
-        src={item.data.path}
-        onLoad={onLoad}
-      />
-      <table className="table table-condensed">
-        <thead>
-          <tr>
-            <td />
-            <td>Answer</td>
-            <td>Reason</td>
-          </tr>
-        </thead>
-        <tbody>
-          {answers
-              .sort((a, b) => a.data.answer - b.data.answer)
-              .map(answer => (
-                <tr key={answer.assignmentid}>
-                  <td><span className="glyphicon glyphicon-user" /></td>
-                  <td>
-                    <OverlayTrigger
-                      overlay={<Tooltip id="tooltip">{answer.data.answerString}</Tooltip>}
-                      placement="bottom"
-                    >
-                      <div>
-                        <span>{answer.data.answer}</span>
-                      </div>
-                    </OverlayTrigger>
-                  </td>
-                  <td>{answer.data.unclearReasonString}</td>
+class ItemLarge extends React.Component {
+
+  componentDidMount() {
+    this.props.connectDragPreview(getEmptyImage(), {
+      // IE fallback: specify that we'd rather screenshot the node
+      // when it already knows it's being dragged so we can hide it with CSS.
+      captureDraggingState: true,
+    });
+  }
+
+  render() {
+    const { item, answers, onLoad, connectDragSource, isDragging } = this.props;
+    return connectDragSource(
+      <div
+        className="item-large"
+        style={{
+          opacity: isDragging ? 0.5 : 1,
+        }}
+      >
+        <div className="panel panel-default">
+          <div className="panel-body">
+            <img
+              className="img-responsive"
+              src={item.data.path}
+              onLoad={onLoad}
+            />
+            <table className="table table-condensed">
+              <thead>
+                <tr>
+                  <td />
+                  <td>Answer</td>
+                  <td>Reason</td>
                 </tr>
-              ))
-          }
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
+              </thead>
+              <tbody>
+                {answers
+                    .sort((a, b) => a.data.answer - b.data.answer)
+                    .map(answer => (
+                      <tr key={answer.assignmentid}>
+                        <td><span className="glyphicon glyphicon-user" /></td>
+                        <td>
+                          <OverlayTrigger
+                            overlay={<Tooltip id="tooltip">{answer.data.answerString}</Tooltip>}
+                            placement="bottom"
+                          >
+                            <div>
+                              <span>{answer.data.answer}</span>
+                            </div>
+                          </OverlayTrigger>
+                        </td>
+                        <td>{answer.data.unclearReasonString}</td>
+                      </tr>
+                    ))
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
 
 ItemLarge.propTypes = propTypes;
 

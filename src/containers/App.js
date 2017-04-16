@@ -8,6 +8,7 @@ import LabelSection from '../containers/LabelSection';
 import Instructions from '../containers/Instructions';
 import SimilarItemList from '../containers/SimilarItemList';
 import Nav from '../components/Nav';
+import CustomDragLayer from '../CustomDragLayer';
 
 const propTypes = {
   labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
@@ -31,6 +32,7 @@ const App = ({ labels, experimentState, initialInstructions, currentItemId }) =>
               </div>
             </div>
             {currentItemId == null ? null : <DrillDownContainer />}
+            {currentItemId == null ? null : <CustomDragLayer />}
             {currentItemId == null ? null : <SimilarItemList />}
           </div>
         </div>
