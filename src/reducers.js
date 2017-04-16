@@ -1,9 +1,14 @@
-import { EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
+import { QUEUE_ITEM_ORACLE, EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
+import getScore from './score';
 
 const initialState = {
   suggestSimilar: true,  // TODO: Handle false case.
   labels: ['yes', 'maybe', 'no'],
   finalLabels: ['yes', 'no'],
+  oracle: {
+    queries: new Map(),
+    minutesToAnswer: 2,
+  },
   uncertainLabel: 'maybe',
   experimentState: null,
   currentItemId: null,
@@ -24,7 +29,7 @@ const initialState = {
   colorUnreviewedBy: 'answer',
 };
 
-const getUnlabeledItemIds = state => (
+export const getUnlabeledItemIds = state => (
   [...state.entities.items.byId.keys()].filter(key =>
     state.entities.items.byId.get(key).group == null &&
     state.entities.items.byId.get(key).label == null)
@@ -38,6 +43,23 @@ const getSimilarItemIds = (primaryItemId, unlabeledItemIds, max) => (
 
 function InstructionsApp(state = initialState, action) {
   switch (action.type) {
+    case QUEUE_ITEM_ORACLE: {
+      return {
+        ...state,
+        oracle: {
+          ...state.oracle,
+          queries: new Map([
+            ...state.oracle.queries,
+            [action.itemId, {
+              queryTime: new Date(),
+              status: 'queued',
+              id: action.itemId,
+              ...state.oracle.queries.get(action.itemId),
+            }],
+          ]),
+        },
+      };
+    }
     case EDIT_GENERAL_INSTRUCTIONS: {
       return {
         ...state,
@@ -270,6 +292,12 @@ export default InstructionsApp;
 export const itemAnswers = (state, itemId) => (
   [...state.entities.answers.byId.values()].filter(answer => (
     answer.data.questionid === itemId))
+);
+
+export const scoreItem = (state, itemId) => (
+  getScore(state.colorUnreviewedBy)(
+    itemAnswers(state, itemId).map(answer => answer.data.answer)
+  )
 );
 
 export const groupAnswers = (state, groupId) => (

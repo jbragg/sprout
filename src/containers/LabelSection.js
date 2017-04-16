@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
 import { editGroup, createGroup, assignAndSetCurrentItem } from '../actions';
 import Group from './Group';
-import SectionItemList from './SectionItemList';
+import ItemList from '../components/ItemList';
 import { ItemTypes } from '../dragConstants';
 
 const propTypes = {
@@ -37,7 +37,7 @@ class LabelSection extends React.Component {
   }
 
   render() {
-    const { groupIds, label, onGroupCreate, connectDropTarget, isOver, canDrop } = this.props;
+    const { groupIds, label, onGroupCreate, connectDropTarget, isOver, canDrop, itemIds } = this.props;
     return connectDropTarget(
       <div className="class-container panel panel-default">
         <div
@@ -50,7 +50,7 @@ class LabelSection extends React.Component {
         </div>
         <div className="panel-body">
           <div>
-            <SectionItemList label={label} />
+            <ItemList itemIds={[...itemIds.values()]} />
           </div>
           {groupIds.map(key => (
             <Group groupId={key} key={key} />

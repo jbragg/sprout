@@ -5,16 +5,14 @@ import getScore from '../score';
 
 const propTypes = {
   itemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
-  metric: PropTypes.string.isRequired,
 };
 
-const ItemList = ({ itemIds, metric }) => (
+const ItemList = ({ itemIds }) => (
   <div className="form-group itemlist">
     {itemIds.map(itemId => (
       <ItemBtnContainer
         itemId={itemId}
         key={itemId}
-        metric={metric}
       />
     ))}
   </div>

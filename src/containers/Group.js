@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { DragSource, DropTarget } from 'react-dnd';
-import SectionItemList from '../containers/SectionItemList';
+import ItemList from '../components/ItemList';
 import { editGroup, mergeGroup, assignAndSetCurrentItem } from '../actions';
 import { groupAnswers } from '../reducers';
 import { ItemTypes } from '../dragConstants';
@@ -78,7 +78,7 @@ class Group extends React.Component {
         </div>
         <div className="panel-body">
           <p><strong>Summary: </strong>{summary}</p>
-          <SectionItemList group={group.id} />
+          <ItemList itemIds={[...group.itemIds.values()]} />
         </div>
       </div>
     ));

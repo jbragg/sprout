@@ -4,6 +4,7 @@ import fetch from 'isomorphic-fetch';
  * action types
  */
 
+export const QUEUE_ITEM_ORACLE = 'QUEUE_ITEM_ORACLE';
 export const SET_CURRENT_ITEM = 'SET_CURRENT_ITEM';
 export const ASSIGN_ITEM = 'ASSIGN_ITEM';
 export const CREATE_GROUP = 'CREATE_GROUP';
@@ -18,6 +19,13 @@ export const EDIT_COLOR_UNREVIEWED = 'EDIT_COLOR_UNREVIEWED';
 /*
  * action creators
  */
+
+export function queueItemOracle(itemId) {
+  return {
+    type: QUEUE_ITEM_ORACLE,
+    itemId,
+  };
+}
 
 export function editColorUnreviewed(metric) {
   return {

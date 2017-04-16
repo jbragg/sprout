@@ -44,16 +44,6 @@ class DrillDown extends React.Component {
               ? null
               : <span className="glyphicon glyphicon-refresh spinning" />
           }
-          <div className="panel panel-default panel-body">
-            <button
-              className="btn btn-primary"
-            >
-              Query the oracle instead
-            </button>
-            <p>
-              Remaining queries: 5
-            </p>
-          </div>
         </div>
       </div>
     );
