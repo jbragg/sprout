@@ -42,7 +42,7 @@ class DrillDown extends React.Component {
           </div>
           {this.state.imageStatus === 'loaded'
               ? null
-              : <span className="glyphicon glyphicon-refresh spinning" />
+              : <div className="panel panel-default panel-body"><h1 className="glyphicon glyphicon-refresh spinning" /></div>
           }
         </div>
       </div>

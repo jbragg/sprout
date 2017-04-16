@@ -17,9 +17,14 @@ const propTypes = {
   currentItemId: PropTypes.number,
 };
 
-const App = ({ labels, experimentState, initialInstructions, currentItemId }) => (
+const App = ({ items, labels, experimentState, initialInstructions, currentItemId }) => (
   experimentState !== 'loaded' ? <span>Loading...</span> :
   <div id="app">
+    <div className="hidden">
+      {items.map(item => (
+        <img src={item.data.path} key={item.id} />
+      ))}
+    </div>
     <Nav />
     <div className="container-fluid">
       <div className="row">
@@ -53,6 +58,7 @@ App.propTypes = propTypes;
 
 const mapStateToProps = state => ({
   labels: state.labels,
+  items: [...state.entities.items.byId.values()],
   currentItemId: state.currentItemId,
   experimentState: state.experimentState,
   initialInstructions: state.initialInstructions,
