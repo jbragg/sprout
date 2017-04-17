@@ -4,6 +4,7 @@ import fetch from 'isomorphic-fetch';
  * action types
  */
 
+export const ANSWER_ORACLE = 'ANSWER_ORACLE';
 export const QUEUE_ITEM_ORACLE = 'QUEUE_ITEM_ORACLE';
 export const SET_CURRENT_ITEM = 'SET_CURRENT_ITEM';
 export const ASSIGN_ITEM = 'ASSIGN_ITEM';
@@ -19,6 +20,12 @@ export const EDIT_COLOR_UNREVIEWED = 'EDIT_COLOR_UNREVIEWED';
 /*
  * action creators
  */
+
+function answerOracle() {
+  return {
+    type: ANSWER_ORACLE,
+  };
+}
 
 export function queueItemOracle(itemId) {
   return {
@@ -87,11 +94,11 @@ export function editGeneralInstructions(markdown) {
 }
 
 function requestExperiment() {
-  return {type: REQUEST_EXPERIMENT};
+  return { type: REQUEST_EXPERIMENT };
 }
 
 function receiveExperiment(json) {
-  return {type: RECEIVE_EXPERIMENT, payload: json};
+  return { type: RECEIVE_EXPERIMENT, payload: json };
 }
 
 const answerKey = [
@@ -141,5 +148,14 @@ export function fetchExperiment() {
         }));
         dispatch(setCurrentItem());
       });
+  }
+}
+
+const ORACLE_CHECK_INTERVAL = 30 * 1000;  // seconds to milliseconds
+let timer = null;
+export function startOracle() {
+  return (dispatch) => {
+    clearInterval(timer);
+    timer = setInterval(() => dispatch(answerOracle()), ORACLE_CHECK_INTERVAL);
   }
 }

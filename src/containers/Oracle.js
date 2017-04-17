@@ -8,11 +8,15 @@ import { queueItemOracle } from '../actions';
 import { ItemTypes } from '../dragConstants';
 
 const propTypes = {
-  queries: PropTypes.objectOf(
+  queuedItems: PropTypes.arrayOf(
     PropTypes.shape({
-      queryTime: PropTypes.instanceOf(Date).isRequired,
-      itemId: PropTypes.number.isRequired,
-      status: PropTypes.string.isRequired,
+      id: PropTypes.number.isRequired,
+    }).isRequired,
+  ).isRequired,
+  answeredItems: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      label: PropTypes.string.isRequired,
     }).isRequired,
   ).isRequired,
   connectDropTarget: PropTypes.func.isRequired,
@@ -25,18 +29,17 @@ const customerHelp = (
   <div>
     <p>Drag items here to ask the customer.</p>
     <p>Items will be queued until the customer reviews them, usually after a few minutes.</p>
-    <p>Based on the customer's answer, reviewed items will appear in the yes / no sections.</p>
+    <p>Based on the customer&apos;s answer, reviewed items will appear in the yes / no sections.</p>
   </div>
 );
 
-const Oracle = ({ queries, finalLabels, connectDropTarget, isOver, canDrop }) => {
-  const queuedItemIds = [...queries.values()].filter(query => query.status === 'queued').map(query => query.id);
-  const pendingItemIds = [...queries.values()].filter(query => query.status === 'pending').map(query => query.id);
+const Oracle = ({ queuedItems, answeredItems, finalLabels, connectDropTarget, isOver, canDrop }) => {
+  const queuedItemIds = queuedItems.map(val => val.id);
   return connectDropTarget(
     <div
       className="navbar-form navbar-right"
       style={{
-        backgroundColor: (isOver && canDrop) ? 'red' : '',
+        backgroundColor: (isOver && canDrop) ? 'yellow' : '',
       }}
     >
       <OverlayTrigger
@@ -47,19 +50,17 @@ const Oracle = ({ queries, finalLabels, connectDropTarget, isOver, canDrop }) =>
       </OverlayTrigger>
       {' '}
       <div className="form-group">
-        <label>Queued:</label>
+        <label>Queued for customer:</label>
         {' '}
         {queuedItemIds.length === 0 ? <div className="form-control" /> : <ItemList itemIds={queuedItemIds} />}
         {' '}
       </div>
       {' '}
-      {pendingItemIds.length === 0 ? null : <ItemList itemIds={pendingItemIds} />}
-      {' '}
       {finalLabels.map((label) => {
-        const itemIds = [...queries.values()].filter(query => query.status === 'answered' && query.label === label).map(query => query.id);
+        const itemIds = answeredItems.filter(val => val.label === label).map(val => val.id);
         return (
           <div className="form-group" key={label}>
-            <label>{label}:</label>
+            <label>Answered {label}:</label>
             {' '}
             {itemIds.length === 0 ? <div className="form-control" /> : <ItemList itemIds={itemIds} />}
             {' '}
@@ -80,7 +81,7 @@ const oracleTarget = {
   drop: (props, monitor) => {
     props.onQueue(monitor.getItem().id);
   },
-  canDrop: (props, monitor) => (!props.queries.has(monitor.getItem().id)),
+  canDrop: (props, monitor) => (props.queuedItems.findIndex(val => val.id === monitor.getItem().id) < 0 && props.answeredItems.findIndex(val => val.id === monitor.getItem().id) < 0),
 }
 
 const collect = (dndConnect, monitor) => ({
@@ -94,8 +95,8 @@ const collect = (dndConnect, monitor) => ({
  */
 
 const mapStateToProps = state => ({
-  queries: state.oracle.queries,
-  minutesToAnswer: state.oracle.minutesToAnswer,
+  queuedItems: state.oracle.queuedItems,
+  answeredItems: state.oracle.answeredItems,
   finalLabels: state.finalLabels,
 });
 

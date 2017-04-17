@@ -7,7 +7,7 @@ import thunkMiddleware from 'redux-thunk';
 
 import InstructionsApp from './reducers';
 import App from './containers/App';
-import { fetchExperiment } from './actions';
+import { fetchExperiment, startOracle } from './actions';
 
 const loggerMiddleware = createLogger();
 
@@ -19,6 +19,7 @@ const store = createStore(
   )
 );
 store.dispatch(fetchExperiment());
+store.dispatch(startOracle());
 
 /*
 window.addEventListener("beforeunload", function(event) {

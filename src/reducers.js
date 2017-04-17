@@ -1,4 +1,4 @@
-import { QUEUE_ITEM_ORACLE, EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
+import { ANSWER_ORACLE, QUEUE_ITEM_ORACLE, EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
 import getScore from './score';
 
 const initialState = {
@@ -6,8 +6,9 @@ const initialState = {
   labels: ['yes', 'maybe', 'no'],
   finalLabels: ['yes', 'no'],
   oracle: {
-    queries: new Map(),
-    minutesToAnswer: 2,
+    queuedItems: [],
+    answerInterval: 1 * 60 * 1000,  // minutes to milliseconds
+    answeredItems: [],
   },
   uncertainLabel: 'maybe',
   experimentState: null,
@@ -43,20 +44,47 @@ const getSimilarItemIds = (primaryItemId, unlabeledItemIds, max) => (
 
 function InstructionsApp(state = initialState, action) {
   switch (action.type) {
+    case ANSWER_ORACLE: {
+      const nextQueuedItem = state.oracle.queuedItems.length > 0 ? state.oracle.queuedItems[0] : null;
+      const lastAnswerTime = state.oracle.answeredItems.length > 0 ? state.oracle.answeredItems[state.oracle.answeredItems.length - 1].answerTime : null;
+      const longEnoughSinceLastAnswer = lastAnswerTime == null || (Date.now() - lastAnswerTime > state.oracle.answerInterval);
+      const longEnoughSinceQueued = nextQueuedItem != null && (Date.now() - nextQueuedItem.queryTime > state.oracle.answerInterval);
+      const shouldAnswer = longEnoughSinceQueued && longEnoughSinceLastAnswer;
+      /*
+      console.log(nextQueuedItem);
+      console.log(lastAnswerTime);
+      console.log(longEnoughSinceLastAnswer);
+      console.log(longEnoughSinceQueued);
+      */
+      return {
+        ...state,
+        oracle: {
+          ...state.oracle,
+          queuedItems: shouldAnswer ? state.oracle.queuedItems.slice(1) : state.oracle.queuedItems,
+          answeredItems: shouldAnswer ? [
+            ...state.oracle.answeredItems,
+            {
+              ...nextQueuedItem,
+              answerTime: Date.now(),
+              label: state.finalLabels[Math.round(Math.random())],
+            },
+          ]
+          : state.oracle.answeredItems,
+        },
+      };
+    }
     case QUEUE_ITEM_ORACLE: {
       return {
         ...state,
         oracle: {
           ...state.oracle,
-          queries: new Map([
-            ...state.oracle.queries,
-            [action.itemId, {
-              queryTime: new Date(),
-              status: 'queued',
+          queuedItems: [
+            ...state.oracle.queuedItems,
+            {
+              queryTime: Date.now(),
               id: action.itemId,
-              ...state.oracle.queries.get(action.itemId),
-            }],
-          ]),
+            },
+          ],
         },
       };
     }
