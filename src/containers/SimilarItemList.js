@@ -22,7 +22,7 @@ const SimilarItemList = ({ primaryItemId, similarItemIds, unreviewedItemIds }) =
             <strong>Next</strong>
           </div>
           <div className="btn-group">
-            <ItemThumbContainer itemId={primaryItemId} />
+            <ItemThumbContainer draggable itemId={primaryItemId} />
           </div>
         </div>
         <div className="col-sm-9">
@@ -31,7 +31,7 @@ const SimilarItemList = ({ primaryItemId, similarItemIds, unreviewedItemIds }) =
           </div>
           <div className="btn-group">
             {similarItemIds.slice(null, 3).map(id => (
-              <ItemThumbContainer itemId={id} key={id} />
+              <ItemThumbContainer draggable itemId={id} key={id} />
             ))}
           </div>
         </div>

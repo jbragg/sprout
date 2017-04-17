@@ -1,3 +1,4 @@
+import React from 'react';
 import { connect } from 'react-redux';
 import { DragSource } from 'react-dnd';
 import ItemLarge from '../components/ItemLarge';
@@ -38,21 +39,19 @@ const mapDispatchToProps = (dispatch, { itemId }) => ({
   },
 });
 
-const connectItem = x => (
-  connect(mapStateToProps, mapDispatchToProps)(x)
-);
+const connectOptionallyDraggable = x => {
+  const Component = connect(mapStateToProps, mapDispatchToProps)(x);
+  const DraggableComponent = DragSource(ItemTypes.ITEM, itemSource, collect)(Component);
+  return ({ draggable, ...props}) => draggable ? <DraggableComponent {...props} /> : <Component {...props} />;
+};
 
-const makeItemDraggable = x => (
-  DragSource(ItemTypes.ITEM, itemSource, collect)(x)
-);
-
-const ItemThumbContainer = connectItem(ItemThumb);
-const ItemLargeDraggableContainer = makeItemDraggable(connectItem(ItemLarge));
-const ItemBtnDraggableContainer = makeItemDraggable(connectItem(ItemBtn));
+const ItemThumbContainer = connectOptionallyDraggable(ItemThumb);
+const ItemLargeContainer = connectOptionallyDraggable(ItemLarge);
+const ItemBtnContainer = connectOptionallyDraggable(ItemBtn);
 
 
 export {
   ItemThumbContainer,
-  ItemLargeDraggableContainer,
-  ItemBtnDraggableContainer,
+  ItemLargeContainer,
+  ItemBtnContainer,
 };

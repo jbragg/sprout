@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 
 const propTypes = {
   selected: PropTypes.bool.isRequired,
@@ -20,21 +21,46 @@ const propTypes = {
       path: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
+  connectDragSource: PropTypes.func.isRequired,
+  connectDragPreview: PropTypes.func,
+  isDragging: PropTypes.bool,
 };
 
-const ItemThumb = ({ item, selected, onClick }) => (
+const defaultProps = ({
+  connectDragPreview: x => x,
+  connectDragSource: x => x,
+  isDragging: false,
+});
 
-  <button
-    className={`item-thumb btn btn-default ${selected ? 'active' : ''}`}
-    onClick={(e) => { onClick(); e.preventDefault(); }}
-  >
-    <img
-      className="img-responsive"
-      src={item.data.path}
-    />
-  </button>
-);
+class ItemThumb extends React.Component {
+  componentDidMount() {
+    this.props.connectDragPreview(getEmptyImage(), {
+      // IE fallback: specify that we'd rather screenshot the node
+      // when it already knows it's being dragged so we can hide it with CSS.
+      captureDraggingState: true,
+    });
+  }
+
+  render() {
+    const { item, selected, onClick, connectDragSource, isDragging } = this.props;
+    return connectDragSource(
+      <button
+        className={`item-thumb btn btn-default ${selected ? 'active' : ''}`}
+        onClick={(e) => { onClick(); e.preventDefault(); }}
+        style={{
+          opacity: isDragging ? 0.5 : 1,
+        }}
+      >
+        <img
+          className="img-responsive"
+          src={item.data.path}
+        />
+      </button>
+    );
+  }
+}
 
 ItemThumb.propTypes = propTypes;
+ItemThumb.defaultProps = defaultProps;
 
 export default ItemThumb;

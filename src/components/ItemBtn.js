@@ -25,6 +25,11 @@ const propTypes = {
   isDragging: PropTypes.bool.isRequired,
 };
 
+const defaultProps = ({
+  connectDragSource: x => x,
+  isDragging: false,
+});
+
 const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, isDragging }) => {
   const answerValues = answers.map(answer => answer.data.answer);
   const score = getScore(metric)(answerValues);
@@ -58,5 +63,6 @@ const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, 
 };
 
 ItemBtn.propTypes = propTypes;
+ItemBtn.defaultProps = defaultProps;
 
 export default ItemBtn;

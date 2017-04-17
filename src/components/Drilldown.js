@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ItemLargeDraggableContainer } from '../containers/ItemContainer';
+import { ItemLargeContainer } from '../containers/ItemContainer';
 
 const propTypes = {
   item: PropTypes.shape({
@@ -35,14 +35,19 @@ class DrillDown extends React.Component {
         <div className="panel-body">
           <p>Assign the item to either an existing group or a general label by dragging it.</p>
           <div className={this.state.imageStatus === 'loaded' ? '' : 'hidden'}>
-            <ItemLargeDraggableContainer
+            <ItemLargeContainer
+              draggable
               itemId={this.props.item.id}
               onLoad={this.handleImageLoaded}
             />
           </div>
           {this.state.imageStatus === 'loaded'
               ? null
-              : <div className="panel panel-default panel-body"><h1 className="glyphicon glyphicon-refresh spinning" /></div>
+              : (
+                <div className="panel panel-default panel-body">
+                  <h1>Loading <span className="glyphicon glyphicon-refresh spinning" /></h1>
+                </div>
+              )
           }
         </div>
       </div>

@@ -21,10 +21,16 @@ const propTypes = {
       path: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
-  connectDragSource: PropTypes.func.isRequired,
-  connectDragPreview: PropTypes.func.isRequired,
-  isDragging: PropTypes.bool.isRequired,
+  connectDragSource: PropTypes.func,
+  connectDragPreview: PropTypes.func,
+  isDragging: PropTypes.bool,
 };
+
+const defaultProps = ({
+  connectDragPreview: x => x,
+  connectDragSource: x => x,
+  isDragging: false,
+});
 
 class ItemLarge extends React.Component {
 
@@ -90,5 +96,6 @@ class ItemLarge extends React.Component {
 }
 
 ItemLarge.propTypes = propTypes;
+ItemLarge.defaultProps = defaultProps;
 
 export default ItemLarge;

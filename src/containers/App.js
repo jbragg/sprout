@@ -18,40 +18,47 @@ const propTypes = {
 };
 
 const App = ({ items, labels, experimentState, initialInstructions, currentItemId }) => (
-  experimentState !== 'loaded' ? <span>Loading...</span> :
-  <div id="app">
-    <div className="hidden">
-      {items.map(item => (
-        <img src={item.data.path} key={item.id} />
-      ))}
+  experimentState !== 'loaded'
+  ? (
+    <div className="container">
+      <h1>Loading <span className="glyphicon glyphicon-refresh spinning" /></h1>
     </div>
-    <Nav />
-    <div className="container-fluid">
-      <div className="row">
-        <div className="col-sm-5">
-          <div className="panel-group">
-            <div className="panel panel-default">
-              <div className="panel-heading"><strong>Initial Instructions</strong></div>
-              <div className="panel-body">
-                <p>{initialInstructions}</p>
+  )
+  : (
+    <div id="app">
+      <div className="hidden">
+        {items.map(item => (
+          <img src={item.data.path} key={item.id} />
+        ))}
+      </div>
+      <Nav />
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-sm-5">
+            <div className="panel-group">
+              <div className="panel panel-default">
+                <div className="panel-heading"><strong>Initial Instructions</strong></div>
+                <div className="panel-body">
+                  <p>{initialInstructions}</p>
+                </div>
               </div>
+              {currentItemId == null ? null : <DrillDownContainer />}
+              {currentItemId == null ? null : <CustomDragLayer />}
+              {currentItemId == null ? null : <SimilarItemList />}
             </div>
-            {currentItemId == null ? null : <DrillDownContainer />}
-            {currentItemId == null ? null : <CustomDragLayer />}
-            {currentItemId == null ? null : <SimilarItemList />}
           </div>
-        </div>
-        <div className="col-sm-4">
-          <div className="panel-group">
-            {labels.map(label => <LabelSection label={label} key={label} />)}
+          <div className="col-sm-4">
+            <div className="panel-group">
+              {labels.map(label => <LabelSection label={label} key={label} />)}
+            </div>
           </div>
-        </div>
-        <div className="col-sm-3">
-          <Instructions />
+          <div className="col-sm-3">
+            <Instructions />
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  )
 );
 
 App.propTypes = propTypes;
