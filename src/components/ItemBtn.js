@@ -38,7 +38,7 @@ const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, 
       }}
     >
       <OverlayTrigger
-        overlay={<Tooltip id="tooltip">{score}</Tooltip>}
+        overlay={<Tooltip id="tooltip">{score.toFixed(2)}</Tooltip>}
         placement="bottom"
       >
         <button
