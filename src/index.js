@@ -15,8 +15,8 @@ const store = createStore(
   InstructionsApp,
   applyMiddleware(
     thunkMiddleware,
-    loggerMiddleware
-  )
+    loggerMiddleware,
+  ),
 );
 store.dispatch(fetchExperiment());
 store.dispatch(startOracle());
@@ -29,7 +29,7 @@ window.addEventListener("beforeunload", function(event) {
 
 ReactDOM.render(
   <Provider store={store}>
-    <App/>
+    <App />
   </Provider>,
-  document.getElementById('root')
+  document.getElementById('root'),
 );
