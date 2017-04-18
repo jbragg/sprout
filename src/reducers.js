@@ -1,3 +1,4 @@
+import { createSelector } from 'reselect';
 import { ANSWER_ORACLE, QUEUE_ITEM_ORACLE, EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
 import getScore from './score';
 
@@ -30,16 +31,35 @@ const initialState = {
   colorUnreviewedBy: 'answer',
 };
 
-export const getUnlabeledItemIds = state => (
-  [...state.entities.items.byId.keys()].filter(key =>
-    state.entities.items.byId.get(key).group == null &&
-    state.entities.items.byId.get(key).label == null)
-);
-
-
 // TODO: Return items that are actually similar.
 const getSimilarItemIds = (primaryItemId, unlabeledItemIds, max) => (
   [...unlabeledItemIds].filter(x => x !== primaryItemId).filter((_, i) => i < max)
+);
+
+export const itemsSelector = state => state.entities.items;
+export const answersSelector = state => state.entities.answers;
+export const metricSelector = state => state.colorUnreviewedBy;
+export const unlabeledItemsSelector = createSelector(
+  itemsSelector,
+  items => [...items.byId.values()].filter(item => item.group == null && item.label == null),
+);
+export const unlabeledItemScoresSelector = createSelector(
+  unlabeledItemsSelector,
+  answersSelector,
+  metricSelector,
+  (items, answers, metric) => new Map([...items].map(item => [item.id, getScore(metric)(item.answers.map(answerId => answers.byId.get(answerId).data.answer))])),
+);
+export const unlabeledSortedItemsSelector = createSelector(
+  unlabeledItemsSelector,
+  unlabeledItemScoresSelector,
+  metricSelector,
+  (items, scores, metric) => [...items].sort((item1, item2) => (metric === 'confusion' ? -1 : 1) * (scores.get(item1.id) - scores.get(item2.id))),
+);
+
+
+export const groupAnswers = (state, groupId) => (
+  [...state.entities.answers.byId.values()].filter(answer => (
+    state.entities.groups.byId.get(groupId).itemIds.has(answer.data.questionid)))
 );
 
 function InstructionsApp(state = initialState, action) {
@@ -106,20 +126,20 @@ function InstructionsApp(state = initialState, action) {
       let similarItemIds = state.similarItemIds;
       if (action.itemId == null && state.primaryItemId == null) {
         // Choose next primaryItem.
-        primaryItemId = Math.min(...getUnlabeledItemIds(state));
+        primaryItemId = Math.min(...unlabeledItemsSelector(state).map(item => item.id));
         currentItemId = primaryItemId;
-        similarItemIds = getSimilarItemIds(primaryItemId, getUnlabeledItemIds(state), 5);
+          similarItemIds = getSimilarItemIds(primaryItemId, unlabeledItemsSelector(state).map(item => item.id), 5);
       } else if (action.itemId == null && state.similarItemIds.length > 0) {
         // Move to next similarItem.
         currentItemId = state.similarItemIds[0];
       } else if (action.itemId == null) {
         // No more similarItems.
         currentItemId = primaryItemId;
-      } else if (getUnlabeledItemIds(state).indexOf(action.itemId) >= 0 && action.itemId !== primaryItemId && similarItemIds.indexOf(action.itemId) < 0) {
+      } else if (unlabeledItemsSelector(state).map(item => item.id).indexOf(action.itemId) >= 0 && action.itemId !== primaryItemId && similarItemIds.indexOf(action.itemId) < 0) {
         // New unlabeled item selected.
         primaryItemId = action.itemId;
         currentItemId = primaryItemId;
-        similarItemIds = getSimilarItemIds(primaryItemId, getUnlabeledItemIds(state), 5);
+        similarItemIds = getSimilarItemIds(primaryItemId, unlabeledItemsSelector(state).map(item => item.id), 5);
       } else {
         currentItemId = action.itemId;
       }
@@ -301,7 +321,12 @@ function InstructionsApp(state = initialState, action) {
         entities: {
           ...state.entities,
           items: {
-            byId: new Map(action.payload.items.map(value => [value.id, value])),
+            byId: new Map(action.payload.items.map(value => [value.id, {
+              ...value,
+              answers: action.payload.answers
+              .filter(answer => answer.data.questionid === value.id)
+              .map(answer => answer.assignmentid),
+            }])),
           },
           answers: {
             byId: new Map(action.payload.answers.map(value => [value.assignmentid, value])),
@@ -316,19 +341,3 @@ function InstructionsApp(state = initialState, action) {
 }
 
 export default InstructionsApp;
-
-export const itemAnswers = (state, itemId) => (
-  [...state.entities.answers.byId.values()].filter(answer => (
-    answer.data.questionid === itemId))
-);
-
-export const scoreItem = (state, itemId) => (
-  getScore(state.colorUnreviewedBy)(
-    itemAnswers(state, itemId).map(answer => answer.data.answer)
-  )
-);
-
-export const groupAnswers = (state, groupId) => (
-  [...state.entities.answers.byId.values()].filter(answer => (
-    state.entities.groups.byId.get(groupId).itemIds.has(answer.data.questionid)))
-);

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import ItemList from '../components/ItemList';
 import { ItemThumbContainer } from '../containers/ItemContainer';
-import { getUnlabeledItemIds, scoreItem } from '../reducers';
+import { unlabeledSortedItemsSelector } from '../reducers';
 
 const propTypes = {
   primaryItemId: PropTypes.number.isRequired,
@@ -53,9 +53,7 @@ SimilarItemList.propTypes = propTypes;
 const mapStateToProps = state => ({
   primaryItemId: state.primaryItemId,
   similarItemIds: state.similarItemIds,
-  unreviewedItemIds: getUnlabeledItemIds(state).sort((id1, id2) => (
-    (state.colorUnreviewedBy === 'confusion' ? -1 : 1) *  // Descending order for confusion
-    (scoreItem(state, id1) - scoreItem(state, id2)))),
+  unreviewedItemIds: unlabeledSortedItemsSelector(state).map(item => item.id),
 });
 
 export default connect(mapStateToProps)(SimilarItemList);

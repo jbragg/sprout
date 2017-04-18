@@ -1,4 +1,4 @@
-import { scaleLinear, scaleLog } from 'd3-scale';
+import { scaleLinear } from 'd3-scale';
 
 const answerScore = vals => (
   scaleLinear().domain([1, 5]).range([0, 1])(
@@ -7,7 +7,7 @@ const answerScore = vals => (
 
 const agreementScore = vals => (
   scaleLinear().domain([0, 2]).range([0, 1])(
-    Math.abs(3 - vals.reduce((a, b) => a + b, 0) / vals.length)
+    Math.abs(3 - (vals.reduce((a, b) => a + b, 0) / vals.length)),
   )
 );
 
@@ -16,7 +16,7 @@ const confusionScore = vals => (
     vals.map(v => Math.abs(3 - v)).reduce((a, b) => a + b, 0) / vals.length)
 );
 
-const getScore = color => {
+const getScore = (color) => {
   if (color === 'confusion') {
     return confusionScore;
   } else if (color === 'agreement') {
