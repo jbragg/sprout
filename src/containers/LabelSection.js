@@ -52,9 +52,11 @@ class LabelSection extends React.Component {
           <div>
             <ItemList itemIds={[...itemIds.values()]} />
           </div>
-          {groupIds.map(key => (
-            <Group groupId={key} key={key} />
-          ))}
+          <div className="panel-group">
+            {groupIds.map(key => (
+              <Group groupId={key} key={key} />
+            ))}
+          </div>
           <form className="form-inline">
             <div className="form-group">
               <label className="sr-only">New group name</label>
