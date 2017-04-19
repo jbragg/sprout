@@ -38,7 +38,7 @@ class Group extends React.Component {
     const { group, connectDropTarget, connectDragSource, isOver, canDrop, isDragging, onGroupMergeOut, summary } = this.props;
     return connectDragSource(connectDropTarget(
       <div
-        className="class-container panel panel-default"
+        className="class-container panel panel-primary"
         style={{
           opacity: isDragging ? 0.5 : 1,
         }}
@@ -51,12 +51,12 @@ class Group extends React.Component {
         >
           <div className="pull-right">
             <button
-              className="btn btn-danger"
+              className="btn btn-default text-danger"
               onClick={() => {
                 onGroupMergeOut({ label: group.label });
               }}
             >
-              Delete
+              <span className="text-danger">Delete</span>
             </button>
           </div>
           <form
