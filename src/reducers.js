@@ -31,23 +31,61 @@ const initialState = {
   colorUnreviewedBy: 'answer',
 };
 
-// TODO: Return items that are actually similar.
-const getSimilarItemIds = (primaryItemId, unlabeledItemIds, max) => (
-  [...unlabeledItemIds].filter(x => x !== primaryItemId).filter((_, i) => i < max)
+/*
+ * utilities
+ */
+
+const dotProduct = (vec1, vec2) => {
+  let sum = 0;
+  for (let i = 0; i < vec1.length; i += 1) {
+    sum += vec1[i] * vec2[i];
+  }
+  return sum;
+};
+const cosineSimilarity = (vec1, vec2) => (
+  dotProduct(vec1, vec2) / Math.sqrt(dotProduct(vec1, vec1)) / Math.sqrt(dotProduct(vec2, vec2))
 );
 
+/*
+ * selectors
+ */
+
 export const itemsSelector = state => state.entities.items;
+export const groupsSelector = state => state.entities.groups;
 export const answersSelector = state => state.entities.answers;
 export const metricSelector = state => state.colorUnreviewedBy;
+export const itemVectorsSelector = createSelector(
+  itemsSelector,
+  items => new Map([...items.byId].map(([key, item]) => [key, item.vector])),
+);
+export const itemSimilaritiesSelector = createSelector(
+  itemVectorsSelector,
+  itemVectors => new Map([...itemVectors].map(([id, vector]) => {
+    if (vector == null) {
+      return [id, []];
+    }
+    const otherItems = ([...itemVectors]
+      .filter(([key, value]) => key !== id && value != null)
+      .map(([key, otherVector]) => [key, cosineSimilarity(vector, otherVector)])
+    );
+    otherItems.sort(([, v1], [, v2]) => v2 - v1);  // descending
+    return [id, new Map(otherItems)];
+  })),
+);
 export const unlabeledItemsSelector = createSelector(
   itemsSelector,
   items => [...items.byId.values()].filter(item => item.group == null && item.label == null),
 );
+export const itemAnswersSelector = createSelector(
+  itemsSelector,
+  answersSelector,
+  (items, answers) => new Map([...items.byId].map(([id, item]) => [id, item.answers.map(answerId => answers.byId.get(answerId))])),
+);
 export const unlabeledItemScoresSelector = createSelector(
   unlabeledItemsSelector,
-  answersSelector,
+  itemAnswersSelector,
   metricSelector,
-  (items, answers, metric) => new Map([...items].map(item => [item.id, getScore(metric)(item.answers.map(answerId => answers.byId.get(answerId).data.answer))])),
+  (items, answers, metric) => new Map(items.map(item => [item.id, getScore(metric)(answers.get(item.id).map(answer => answer.data.answer))])),
 );
 export const unlabeledSortedItemsSelector = createSelector(
   unlabeledItemsSelector,
@@ -56,11 +94,14 @@ export const unlabeledSortedItemsSelector = createSelector(
   (items, scores, metric) => [...items].sort((item1, item2) => (metric === 'confusion' ? -1 : 1) * (scores.get(item1.id) - scores.get(item2.id))),
 );
 
+const getSimilarItemIds = (itemId, state, unlabeledOnly = true) => {
+  const unlabeledItemIds = unlabeledItemsSelector(state).map(item => item.id);
+  return [...itemSimilaritiesSelector(state).get(itemId).keys()].filter(id => !unlabeledOnly || unlabeledItemIds.indexOf(id) >= 0);
+};
 
-export const groupAnswers = (state, groupId) => (
-  [...state.entities.answers.byId.values()].filter(answer => (
-    state.entities.groups.byId.get(groupId).itemIds.has(answer.data.questionid)))
-);
+/*
+ * reducers
+ */
 
 function InstructionsApp(state = initialState, action) {
   switch (action.type) {
@@ -128,7 +169,7 @@ function InstructionsApp(state = initialState, action) {
         // Choose next primaryItem.
         primaryItemId = Math.min(...unlabeledItemsSelector(state).map(item => item.id));
         currentItemId = primaryItemId;
-          similarItemIds = getSimilarItemIds(primaryItemId, unlabeledItemsSelector(state).map(item => item.id), 5);
+        similarItemIds = getSimilarItemIds(primaryItemId, state);
       } else if (action.itemId == null && state.similarItemIds.length > 0) {
         // Move to next similarItem.
         currentItemId = state.similarItemIds[0];
@@ -139,7 +180,7 @@ function InstructionsApp(state = initialState, action) {
         // New unlabeled item selected.
         primaryItemId = action.itemId;
         currentItemId = primaryItemId;
-        similarItemIds = getSimilarItemIds(primaryItemId, unlabeledItemsSelector(state).map(item => item.id), 5);
+        similarItemIds = getSimilarItemIds(primaryItemId, state);
       } else {
         currentItemId = action.itemId;
       }
