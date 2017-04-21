@@ -28,7 +28,7 @@ const initialState = {
     ]),
   },
   generalInstructions: '',
-  colorUnreviewedBy: 'answer',
+  colorUnreviewedBy: 'confusion',
 };
 
 /*
@@ -67,8 +67,8 @@ export const itemSimilaritiesSelector = createSelector(
     const otherItems = ([...itemVectors]
       .filter(([key, value]) => key !== id && value != null)
       .map(([key, otherVector]) => [key, cosineSimilarity(vector, otherVector)])
+      .sort(([, v1], [, v2]) => v2 - v1)  // descending
     );
-    otherItems.sort(([, v1], [, v2]) => v2 - v1);  // descending
     return [id, new Map(otherItems)];
   })),
 );
@@ -167,7 +167,7 @@ function InstructionsApp(state = initialState, action) {
       let similarItemIds = state.similarItemIds;
       if (action.itemId == null && state.primaryItemId == null) {
         // Choose next primaryItem.
-        primaryItemId = Math.min(...unlabeledItemsSelector(state).map(item => item.id));
+        primaryItemId = unlabeledSortedItemsSelector(state)[0].id;
         currentItemId = primaryItemId;
         similarItemIds = getSimilarItemIds(primaryItemId, state);
       } else if (action.itemId == null && state.similarItemIds.length > 0) {
