@@ -52,6 +52,7 @@ const cosineSimilarity = (vec1, vec2) => (
 
 export const itemsSelector = state => state.entities.items;
 export const groupsSelector = state => state.entities.groups;
+export const currentItemIdSelector = state => state.currentItemId;
 export const answersSelector = state => state.entities.answers;
 export const metricSelector = state => state.colorUnreviewedBy;
 export const itemVectorsSelector = createSelector(
@@ -62,7 +63,7 @@ export const itemSimilaritiesSelector = createSelector(
   itemVectorsSelector,
   itemVectors => new Map([...itemVectors].map(([id, vector]) => {
     if (vector == null) {
-      return [id, []];
+      return [id, new Map()];
     }
     const otherItems = ([...itemVectors]
       .filter(([key, value]) => key !== id && value != null)
@@ -93,6 +94,29 @@ export const unlabeledSortedItemsSelector = createSelector(
   metricSelector,
   (items, scores, metric) => [...items].sort((item1, item2) => (metric === 'confusion' ? -1 : 1) * (scores.get(item1.id) - scores.get(item2.id))),
 );
+export const groupItemsSelector = createSelector(
+  groupsSelector,
+  groups => new Map([...groups.byId].map(([key, value]) => [key, value.itemIds])),
+);
+/*
+ * Return closest group id, or -1
+ */
+export const recommendedGroupSelector = createSelector(
+  currentItemIdSelector,
+  groupItemsSelector,
+  itemSimilaritiesSelector,
+  (itemId, groups, similarities) => {
+    if (itemId == null) {
+      return -1;
+    }
+    const groupSimilarityIndices = new Map([...groups]
+      .map(([groupId, itemIds]) => [groupId, [...similarities.get(itemId).keys()].findIndex(id => [...itemIds].indexOf(id) >= 0)])
+      .sort(([, i1], [, i2]) => i1 - i2)
+    );
+    const closestGroupIndex = [...groupSimilarityIndices.values()].findIndex(i => i >= 0);
+    return closestGroupIndex >= 0 ? [...groupSimilarityIndices.keys()][closestGroupIndex] : -1;
+  },
+);
 
 const getSimilarItemIds = (itemId, state, unlabeledOnly = true) => {
   const unlabeledItemIds = unlabeledItemsSelector(state).map(item => item.id);
@@ -111,12 +135,6 @@ function InstructionsApp(state = initialState, action) {
       const longEnoughSinceLastAnswer = lastAnswerTime == null || (Date.now() - lastAnswerTime > state.oracle.answerInterval);
       const longEnoughSinceQueued = nextQueuedItem != null && (Date.now() - nextQueuedItem.queryTime > state.oracle.answerInterval);
       const shouldAnswer = longEnoughSinceQueued && longEnoughSinceLastAnswer;
-      /*
-      console.log(nextQueuedItem);
-      console.log(lastAnswerTime);
-      console.log(longEnoughSinceLastAnswer);
-      console.log(longEnoughSinceQueued);
-      */
       return {
         ...state,
         oracle: {
@@ -165,19 +183,21 @@ function InstructionsApp(state = initialState, action) {
       let currentItemId = state.currentItemId;
       let primaryItemId = state.primaryItemId;
       let similarItemIds = state.similarItemIds;
-      if (action.itemId == null && state.primaryItemId == null) {
+      if (action.itemId == null && currentItemId == null && state.primaryItemId == null) {
         // Choose next primaryItem.
         primaryItemId = unlabeledSortedItemsSelector(state)[0].id;
         currentItemId = primaryItemId;
         similarItemIds = getSimilarItemIds(primaryItemId, state);
-      } else if (action.itemId == null && state.similarItemIds.length > 0) {
+      } else if (action.itemId == null && currentItemId == null && state.similarItemIds.length > 0) {
         // Move to next similarItem.
         currentItemId = state.similarItemIds[0];
-      } else if (action.itemId == null) {
+      } else if (action.itemId == null && currentItemId == null) {
         // No more similarItems.
         currentItemId = primaryItemId;
-      } else if (unlabeledItemsSelector(state).map(item => item.id).indexOf(action.itemId) >= 0 && action.itemId !== primaryItemId && similarItemIds.indexOf(action.itemId) < 0) {
-        // New unlabeled item selected.
+      } else if (action.itemId == null) {
+        // Nothing to do.
+      } else if (action.itemId !== primaryItemId && state.similarItemIds.indexOf(action.itemId) < 0) {
+        // New item.
         primaryItemId = action.itemId;
         currentItemId = primaryItemId;
         similarItemIds = getSimilarItemIds(primaryItemId, state);
@@ -194,7 +214,7 @@ function InstructionsApp(state = initialState, action) {
     case ASSIGN_ITEM: {
       return {
         ...state,
-        currentItemId: action.itemId === state.currentItemId ? null : state.currentItemId,
+        currentItemId: (action.itemId === state.currentItemId || action.itemId === state.primaryItemId) ? null : state.currentItemId,
         primaryItemId: action.itemId === state.primaryItemId ? null : state.primaryItemId,
         similarItemIds: [...state.similarItemIds].filter(id => id !== action.itemId),
         entities: {

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { DragSource, DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
 import { editGroup, mergeGroup, assignAndSetCurrentItem } from '../actions';
-import { itemAnswersSelector } from '../reducers';
+import { itemAnswersSelector, recommendedGroupSelector } from '../reducers';
 import { ItemTypes } from '../dragConstants';
 
 const propTypes = {
@@ -21,12 +21,29 @@ const propTypes = {
   canDrop: PropTypes.bool.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
   connectDragSource: PropTypes.func.isRequired,
+  recommended: PropTypes.bool.isRequired,
+  isDragging: PropTypes.bool.isRequired,
+  currentItemId: PropTypes.number,
+};
+
+const defaultProps = {
+  currentItemId: null,
 };
 
 class Group extends React.Component {
   constructor(props) {
     super(props);
+    this.state = { recommended: props.recommended };
     this.handleChange = this.handleChange.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { currentItemId } = this.props;
+    if (nextProps.currentItemId !== currentItemId) {
+      this.setState({ recommended: false }, () => {
+        setTimeout(() => this.setState({ recommended: nextProps.recommended }), 0);
+      });
+    }
   }
 
   handleChange(event) {
@@ -38,7 +55,7 @@ class Group extends React.Component {
     const { group, connectDropTarget, connectDragSource, isOver, canDrop, isDragging, onGroupMergeOut, summary } = this.props;
     return connectDragSource(connectDropTarget(
       <div
-        className="class-container panel panel-primary"
+        className={`class-container panel panel-primary ${this.state.recommended ? 'recommended' : ''}`}
         style={{
           opacity: isDragging ? 0.5 : 1,
         }}
@@ -63,6 +80,17 @@ class Group extends React.Component {
             className="form-inline"
             onSubmit={(e) => { e.preventDefault(); }}
           >
+            {this.state.recommended
+                ? (
+                  <span
+                    className={`glyphicon glyphicon-star ${(isOver && canDrop) ? 'text-primary' : ''} pull-left`}
+                    style={{
+                      color: (isOver && canDrop) ? '' : 'yellow',
+                    }}
+                  />
+                )
+                : null
+            }
             <div className="form-group form-group-sm">
               <label className="sr-only">Group Name</label>
               <input
@@ -80,12 +108,13 @@ class Group extends React.Component {
           <p><strong>Summary: </strong>{summary}</p>
           <ItemList itemIds={[...group.itemIds.values()]} />
         </div>
-      </div>
+      </div>,
     ));
   }
 }
 
 Group.propTypes = propTypes;
+Group.defaultProps = defaultProps;
 
 /*
  * react-dnd
@@ -133,6 +162,8 @@ const collectTarget = (dndConnect, monitor) => ({
 const mapStateToProps = (state, { groupId }) => ({
   group: state.entities.groups.byId.get(groupId),
   summary: [].concat(...[...state.entities.groups.byId.get(groupId).itemIds].map(id => itemAnswersSelector(state).get(id))).map(answer => answer.data.unclear_type).filter(s => s.length > 0).join(', '),
+  recommended: recommendedGroupSelector(state) === groupId,
+  currentItemId: state.currentItemId,
 });
 
 const mapDispatchToProps = (dispatch, { groupId }) => ({
@@ -152,6 +183,6 @@ const mapDispatchToProps = (dispatch, { groupId }) => ({
 
 export default connect(mapStateToProps, mapDispatchToProps)(
   DragSource(ItemTypes.GROUP, groupSource, collectSource)(
-    DropTarget([ItemTypes.ITEM, ItemTypes.GROUP], groupTarget, collectTarget)(Group)
-  )
+    DropTarget([ItemTypes.ITEM, ItemTypes.GROUP], groupTarget, collectTarget)(Group),
+  ),
 );
