@@ -5,9 +5,7 @@
   "scripts": {
     "build": "./scripts/build.sh",
     "build-prod": "./scripts/build-prod.sh",
-    "watch": "./scripts/watch.sh",
-    "dev": "http-server ./src/static -a localhost",
-    "dev-public": "http-server ./src/static"
+    "watch": "./scripts/watch.sh"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -40,7 +38,6 @@
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^4.0.0",
     "eslint-plugin-react": "^6.10.3",
-    "http-server": "^0.9.0",
     "uglify": "^0.1.5",
     "watchify": "^3.9.0"
   }

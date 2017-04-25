@@ -1,4 +1,8 @@
-node_modules/
+*.py[co]
 *.log
+*.swp
 src/static/js/
 src/static/private/
+lib/
+node_modules/
+experiment_data/
