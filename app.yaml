@@ -10,6 +10,9 @@ handlers:
   script: main.app
 - url: /static
   static_dir: src/static
+- url: /robots.txt
+  static_files: src/static/robots.txt
+  upload: src/static/robots\.txt
 - url: /.*
   static_files: src/static/index.html
   upload: src/static/index\.html
