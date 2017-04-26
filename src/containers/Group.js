@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { DragSource, DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
 import { editGroup, mergeGroup, assignAndSetCurrentItem } from '../actions';
-import { itemAnswersSelector, recommendedGroupSelector } from '../reducers';
+import { recommendedGroupSelector, getItemsSummary } from '../reducers';
 import { ItemTypes } from '../dragConstants';
 
 const propTypes = {
@@ -161,7 +161,7 @@ const collectTarget = (dndConnect, monitor) => ({
 
 const mapStateToProps = (state, { groupId }) => ({
   group: state.entities.groups.byId.get(groupId),
-  summary: [].concat(...[...state.entities.groups.byId.get(groupId).itemIds].map(id => itemAnswersSelector(state).get(id))).map(answer => answer.data.unclear_type).filter(s => s.length > 0).join(', '),
+  summary: getItemsSummary([...state.entities.groups.byId.get(groupId).itemIds], state),
   recommended: recommendedGroupSelector(state) === groupId,
   currentItemId: state.currentItemId,
 });

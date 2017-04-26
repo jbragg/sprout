@@ -7,6 +7,8 @@ import DrillDownContainer from '../containers/DrillDownContainer';
 import LabelSection from '../containers/LabelSection';
 import Instructions from '../containers/Instructions';
 import SimilarItemList from '../containers/SimilarItemList';
+import ClusterItemList from '../containers/ClusterItemList';
+import UnreviewedItemList from '../containers/UnreviewedItemList';
 import Nav from '../components/Nav';
 import CustomDragLayer from '../CustomDragLayer';
 import { fetchExperiment } from '../actions';
@@ -57,9 +59,11 @@ class App extends React.Component {
                       <p>{initialInstructions}</p>
                     </div>
                   </div>
+                  {currentItemId == null ? null : <ClusterItemList />}
+                  {currentItemId == null ? null : <SimilarItemList />}
+                  {true ? null : <UnreviewedItemList />}
                   {currentItemId == null ? null : <DrillDownContainer />}
                   {currentItemId == null ? null : <CustomDragLayer />}
-                  {currentItemId == null ? null : <SimilarItemList />}
                 </div>
               </div>
               <div className="col-sm-4">

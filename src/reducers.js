@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect';
-import { ANSWER_ORACLE, QUEUE_ITEM_ORACLE, EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
+import { ANSWER_ORACLE, QUEUE_ITEM_ORACLE, EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT, SET_CLUSTER_ID } from './actions';
 import getScore from './score';
 import latin3x3 from './latin/latin3x3';
 
@@ -19,6 +19,7 @@ const initialState = {
   currentItemId: null,
   primaryItemId: null,
   similarItemIds: [],
+  clusterId: 0,
   initialInstructions: null,
   entities: {
     groups: { byId: new Map() },
@@ -69,6 +70,10 @@ export const groupsSelector = state => state.entities.groups;
 export const currentItemIdSelector = state => state.currentItemId;
 export const answersSelector = state => state.entities.answers;
 export const metricSelector = state => state.colorUnreviewedBy;
+export const clusterIdsSelector = createSelector(
+  itemsSelector,
+  items => new Set([...items.byId.values()].map(item => item.cluster)),
+)
 export const itemVectorsSelector = createSelector(
   itemsSelector,
   items => new Map([...items.byId].map(([key, item]) => [key, item.vector])),
@@ -90,6 +95,11 @@ export const itemSimilaritiesSelector = createSelector(
 export const unlabeledItemsSelector = createSelector(
   itemsSelector,
   items => [...items.byId.values()].filter(item => item.group == null && item.label == null),
+);
+export const unlabeledClusterItemsSelector = createSelector(
+  state => state.clusterId,
+  unlabeledItemsSelector,
+  (clusterId, items) => clusterId == null ? [] : items.filter(item => item.cluster === clusterId).map(item => item.id),
 );
 export const itemAnswersSelector = createSelector(
   itemsSelector,
@@ -137,12 +147,23 @@ const getSimilarItemIds = (itemId, state, unlabeledOnly = true) => {
   return [...itemSimilaritiesSelector(state).get(itemId).keys()].filter(id => !unlabeledOnly || unlabeledItemIds.indexOf(id) >= 0);
 };
 
+export const getItemsSummary = (itemIds, state) => (
+  [].concat(...itemIds.map(id => itemAnswersSelector(state).get(id))).map(answer => answer.data.unclear_type).filter(s => s.length > 0).join(', ')
+);
+
+
 /*
  * reducers
  */
 
 function InstructionsApp(state = initialState, action) {
   switch (action.type) {
+    case SET_CLUSTER_ID: {
+      return {
+        ...state,
+        clusterId: action.id,
+      };
+    }
     case ANSWER_ORACLE: {
       const nextQueuedItem = state.oracle.queuedItems.length > 0 ? state.oracle.queuedItems[0] : null;
       const lastAnswerTime = state.oracle.answeredItems.length > 0 ? state.oracle.answeredItems[state.oracle.answeredItems.length - 1].answerTime : null;

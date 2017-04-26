@@ -1,20 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import ItemList from '../components/ItemList';
 import { ItemThumbContainer } from '../containers/ItemContainer';
-import { unlabeledSortedItemsSelector } from '../reducers';
 
 const propTypes = {
   primaryItemId: PropTypes.number.isRequired,
   similarItemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
 };
 
-const SimilarItemList = ({ primaryItemId, similarItemIds, unreviewedItemIds }) => (
+const SimilarItemList = ({ primaryItemId, similarItemIds }) => (
   <div className="panel panel-default">
-    <div className="panel-heading">
-      Unclassified
-    </div>
     <div className="panel-body">
       <div className="row">
         <div className="col-sm-3">
@@ -36,14 +31,6 @@ const SimilarItemList = ({ primaryItemId, similarItemIds, unreviewedItemIds }) =
           </div>
         </div>
       </div>
-      <div className="row">
-        <div className="col-sm-12">
-          <div>
-            <strong>All</strong>
-          </div>
-          <ItemList itemIds={unreviewedItemIds} />
-        </div>
-      </div>
     </div>
   </div>
 );
@@ -53,7 +40,6 @@ SimilarItemList.propTypes = propTypes;
 const mapStateToProps = state => ({
   primaryItemId: state.primaryItemId,
   similarItemIds: state.similarItemIds,
-  unreviewedItemIds: unlabeledSortedItemsSelector(state).map(item => item.id),
 });
 
 export default connect(mapStateToProps)(SimilarItemList);
