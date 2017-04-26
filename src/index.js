@@ -1,13 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
+import { logger } from 'redux-logger';
 import fetch from 'isomorphic-fetch';
 
 import InstructionsApp from './reducers';
-import App from './containers/App';
-import { fetchExperiment, startOracle } from './actions';
+
+import Root from './components/Root';
 
 /**
  * Logs all actions to back-end server.
@@ -16,6 +16,9 @@ import { fetchExperiment, startOracle } from './actions';
  * TODO: Perform this logging only during experiments.
  */
 const productionLogger = store => next => (action) => {
+  if (store.getState().participantIndex == null) {
+    return next(action);
+  }
   const logEntry = {};
   logEntry.start_time = new Date();
   logEntry.prev_state = store.getState();
@@ -44,15 +47,12 @@ const middlewares = [thunkMiddleware];
 if (process.env.NODE_ENV === 'production') {
   middlewares.push(productionLogger);
 } else {
-  const { logger } = require('redux-logger');
   middlewares.push(logger);
 }
 const store = createStore(
   InstructionsApp,
   applyMiddleware(...middlewares),
 );
-store.dispatch(fetchExperiment());
-store.dispatch(startOracle());
 
 /*
 window.addEventListener("beforeunload", function(event) {
@@ -61,8 +61,6 @@ window.addEventListener("beforeunload", function(event) {
 */
 
 ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
+  <Root store={store} />,
   document.getElementById('root'),
 );

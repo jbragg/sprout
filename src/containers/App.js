@@ -9,59 +9,77 @@ import Instructions from '../containers/Instructions';
 import SimilarItemList from '../containers/SimilarItemList';
 import Nav from '../components/Nav';
 import CustomDragLayer from '../CustomDragLayer';
+import { fetchExperiment } from '../actions';
 
 const propTypes = {
   labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-  experimentState: PropTypes.string.isRequired,
+  experimentState: PropTypes.string,
   initialInstructions: PropTypes.string,
   currentItemId: PropTypes.number,
 };
 
-const App = ({ items, labels, experimentState, initialInstructions, currentItemId }) => (
-  experimentState !== 'loaded'
-  ? (
-    <div className="container">
-      <h1>Loading <span className="glyphicon glyphicon-refresh spinning" /></h1>
-    </div>
-  )
-  : (
-    <div id="app">
-      <div className="hidden">
-        {items.map(item => (
-          <img src={item.data.path} key={item.id} />
-        ))}
-      </div>
-      <Nav />
-      <div className="container-fluid">
-        <div className="row">
-          <div className="col-sm-5">
-            <div className="panel-group">
-              <div className="panel panel-default">
-                <div className="panel-heading"><strong>Initial Instructions</strong></div>
-                <div className="panel-body">
-                  <p>{initialInstructions}</p>
+const defaultProps = {
+  experimentState: null,
+};
+
+class App extends React.Component {
+  constructor(props) {
+    super(props)
+    const { initialize } = this.props;
+    const { participantIndex, taskIndex } = this.props.match.params;
+    initialize(participantIndex, taskIndex);
+  }
+
+  render() {
+    const { items, labels, experimentState, initialInstructions, currentItemId } = this.props;
+    return (
+      experimentState !== 'loaded'
+      ? (
+        <div className="container">
+          <h1>Loading <span className="glyphicon glyphicon-refresh spinning" /></h1>
+        </div>
+      )
+      : (
+        <div id="app">
+          <div className="hidden">
+            {items.map(item => (
+              <img src={item.data.path} key={item.id} />
+            ))}
+          </div>
+          <Nav />
+          <div className="container-fluid">
+            <div className="row">
+              <div className="col-sm-5">
+                <div className="panel-group">
+                  <div className="panel panel-default">
+                    <div className="panel-heading"><strong>Initial Instructions</strong></div>
+                    <div className="panel-body">
+                      <p>{initialInstructions}</p>
+                    </div>
+                  </div>
+                  {currentItemId == null ? null : <DrillDownContainer />}
+                  {currentItemId == null ? null : <CustomDragLayer />}
+                  {currentItemId == null ? null : <SimilarItemList />}
                 </div>
               </div>
-              {currentItemId == null ? null : <DrillDownContainer />}
-              {currentItemId == null ? null : <CustomDragLayer />}
-              {currentItemId == null ? null : <SimilarItemList />}
+              <div className="col-sm-4">
+                <div className="panel-group">
+                  {labels.map(label => <LabelSection label={label} key={label} />)}
+                </div>
+              </div>
+              <div className="col-sm-3">
+                <Instructions />
+              </div>
             </div>
-          </div>
-          <div className="col-sm-4">
-            <div className="panel-group">
-              {labels.map(label => <LabelSection label={label} key={label} />)}
-            </div>
-          </div>
-          <div className="col-sm-3">
-            <Instructions />
           </div>
         </div>
-      </div>
-    </div>
-  )
-);
+      )
+    )
+  }
+}
 
 App.propTypes = propTypes;
+App.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
   labels: state.labels,
@@ -71,4 +89,10 @@ const mapStateToProps = state => ({
   initialInstructions: state.initialInstructions,
 });
 
-export default DragDropContext(HTML5Backend)(connect(mapStateToProps)(App));
+const mapDispatchToProps = dispatch => ({
+  initialize: (participantIndex, taskIndex) => {
+    dispatch(fetchExperiment(participantIndex, taskIndex));
+  },
+});
+
+export default DragDropContext(HTML5Backend)(connect(mapStateToProps, mapDispatchToProps)(App));

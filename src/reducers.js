@@ -1,8 +1,11 @@
 import { createSelector } from 'reselect';
 import { ANSWER_ORACLE, QUEUE_ITEM_ORACLE, EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT } from './actions';
 import getScore from './score';
+import latin3x3 from './latin/latin3x3';
 
 const initialState = {
+  participantIndex: null,
+  systemVersion: null,
   suggestSimilar: true,  // TODO: Handle false case.
   labels: ['yes', 'maybe', 'no'],
   finalLabels: ['yes', 'no'],
@@ -42,9 +45,20 @@ const dotProduct = (vec1, vec2) => {
   }
   return sum;
 };
+
 const cosineSimilarity = (vec1, vec2) => (
   dotProduct(vec1, vec2) / Math.sqrt(dotProduct(vec1, vec1)) / Math.sqrt(dotProduct(vec2, vec2))
 );
+
+const getTreatment = (participantIndex, taskIndex) => {
+  if (participantIndex == null || taskIndex == null) {
+    return 2;  // full system
+  }
+  const participant = Number(participantIndex);
+  const task = Number(taskIndex);
+  const squareIndex = Math.floor(participant / 3) % latin3x3.length;
+  return latin3x3[squareIndex][participant % 3][task];
+};
 
 /*
  * selectors
@@ -378,6 +392,11 @@ function InstructionsApp(state = initialState, action) {
       return {
         ...state,
         experimentState: 'loaded',
+        systemVersion: getTreatment(
+          action.payload.participantIndex,
+          action.payload.taskIndex,
+        ),
+        participantIndex: action.payload.participantIndex,
         initialInstructions: action.payload.initialInstructions,
         entities: {
           ...state.entities,

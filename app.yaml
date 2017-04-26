@@ -8,11 +8,11 @@ builtins:
 handlers:
 - url: /record
   script: main.app
-- url: /
+- url: /static
+  static_dir: src/static
+- url: /.*
   static_files: src/static/index.html
   upload: src/static/index\.html
-- url: /
-  static_dir: src/static
 
 skip_files:
 - ^(.*/)?#.*#$
@@ -27,6 +27,6 @@ skip_files:
 - ^[^/]*.sh$
 - ^node_modules/.*$
 - ^scripts/.*$
-- ^src/(components|containers)/.*$
+- ^src/(components|containers|latin)/.*$
 - ^src/[^/]*\.js$
 - ^experiment_data/.*$

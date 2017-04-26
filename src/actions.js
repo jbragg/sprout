@@ -123,12 +123,12 @@ function formatAnswerData(answerData) {
   };
 }
 
-export function fetchExperiment() {
+export function fetchExperiment(participantIndex, taskIndex) {
   return (dispatch) => {
     dispatch(requestExperiment());
-    const experimentPromise = fetch('private/pilot_instructions_experiment.json')
+    const experimentPromise = fetch('/static/private/pilot_instructions_experiment.json')
       .then(response => response.json());
-    const answersPromise = fetch('private/pilot_instructions_data_anon.json')
+    const answersPromise = fetch('/static/private/pilot_instructions_data_anon.json')
       .then(response => response.json());
 
     return Promise.all([experimentPromise, answersPromise])
@@ -143,17 +143,20 @@ export function fetchExperiment() {
         }
         dispatch(receiveExperiment({
           items: experiment.data.data,
-          answers: answers,
+          answers,
           initialInstructions: experiment.data.initial_instructions,
+          participantIndex,
+          taskIndex,
         }));
         dispatch(setCurrentItem());
+        dispatch(startOracle());
       });
   }
 }
 
 const ORACLE_CHECK_INTERVAL = 30 * 1000;  // seconds to milliseconds
 let timer = null;
-export function startOracle() {
+function startOracle() {
   return (dispatch) => {
     clearInterval(timer);
     timer = setInterval(() => dispatch(answerOracle()), ORACLE_CHECK_INTERVAL);
