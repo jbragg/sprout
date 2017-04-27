@@ -5,7 +5,7 @@ import thunkMiddleware from 'redux-thunk';
 import { logger } from 'redux-logger';
 import fetch from 'isomorphic-fetch';
 
-import InstructionsApp from './reducers';
+import reducer from './reducers/index';
 
 import Root from './components/Root';
 
@@ -50,7 +50,7 @@ if (process.env.NODE_ENV === 'production') {
   middlewares.push(logger);
 }
 const store = createStore(
-  InstructionsApp,
+  reducer,
   applyMiddleware(...middlewares),
 );
 

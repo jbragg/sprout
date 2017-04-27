@@ -30,6 +30,6 @@ skip_files:
 - ^[^/]*.sh$
 - ^node_modules/.*$
 - ^scripts/.*$
-- ^src/(components|containers|latin)/.*$
+- ^src/(components|containers|latin|reducers)/.*$
 - ^src/[^/]*\.js$
 - ^experiment_data/.*$

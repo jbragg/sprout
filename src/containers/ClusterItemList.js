@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { ItemThumbContainer } from '../containers/ItemContainer';
-import { clusterIdsSelector, unlabeledClusterItemsSelector, getItemsSummary } from '../reducers/';
+import { clusterIdsSelector, unlabeledClusterItemsSelector, getItemsSummary } from '../reducers/index';
 import { setClusterId } from '../actions';
 
 const propTypes = {

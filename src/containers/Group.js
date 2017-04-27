@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { DragSource, DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
 import { editGroup, mergeGroup, assignAndSetCurrentItem } from '../actions';
-import { recommendedGroupSelector, getItemsSummary } from '../reducers';
+import { recommendedGroupSelector, getItemsSummary } from '../reducers/index';
 import { ItemTypes } from '../dragConstants';
 
 const propTypes = {

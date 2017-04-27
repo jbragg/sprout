@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import ItemList from '../components/ItemList';
-import { unlabeledSortedItemsSelector } from '../reducers';
+import { unlabeledSortedItemsSelector } from '../reducers/index';
 
 const propTypes = {
   unreviewedItemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,

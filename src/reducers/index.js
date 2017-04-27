@@ -1,9 +1,15 @@
+import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
-import { ANSWER_ORACLE, QUEUE_ITEM_ORACLE, EDIT_COLOR_UNREVIEWED, EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT, RECEIVE_EXPERIMENT, SET_CLUSTER_ID } from './actions';
-import getScore from './score';
-import latin3x3 from './latin/latin3x3';
+import {
+  ANSWER_ORACLE, QUEUE_ITEM_ORACLE, EDIT_COLOR_UNREVIEWED,
+  EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM,
+  EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
+  RECEIVE_EXPERIMENT, SET_CLUSTER_ID, SET_VIEW } from '../actions';
+import getScore from '../score';
+import latin3x3 from '../latin/latin3x3';
 
 const initialState = {
+  view: 'labeling',
   participantIndex: null,
   systemVersion: null,
   suggestSimilar: true,  // TODO: Handle false case.
@@ -158,6 +164,12 @@ export const getItemsSummary = (itemIds, state) => (
 
 function InstructionsApp(state = initialState, action) {
   switch (action.type) {
+    case SET_VIEW: {
+      return {
+        ...state,
+        view: action.name,
+      };
+    }
     case SET_CLUSTER_ID: {
       return {
         ...state,

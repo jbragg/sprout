@@ -9,7 +9,7 @@ import Instructions from '../containers/Instructions';
 import SimilarItemList from '../containers/SimilarItemList';
 import ClusterItemList from '../containers/ClusterItemList';
 import UnreviewedItemList from '../containers/UnreviewedItemList';
-import Nav from '../components/Nav';
+import Nav from '../containers/Nav';
 import CustomDragLayer from '../CustomDragLayer';
 import { fetchExperiment } from '../actions';
 
@@ -24,6 +24,12 @@ const defaultProps = {
   experimentState: null,
 };
 
+const labeledGroups = ({ labels }) => (
+  <div className="panel-group">
+    {labels.map(label => <LabelSection label={label} key={label} />)}
+  </div>
+);
+
 class App extends React.Component {
   constructor(props) {
     super(props)
@@ -33,7 +39,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { items, labels, experimentState, initialInstructions, currentItemId } = this.props;
+    const { view, items, labels, experimentState, initialInstructions, currentItemId } = this.props;
     return (
       experimentState !== 'loaded'
       ? (
@@ -50,31 +56,40 @@ class App extends React.Component {
           </div>
           <Nav />
           <div className="container-fluid">
-            <div className="row">
-              <div className="col-sm-5">
-                <div className="panel-group">
-                  <div className="panel panel-default">
-                    <div className="panel-heading"><strong>Initial Instructions</strong></div>
-                    <div className="panel-body">
-                      <p>{initialInstructions}</p>
+            {view === 'labeling'
+                ? (
+                  <div className="row">
+                    <div className="col-sm-5">
+                      <div className="panel-group">
+                        <div className="panel panel-default">
+                          <div className="panel-heading"><strong>Initial Instructions</strong></div>
+                          <div className="panel-body">
+                            <p>{initialInstructions}</p>
+                          </div>
+                        </div>
+                        {currentItemId == null ? null : <ClusterItemList />}
+                        {currentItemId == null ? null : <SimilarItemList />}
+                        {true ? null : <UnreviewedItemList />}
+                        {currentItemId == null ? null : <DrillDownContainer />}
+                        {currentItemId == null ? null : <CustomDragLayer />}
+                      </div>
+                    </div>
+                    <div className="col-sm-7">
+                      {labeledGroups({ labels })}
                     </div>
                   </div>
-                  {currentItemId == null ? null : <ClusterItemList />}
-                  {currentItemId == null ? null : <SimilarItemList />}
-                  {true ? null : <UnreviewedItemList />}
-                  {currentItemId == null ? null : <DrillDownContainer />}
-                  {currentItemId == null ? null : <CustomDragLayer />}
-                </div>
-              </div>
-              <div className="col-sm-4">
-                <div className="panel-group">
-                  {labels.map(label => <LabelSection label={label} key={label} />)}
-                </div>
-              </div>
-              <div className="col-sm-3">
-                <Instructions />
-              </div>
-            </div>
+                )
+                : (
+                  <div className="row">
+                    <div className="col-sm-7">
+                      {labeledGroups({ labels })}
+                    </div>
+                    <div className="col-sm-5">
+                      <Instructions />
+                    </div>
+                  </div>
+                )
+            }
           </div>
         </div>
       )
@@ -86,6 +101,7 @@ App.propTypes = propTypes;
 App.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
+  view: state.view,
   labels: state.labels,
   items: [...state.entities.items.byId.values()],
   currentItemId: state.currentItemId,
