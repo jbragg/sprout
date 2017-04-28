@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Nav, NavItem } from 'react-bootstrap';
+import { Navbar, Nav, NavItem } from 'react-bootstrap';
 import Oracle from '../containers/Oracle';
 import EditColor from '../containers/EditColor';
 import { setView } from '../actions';
@@ -11,22 +11,24 @@ const propTypes = {
   onSetView: PropTypes.func.isRequired,
 };
 
-const Navbar = ({ view, onSetView }) => (
+const AppNavbar = ({ view, onSetView, unlabeledItems, labeledItems}) => (
   <div className="container-fluid">
-    <Nav
-      bsStyle="tabs"
-      activeKey={view}
-      onSelect={(key) => { onSetView(key); }}
-    >
-      <NavItem eventKey="labeling">Labeling</NavItem>
-      <NavItem eventKey="instructions">Instructions</NavItem>
+    <Navbar fluid>
+      <Nav
+        bsStyle="pills"
+        activeKey={view}
+        onSelect={(key) => { onSetView(key); }}
+      >
+        <NavItem eventKey="labeling">Labeling</NavItem>
+        <NavItem eventKey="instructions">Instructions</NavItem>
+      </Nav>
       <EditColor />
       <Oracle />
-    </Nav>
+    </Navbar>
   </div>
 );
 
-Navbar.propTypes = propTypes;
+AppNavbar.propTypes = propTypes;
 
 const mapStateToProps = state => ({
   view: state.view,
@@ -38,4 +40,4 @@ const mapDispatchToProps = dispatch => ({
   },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Navbar);
+export default connect(mapStateToProps, mapDispatchToProps)(AppNavbar);

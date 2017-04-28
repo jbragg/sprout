@@ -44,3 +44,11 @@
 .navbar {
   margin-bottom: 5px;
 }
+
+.progress-bar {
+  min-width: 2em;
+}
+
+.progress {
+  margin-bottom: 0;
+}

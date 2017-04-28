@@ -3,13 +3,12 @@ import PropTypes from 'prop-types';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
-import DrillDownContainer from '../containers/DrillDownContainer';
-import LabelSection from '../containers/LabelSection';
-import Instructions from '../containers/Instructions';
-import SimilarItemList from '../containers/SimilarItemList';
-import ClusterItemList from '../containers/ClusterItemList';
-import UnreviewedItemList from '../containers/UnreviewedItemList';
-import Nav from '../containers/Nav';
+import DrillDownContainer from './DrillDownContainer';
+import LabelSection from './LabelSection';
+import Instructions from './Instructions';
+import SimilarItemList from './SimilarItemList';
+import Nav from './Nav';
+import Progress from './Progress';
 import CustomDragLayer from '../CustomDragLayer';
 import { fetchExperiment } from '../actions';
 
@@ -67,9 +66,8 @@ class App extends React.Component {
                             <p>{initialInstructions}</p>
                           </div>
                         </div>
-                        {currentItemId == null ? null : <ClusterItemList />}
+                        <Progress />
                         {currentItemId == null ? null : <SimilarItemList />}
-                        {true ? null : <UnreviewedItemList />}
                         {currentItemId == null ? null : <DrillDownContainer />}
                         {currentItemId == null ? null : <CustomDragLayer />}
                       </div>
