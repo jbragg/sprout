@@ -7,8 +7,6 @@ import fetch from 'isomorphic-fetch';
 export const ANSWER_ORACLE = 'ANSWER_ORACLE';
 export const QUEUE_ITEM_ORACLE = 'QUEUE_ITEM_ORACLE';
 export const SET_CURRENT_ITEM = 'SET_CURRENT_ITEM';
-export const SET_CLUSTER_ID = 'SET_CLUSTER_ID';
-export const SET_VIEW = 'SET_VIEW';
 export const ASSIGN_ITEM = 'ASSIGN_ITEM';
 export const CREATE_GROUP = 'CREATE_GROUP';
 export const MERGE_GROUP = 'MERGE_GROUP';
@@ -22,20 +20,6 @@ export const EDIT_COLOR_UNREVIEWED = 'EDIT_COLOR_UNREVIEWED';
 /*
  * action creators
  */
-
-export function setView(name) {
-  return {
-    type: SET_VIEW,
-    name,
-  };
-}
-
-export function setClusterId(id) {
-  return {
-    type: SET_CLUSTER_ID,
-    id,
-  };
-}
 
 function answerOracle() {
   return {

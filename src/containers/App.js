@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
+import { Grid, Col, PanelGroup } from 'react-bootstrap';
 import DrillDownContainer from './DrillDownContainer';
 import LabelSection from './LabelSection';
 import Instructions from './Instructions';
@@ -15,30 +16,24 @@ import { fetchExperiment } from '../actions';
 const propTypes = {
   labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
   experimentState: PropTypes.string,
-  initialInstructions: PropTypes.string,
   currentItemId: PropTypes.number,
+  initialize: PropTypes.func.isRequired,
 };
 
 const defaultProps = {
   experimentState: null,
 };
 
-const labeledGroups = ({ labels }) => (
-  <div className="panel-group">
-    {labels.map(label => <LabelSection label={label} key={label} />)}
-  </div>
-);
-
 class App extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     const { initialize } = this.props;
     const { participantIndex, taskIndex } = this.props.match.params;
     initialize(participantIndex, taskIndex);
   }
 
   render() {
-    const { view, items, labels, experimentState, initialInstructions, currentItemId } = this.props;
+    const { items, labels, experimentState, currentItemId } = this.props;
     return (
       experimentState !== 'loaded'
       ? (
@@ -53,45 +48,28 @@ class App extends React.Component {
               <img src={item.data.path} key={item.id} />
             ))}
           </div>
+          {currentItemId == null ? null : <CustomDragLayer />}
           <Nav />
-          <div className="container-fluid">
-            {view === 'labeling'
-                ? (
-                  <div className="row">
-                    <div className="col-sm-5">
-                      <div className="panel-group">
-                        <div className="panel panel-default">
-                          <div className="panel-heading"><strong>Initial Instructions</strong></div>
-                          <div className="panel-body">
-                            <p>{initialInstructions}</p>
-                          </div>
-                        </div>
-                        <Progress />
-                        {currentItemId == null ? null : <SimilarItemList />}
-                        {currentItemId == null ? null : <DrillDownContainer />}
-                        {currentItemId == null ? null : <CustomDragLayer />}
-                      </div>
-                    </div>
-                    <div className="col-sm-7">
-                      {labeledGroups({ labels })}
-                    </div>
-                  </div>
-                )
-                : (
-                  <div className="row">
-                    <div className="col-sm-7">
-                      {labeledGroups({ labels })}
-                    </div>
-                    <div className="col-sm-5">
-                      <Instructions />
-                    </div>
-                  </div>
-                )
-            }
-          </div>
+          <Grid fluid>
+            <Col sm={4}>
+              <Instructions />
+            </Col>
+            <Col sm={4}>
+              <PanelGroup>
+                <Progress />
+                {currentItemId == null ? null : <SimilarItemList />}
+                {currentItemId == null ? null : <DrillDownContainer />}
+              </PanelGroup>
+            </Col>
+            <Col sm={4}>
+              <PanelGroup>
+                {labels.map(label => <LabelSection label={label} key={label} />)}
+              </PanelGroup>
+            </Col>
+          </Grid>
         </div>
       )
-    )
+    );
   }
 }
 
@@ -99,12 +77,10 @@ App.propTypes = propTypes;
 App.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
-  view: state.view,
   labels: state.labels,
   items: [...state.entities.items.byId.values()],
   currentItemId: state.currentItemId,
   experimentState: state.experimentState,
-  initialInstructions: state.initialInstructions,
 });
 
 const mapDispatchToProps = dispatch => ({

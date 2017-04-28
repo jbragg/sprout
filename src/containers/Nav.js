@@ -14,14 +14,6 @@ const propTypes = {
 const AppNavbar = ({ view, onSetView, unlabeledItems, labeledItems}) => (
   <div className="container-fluid">
     <Navbar fluid>
-      <Nav
-        bsStyle="pills"
-        activeKey={view}
-        onSelect={(key) => { onSetView(key); }}
-      >
-        <NavItem eventKey="labeling">Labeling</NavItem>
-        <NavItem eventKey="instructions">Instructions</NavItem>
-      </Nav>
       <EditColor />
       <Oracle />
     </Navbar>

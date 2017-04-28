@@ -4,7 +4,7 @@ import {
   ANSWER_ORACLE, QUEUE_ITEM_ORACLE, EDIT_COLOR_UNREVIEWED,
   EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM,
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
-  RECEIVE_EXPERIMENT, SET_CLUSTER_ID, SET_VIEW } from '../actions';
+  RECEIVE_EXPERIMENT } from '../actions';
 import getScore from '../score';
 import latin3x3 from '../latin/latin3x3';
 
@@ -37,7 +37,7 @@ const initialState = {
       ['no', { itemIds: new Set() }],
     ]),
   },
-  generalInstructions: '',
+  generalInstructions: null,
   colorUnreviewedBy: 'confusion',
 };
 
@@ -164,18 +164,6 @@ export const getItemsSummary = (itemIds, state) => (
 
 function InstructionsApp(state = initialState, action) {
   switch (action.type) {
-    case SET_VIEW: {
-      return {
-        ...state,
-        view: action.name,
-      };
-    }
-    case SET_CLUSTER_ID: {
-      return {
-        ...state,
-        clusterId: action.id,
-      };
-    }
     case ANSWER_ORACLE: {
       const nextQueuedItem = state.oracle.queuedItems.length > 0 ? state.oracle.queuedItems[0] : null;
       const lastAnswerTime = state.oracle.answeredItems.length > 0 ? state.oracle.answeredItems[state.oracle.answeredItems.length - 1].answerTime : null;
@@ -431,6 +419,7 @@ function InstructionsApp(state = initialState, action) {
         ),
         participantIndex: action.payload.participantIndex,
         initialInstructions: action.payload.initialInstructions,
+        generalInstructions: action.payload.initialInstructions,
         entities: {
           ...state.entities,
           items: {
