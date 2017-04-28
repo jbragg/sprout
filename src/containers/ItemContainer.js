@@ -29,7 +29,6 @@ const mapStateToProps = (state, { itemId } ) => ({
   selected: state.currentItemId === itemId,
   item: state.entities.items.byId.get(itemId),
   answers: state.entities.items.byId.get(itemId).answers.map(id => state.entities.answers.byId.get(id)),
-  metric: state.colorUnreviewedBy,
 });
 
 const mapDispatchToProps = (dispatch, { itemId }) => ({

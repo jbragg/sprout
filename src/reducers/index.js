@@ -5,7 +5,7 @@ import {
   EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM,
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
   RECEIVE_EXPERIMENT } from '../actions';
-import getScore from '../score';
+import getScore, { defaults as defaultMetrics } from '../score';
 import latin3x3 from '../latin/latin3x3';
 
 const initialState = {
@@ -38,7 +38,6 @@ const initialState = {
     ]),
   },
   generalInstructions: null,
-  colorUnreviewedBy: 'confusion',
 };
 
 /*
@@ -75,7 +74,6 @@ export const itemsSelector = state => state.entities.items;
 export const groupsSelector = state => state.entities.groups;
 export const currentItemIdSelector = state => state.currentItemId;
 export const answersSelector = state => state.entities.answers;
-export const metricSelector = state => state.colorUnreviewedBy;
 export const clusterIdsSelector = createSelector(
   itemsSelector,
   items => new Set([...items.byId.values()].map(item => item.cluster)),
@@ -115,14 +113,12 @@ export const itemAnswersSelector = createSelector(
 export const unlabeledItemScoresSelector = createSelector(
   unlabeledItemsSelector,
   itemAnswersSelector,
-  metricSelector,
-  (items, answers, metric) => new Map(items.map(item => [item.id, getScore(metric)(answers.get(item.id).map(answer => answer.data.answer))])),
+  (items, answers) => new Map(items.map(item => [item.id, getScore(defaultMetrics.sort)(answers.get(item.id).map(answer => answer.data.answer))])),
 );
 export const unlabeledSortedItemsSelector = createSelector(
   unlabeledItemsSelector,
   unlabeledItemScoresSelector,
-  metricSelector,
-  (items, scores, metric) => [...items].sort((item1, item2) => (metric === 'confusion' ? -1 : 1) * (scores.get(item1.id) - scores.get(item2.id))),
+  (items, scores) => [...items].sort((item1, item2) => -1 * (scores.get(item1.id) - scores.get(item2.id))),  // Descending order for confusion.
 );
 export const groupItemsSelector = createSelector(
   groupsSelector,

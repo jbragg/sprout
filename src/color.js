@@ -7,10 +7,10 @@ const getContrastColor = (rgbColor) => {
   return (yiq >= 128) ? 'black' : 'white';
 };
 
-const getColor = (color) => {
-  if (color === 'confusion') {
+const getColor = (metric) => {
+  if (metric === 'confusion') {
     return interpolateReds;
-  } else if (color === 'agreement') {
+  } else if (metric === 'agreement') {
     return interpolateGreens;
   }
   return interpolateRdYlGn;  // color === 'answer'

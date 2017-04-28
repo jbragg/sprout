@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 import getScore from '../score';
 import { getColor, getContrastColor } from '../color';
+import { defaults as defaultMetrics } from '../score';
 
 const propTypes = {
   selected: PropTypes.bool.isRequired,
@@ -20,7 +21,7 @@ const propTypes = {
   ).isRequired,
   item: PropTypes.shape({
     id: PropTypes.number }).isRequired,
-  metric: PropTypes.string.isRequired,
+  metric: PropTypes.string,
   connectDragSource: PropTypes.func.isRequired,
   isDragging: PropTypes.bool.isRequired,
 };
@@ -28,6 +29,7 @@ const propTypes = {
 const defaultProps = ({
   connectDragSource: x => x,
   isDragging: false,
+  metric: defaultMetrics.color,
 });
 
 const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, isDragging }) => {
