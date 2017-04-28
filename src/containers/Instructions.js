@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { PanelGroup, Panel, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import ReactMarkdown from 'react-markdown';
 import { editGroup, editGeneralInstructions } from '../actions';
+import Oracle from '../containers/Oracle';
 
 const propTypes = {
   onGroupEdit: PropTypes.func.isRequired,
@@ -17,12 +18,13 @@ const propTypes = {
 const Instructions = ({ finalLabels, labels, groups, onGroupEdit, onEditGeneralInstructions, initialInstructions, generalInstructions }) => (
   <PanelGroup>
     <Panel
-      header="Customer's instructions"
+      header={<span>Customer's instructions</span>}
     >
       <p>{initialInstructions}</p>
     </Panel>
+    <Oracle />
     <Panel
-      header="Improved instructions"
+      header={<span>Improved instructions</span>}
     >
       <FormGroup>
         <FormControl
@@ -44,7 +46,7 @@ const Instructions = ({ finalLabels, labels, groups, onGroupEdit, onEditGeneralI
       </span>
     </Panel>
     <Panel
-      header="Preview"
+      header={<span>Preview</span>}
     >
       <ReactMarkdown source={generalInstructions} />
     </Panel>

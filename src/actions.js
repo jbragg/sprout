@@ -15,7 +15,6 @@ export const EDIT_GENERAL_INSTRUCTIONS = 'EDIT_GENERAL_INSTRUCTIONS';
 export const REQUEST_EXPERIMENT = 'REQUEST_EXPERIMENT';
 export const RECEIVE_EXPERIMENT = 'RECEIVE_EXPERIMENT';
 export const FETCH_EXPERIMENT = 'FETCH_EXPERIMENT';
-export const EDIT_COLOR_UNREVIEWED = 'EDIT_COLOR_UNREVIEWED';
 
 /*
  * action creators
@@ -31,13 +30,6 @@ export function queueItemOracle(itemId) {
   return {
     type: QUEUE_ITEM_ORACLE,
     itemId,
-  };
-}
-
-export function editColorUnreviewed(metric) {
-  return {
-    type: EDIT_COLOR_UNREVIEWED,
-    metric,
   };
 }
 

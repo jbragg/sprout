@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Popover, OverlayTrigger } from 'react-bootstrap';
+import { Popover, OverlayTrigger, Row, Col, Panel } from 'react-bootstrap';
 import { DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
 import { queueItemOracle } from '../actions';
@@ -36,38 +36,42 @@ const customerHelp = (
 const Oracle = ({ queuedItems, answeredItems, finalLabels, connectDropTarget, isOver, canDrop }) => {
   const queuedItemIds = queuedItems.map(val => val.id);
   return connectDropTarget(
-    <div
-      className="navbar-form navbar-right"
-      style={{
-        backgroundColor: (isOver && canDrop) ? 'yellow' : '',
-      }}
-    >
-      <OverlayTrigger
-        overlay={<Popover id="popover" title="Help">{customerHelp}</Popover>}
-        placement="bottom"
+    <div className="panel">
+      <Panel
+        className={(isOver && canDrop) ? 'target' : ''}
+        header={
+          <span>
+          Ask for a clarification
+          <OverlayTrigger
+            overlay={<Popover id="popover" title="Help">{customerHelp}</Popover>}
+            placement="bottom"
+          >
+            <span className="glyphicon glyphicon-question-sign" />
+          </OverlayTrigger>
+          </span>
+        }
       >
-        <span className="glyphicon glyphicon-question-sign" />
-      </OverlayTrigger>
-      {' '}
-      <div className="form-group">
-        <label>Queued for customer:</label>
-        {' '}
-        {queuedItemIds.length === 0 ? <div className="form-control" /> : <ItemList itemIds={queuedItemIds} />}
-        {' '}
-      </div>
-      {' '}
-      {finalLabels.map((label) => {
-        const itemIds = answeredItems.filter(val => val.label === label).map(val => val.id);
-        return (
-          <div className="form-group" key={label}>
-            <label>Answered {label}:</label>
-            {' '}
-            {itemIds.length === 0 ? <div className="form-control" /> : <ItemList itemIds={itemIds} />}
-            {' '}
-          </div>
-        );
-      })}
-    </div>
+        <div>
+          {queuedItemIds.length === 0 ? null : <ItemList itemIds={queuedItemIds} />}
+        </div>
+        <Row>
+          {finalLabels.map((label) => {
+            const itemIds = answeredItems.filter(val => val.label === label).map(val => val.id);
+            return (
+              <Col sm={6} key={label}>
+                <Panel
+                  header={<span>{label}</span>}
+                >
+                  <div>
+                    {itemIds.length === 0 ? null : <ItemList itemIds={itemIds} />}
+                  </div>
+                </Panel>
+              </Col>
+            );
+          })}
+        </Row>
+      </Panel>
+    </div>,
   );
 };
 
@@ -82,7 +86,7 @@ const oracleTarget = {
     props.onQueue(monitor.getItem().id);
   },
   canDrop: (props, monitor) => (props.queuedItems.findIndex(val => val.id === monitor.getItem().id) < 0 && props.answeredItems.findIndex(val => val.id === monitor.getItem().id) < 0),
-}
+};
 
 const collect = (dndConnect, monitor) => ({
   connectDropTarget: dndConnect.dropTarget(),

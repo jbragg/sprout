@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import {
-  ANSWER_ORACLE, QUEUE_ITEM_ORACLE, EDIT_COLOR_UNREVIEWED,
+  ANSWER_ORACLE, QUEUE_ITEM_ORACLE,
   EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM,
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
   RECEIVE_EXPERIMENT } from '../actions';
@@ -206,12 +206,6 @@ function InstructionsApp(state = initialState, action) {
       return {
         ...state,
         generalInstructions: action.markdown,
-      };
-    }
-    case EDIT_COLOR_UNREVIEWED: {
-      return {
-        ...state,
-        colorUnreviewedBy: action.metric,
       };
     }
     case SET_CURRENT_ITEM: {

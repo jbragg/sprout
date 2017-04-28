@@ -52,3 +52,7 @@
 .progress {
   margin-bottom: 0;
 }
+
+.target .panel-heading {
+  background-color: yellow;
+}

@@ -39,14 +39,9 @@ class LabelSection extends React.Component {
   render() {
     const { groupIds, label, onGroupCreate, connectDropTarget, isOver, canDrop, itemIds } = this.props;
     return connectDropTarget(
-      <div className="class-container panel panel-default">
-        <div
-          className="panel-heading"
-          style={{
-            backgroundColor: (isOver && canDrop) ? 'yellow' : '',
-          }}
-        >
-          <strong>{label}</strong>
+      <div className={`panel panel-default ${(isOver && canDrop) ? 'target' : ''}`}>
+        <div className="panel-heading">
+          <span className="panel-title">{label}</span>
         </div>
         <div className="panel-body">
           <div>

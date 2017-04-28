@@ -55,17 +55,12 @@ class Group extends React.Component {
     const { group, connectDropTarget, connectDragSource, isOver, canDrop, isDragging, onGroupMergeOut, summary } = this.props;
     return connectDragSource(connectDropTarget(
       <div
-        className={`class-container panel panel-primary ${this.state.recommended ? 'recommended' : ''}`}
+        className={`class-container panel panel-primary ${this.state.recommended ? 'recommended' : ''} ${(isOver && canDrop) ? 'target' : ''}`}
         style={{
           opacity: isDragging ? 0.5 : 1,
         }}
       >
-        <div
-          className="panel-heading"
-          style={{
-            backgroundColor: (isOver && canDrop) ? 'yellow' : '',
-          }}
-        >
+        <div className="panel-heading">
           <div className="pull-right">
             <button
               className="btn btn-default text-danger"
