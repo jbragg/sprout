@@ -56,3 +56,8 @@
 .target .panel-heading {
   background-color: yellow;
 }
+
+.no-gutter {
+  margin-left: 0;
+  margin-right: 0;
+}

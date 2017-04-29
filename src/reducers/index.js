@@ -113,7 +113,7 @@ export const itemAnswersSelector = createSelector(
 export const unlabeledItemScoresSelector = createSelector(
   unlabeledItemsSelector,
   itemAnswersSelector,
-  (items, answers) => new Map(items.map(item => [item.id, getScore(defaultMetrics.sort)(answers.get(item.id).map(answer => answer.data.answer))])),
+  (items, answers) => new Map(items.map(item => [item.id, getScore(defaultMetrics.sort)(...answers.get(item.id).map(answer => answer.data.answer)).color])),
 );
 export const unlabeledSortedItemsSelector = createSelector(
   unlabeledItemsSelector,

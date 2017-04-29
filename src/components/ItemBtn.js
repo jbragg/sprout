@@ -1,9 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
-import getScore from '../score';
 import { getColor, getContrastColor } from '../color';
-import { defaults as defaultMetrics } from '../score';
+import getScore, { defaults as defaultMetrics } from '../score';
 
 const propTypes = {
   selected: PropTypes.bool.isRequired,
@@ -34,8 +33,8 @@ const defaultProps = ({
 
 const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, isDragging }) => {
   const answerValues = answers.map(answer => answer.data.answer);
-  const score = getScore(metric)(answerValues);
-  const backgroundColor = getColor(metric)(score);
+  const scores = getScore(metric)(...answerValues);
+  const backgroundColor = getColor(metric)(scores.color);
   const textColor = getContrastColor(backgroundColor);
   return connectDragSource(
     <div
@@ -45,7 +44,7 @@ const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, 
       }}
     >
       <OverlayTrigger
-        overlay={<Tooltip id="tooltip">{score.toFixed(2)}</Tooltip>}
+        overlay={<Tooltip id="tooltip">{scores.human.toFixed(2)}</Tooltip>}
         placement="bottom"
       >
         <button

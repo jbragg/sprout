@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
-import { Grid, Col, PanelGroup } from 'react-bootstrap';
+import { Grid, Row, Col, PanelGroup } from 'react-bootstrap';
 import DrillDownContainer from './DrillDownContainer';
 import LabelSection from './LabelSection';
 import Instructions from './Instructions';
@@ -60,6 +60,37 @@ class App extends React.Component {
               </PanelGroup>
             </Col>
             <Col sm={4}>
+              <div>
+                <strong>Crowd answer</strong>
+                <img
+                  src="/static/RdYlGn.png"
+                  height="20"
+                  width="100%"
+                />
+                <Row>
+                  <Col
+                    className="no-gutter"
+                    sm={4}
+                  >
+                    <div>-1</div>
+                    <div>No</div>
+                  </Col>
+                  <Col
+                    className="no-gutter text-center"
+                    sm={4}
+                  >
+                    <div>0</div>
+                    <div>Maybe</div>
+                  </Col>
+                  <Col
+                    className="no-gutter text-right"
+                    sm={4}
+                  >
+                    <div>1</div>
+                    <div>Yes</div>
+                  </Col>
+                </Row>
+              </div>
               <PanelGroup>
                 {labels.map(label => <LabelSection label={label} key={label} />)}
               </PanelGroup>

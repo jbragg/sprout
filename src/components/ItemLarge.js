@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import getScore, { defaults as defaultMetrics } from '../score';
 
 const propTypes = {
   onLoad: PropTypes.func.isRequired,
@@ -78,7 +79,7 @@ class ItemLarge extends React.Component {
                             placement="bottom"
                           >
                             <div>
-                              <span>{answer.data.answer}</span>
+                              <span>{getScore(defaultMetrics.color)(answer.data.answer).human}</span>
                             </div>
                           </OverlayTrigger>
                         </td>

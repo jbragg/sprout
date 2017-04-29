@@ -10,11 +10,14 @@ const propTypes = {
 };
 
 const Progress = ({ labeledItems, totalItems }) => (
-  <ProgressBar
-    now={labeledItems}
-    label={`${labeledItems}`}
-    max={totalItems}
-  />
+  <div>
+    <strong>Items labeled</strong>
+    <ProgressBar
+      now={labeledItems}
+      label={`${labeledItems}`}
+      max={totalItems}
+    />
+  </div>
 );
 
 Progress.propTypes = propTypes;
