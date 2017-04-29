@@ -38,6 +38,9 @@ class Group extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    /**
+     * Need to remove css class before reapplying to ensure animation works.
+     */
     const { currentItemId } = this.props;
     if (nextProps.currentItemId !== currentItemId) {
       this.setState({ recommended: false }, () => {

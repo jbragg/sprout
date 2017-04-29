@@ -8,6 +8,8 @@ import {
 import getScore, { defaults as defaultMetrics } from '../score';
 import latin3x3 from '../latin/latin3x3';
 
+const similarityThreshold = 0.5;
+
 const initialState = {
   view: 'labeling',
   participantIndex: null,
@@ -91,6 +93,7 @@ export const itemSimilaritiesSelector = createSelector(
     const otherItems = ([...itemVectors]
       .filter(([key, value]) => key !== id && value != null)
       .map(([key, otherVector]) => [key, cosineSimilarity(vector, otherVector)])
+      .filter(([, similarity]) => similarity >= similarityThreshold)
       .sort(([, v1], [, v2]) => v2 - v1)  // descending
     );
     return [id, new Map(otherItems)];
@@ -137,6 +140,7 @@ export const recommendedGroupSelector = createSelector(
     }
     const groupSimilarityIndices = new Map([...groups]
       .map(([groupId, itemIds]) => [groupId, [...similarities.get(itemId).keys()].findIndex(id => [...itemIds].indexOf(id) >= 0)])
+      .filter(([, similarity]) => similarity >= similarityThreshold)
       .sort(([, i1], [, i2]) => i1 - i2)
     );
     const closestGroupIndex = [...groupSimilarityIndices.values()].findIndex(i => i >= 0);
