@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import latin3x3 from './latin/latin3x3';
 
 /*
  * action types
@@ -115,6 +116,34 @@ function formatAnswerData(answerData) {
   };
 }
 
+const getTreatment = (participantIndex, taskIndex) => {
+  if (participantIndex == null || taskIndex == null) {
+    return 2;  // full system
+  }
+  const participant = Number(participantIndex);
+  const task = Number(taskIndex);
+  const squareIndex = Math.floor(participant / 3) % latin3x3.length;
+  return latin3x3[squareIndex][participant % 3][task];
+};
+
+const setUpExperiment = (experiment, answers, participantIndex, taskIndex) => {
+  const rootDirPrefix = experiment.data.root_dir;
+  for (let item of experiment.data.data) {
+    item.data.path = `${rootDirPrefix}/${item.data.path}`;
+  }
+  for (let answer of answers) {
+    answer.data = formatAnswerData(answer.data);
+  }
+  return {
+    items: experiment.data.data,
+    answers,
+    initialInstructions: experiment.data.initial_instructions,
+    participantIndex,
+    taskIndex,
+    systemVersion: getTreatment(participantIndex, taskIndex),
+  };
+};
+
 export function fetchExperiment(participantIndex, taskIndex) {
   return (dispatch) => {
     dispatch(requestExperiment());
@@ -126,20 +155,12 @@ export function fetchExperiment(participantIndex, taskIndex) {
     return Promise.all([experimentPromise, answersPromise])
       .then((result) => {
         const [experiment, answers] = result;
-        const rootDirPrefix = experiment.data.root_dir;
-        for (let item of experiment.data.data) {
-          item.data.path = `${rootDirPrefix}/${item.data.path}`;
-        }
-        for (let answer of answers) {
-          answer.data = formatAnswerData(answer.data);
-        }
-        dispatch(receiveExperiment({
-          items: experiment.data.data,
+        dispatch(receiveExperiment(setUpExperiment(
+          experiment,
           answers,
-          initialInstructions: experiment.data.initial_instructions,
           participantIndex,
           taskIndex,
-        }));
+        )));
         dispatch(setCurrentItem());
         dispatch(startOracle());
       });

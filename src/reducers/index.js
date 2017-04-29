@@ -6,7 +6,6 @@ import {
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
   RECEIVE_EXPERIMENT } from '../actions';
 import getScore, { defaults as defaultMetrics } from '../score';
-import latin3x3 from '../latin/latin3x3';
 
 const similarityThreshold = 0.5;
 
@@ -57,16 +56,6 @@ const dotProduct = (vec1, vec2) => {
 const cosineSimilarity = (vec1, vec2) => (
   dotProduct(vec1, vec2) / Math.sqrt(dotProduct(vec1, vec1)) / Math.sqrt(dotProduct(vec2, vec2))
 );
-
-const getTreatment = (participantIndex, taskIndex) => {
-  if (participantIndex == null || taskIndex == null) {
-    return 2;  // full system
-  }
-  const participant = Number(participantIndex);
-  const task = Number(taskIndex);
-  const squareIndex = Math.floor(participant / 3) % latin3x3.length;
-  return latin3x3[squareIndex][participant % 3][task];
-};
 
 /*
  * selectors
@@ -407,10 +396,7 @@ function InstructionsApp(state = initialState, action) {
       return {
         ...state,
         experimentState: 'loaded',
-        systemVersion: getTreatment(
-          action.payload.participantIndex,
-          action.payload.taskIndex,
-        ),
+        systemVersion: action.payload.systemVersion,
         participantIndex: action.payload.participantIndex,
         initialInstructions: action.payload.initialInstructions,
         generalInstructions: action.payload.initialInstructions,
