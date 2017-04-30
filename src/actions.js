@@ -86,6 +86,15 @@ export function editGeneralInstructions(markdown) {
   };
 }
 
+const ORACLE_CHECK_INTERVAL = 30 * 1000;  // seconds to milliseconds
+let timer = null;
+function startOracle() {
+  return (dispatch) => {
+    clearInterval(timer);
+    timer = setInterval(() => dispatch(answerOracle()), ORACLE_CHECK_INTERVAL);
+  };
+}
+
 function requestExperiment() {
   return { type: REQUEST_EXPERIMENT };
 }
@@ -107,7 +116,7 @@ function formatAnswerData(answerData) {
   const answerKeyIndex = answerKey.indexOf(answerData.answer);
   let answerValue = (answerKeyIndex >= 0) ? answerKeyIndex + 1 : Number(answerData.answer);
   // Answers on the server go from Definitely Yes to Definitely No, but we reverse that.
-  answerValue = (answerValue - 3) * -1 + 3;
+  answerValue = ((answerValue - 3) * -1) + 3;
   return {
     ...answerData,
     answer: answerValue,
@@ -126,25 +135,27 @@ const getTreatment = (participantIndex, taskIndex) => {
   return latin3x3[squareIndex][participant % 3][task];
 };
 
-const setUpExperiment = (experiment, answers, participantIndex, taskIndex) => {
+const setUpExperiment = (experiment, answers) => {
   const rootDirPrefix = experiment.data.root_dir;
-  for (let item of experiment.data.data) {
-    item.data.path = `${rootDirPrefix}/${item.data.path}`;
-  }
-  for (let answer of answers) {
-    answer.data = formatAnswerData(answer.data);
-  }
+  const items = experiment.data.data.map(item => ({
+    ...item,
+    data: {
+      ...item.data,
+      path: `${rootDirPrefix}/${item.data.path}`,
+    },
+  }));
+  const formattedAnswers = answers.map(answer => ({
+    ...answer,
+    data: formatAnswerData(answer.data),
+  }));
   return {
-    items: experiment.data.data,
-    answers,
+    items,
+    answers: formattedAnswers,
     initialInstructions: experiment.data.initial_instructions,
-    participantIndex,
-    taskIndex,
-    systemVersion: getTreatment(participantIndex, taskIndex),
   };
 };
 
-export function fetchExperiment(participantIndex, taskIndex) {
+export function fetchExperiment(params) {
   return (dispatch) => {
     dispatch(requestExperiment());
     const experimentPromise = fetch('/static/private/pilot_instructions_experiment.json')
@@ -155,23 +166,21 @@ export function fetchExperiment(participantIndex, taskIndex) {
     return Promise.all([experimentPromise, answersPromise])
       .then((result) => {
         const [experiment, answers] = result;
-        dispatch(receiveExperiment(setUpExperiment(
-          experiment,
-          answers,
-          participantIndex,
+        const taskIndex = params.taskIndex || 0;
+        dispatch(receiveExperiment({
+          ...setUpExperiment(
+            experiment,
+            answers,
+          ),
           taskIndex,
-        )));
+          participantIndex: params.participantIndex,
+          systemVersion: (params.participantIndex == null
+            ? (params.systemVersion || 2)
+            : getTreatment(params.participantIndex, taskIndex)
+          ),
+        }));
         dispatch(setCurrentItem());
         dispatch(startOracle());
       });
-  }
-}
-
-const ORACLE_CHECK_INTERVAL = 30 * 1000;  // seconds to milliseconds
-let timer = null;
-function startOracle() {
-  return (dispatch) => {
-    clearInterval(timer);
-    timer = setInterval(() => dispatch(answerOracle()), ORACLE_CHECK_INTERVAL);
-  }
+  };
 }

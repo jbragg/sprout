@@ -17,6 +17,7 @@
     "d3-scale-chromatic": "1.1.1",
     "isomorphic-fetch": "2.2.1",
     "prop-types": "15.5.8",
+    "query-string": "4.3.4",
     "react": "15.5.4",
     "react-bootstrap": "0.31.0",
     "react-dnd": "2.3.0",

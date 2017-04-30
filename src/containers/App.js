@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
+import { parse } from 'query-string';
 import { connect } from 'react-redux';
 import { Grid, Row, Col, PanelGroup } from 'react-bootstrap';
 import DrillDownContainer from './DrillDownContainer';
@@ -17,18 +18,40 @@ const propTypes = {
   experimentState: PropTypes.string,
   currentItemId: PropTypes.number,
   initialize: PropTypes.func.isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.object.isRequired,
+  }).isRequired,
+  location: PropTypes.shape({
+    search: PropTypes.string.isRequired,
+  }).isRequired,
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      data: PropTypes.shape({
+        path: PropTypes.string.isRequired,
+      }).isRequired,
+    }),
+  ).isRequired,
 };
 
 const defaultProps = {
   experimentState: null,
+  currentItemId: null,
 };
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     const { initialize } = this.props;
-    const { participantIndex, taskIndex } = this.props.match.params;
-    initialize(participantIndex, taskIndex);
+    const params = {
+      ...this.props.match.params,
+      ...parse(this.props.location.search),
+    };
+    ['participantIndex', 'taskIndex', 'systemVersion'].forEach((key) => {
+      if (params[key] != null) {
+        params[key] = Number(params[key]);
+      }
+    });
+    initialize(params);
   }
 
   render() {
@@ -113,8 +136,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  initialize: (participantIndex, taskIndex) => {
-    dispatch(fetchExperiment(participantIndex, taskIndex));
+  initialize: (params) => {
+    dispatch(fetchExperiment(params));
   },
 });
 

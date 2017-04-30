@@ -110,7 +110,7 @@ export const unlabeledItemScoresSelector = createSelector(
 export const unlabeledSortedItemsSelector = createSelector(
   unlabeledItemsSelector,
   unlabeledItemScoresSelector,
-  (items, scores) => [...items].sort((item1, item2) => -1 * (scores.get(item1.id) - scores.get(item2.id))),  // Descending order for confusion.
+  (items, scores) => [...items].sort((item1, item2) => scores.get(item1.id) - scores.get(item2.id)),
 );
 export const groupItemsSelector = createSelector(
   groupsSelector,
@@ -137,6 +137,20 @@ export const recommendedGroupSelector = createSelector(
   },
 );
 
+const nextClusterSelector = createSelector(
+  state => state.clusterId,
+  clusterIdsSelector,
+  (clusterId, clusterIds) => {
+    if (clusterId === Math.max(...clusterIds)) {
+      return -1;
+    } else if (clusterId >= 0) {
+      return clusterId + 1;
+    } else {
+      return clusterId;
+    }
+  },
+);
+
 const getSimilarItemIds = (itemId, state, unlabeledOnly = true) => {
   const unlabeledItemIds = unlabeledItemsSelector(state).map(item => item.id);
   return [...itemSimilaritiesSelector(state).get(itemId).keys()].filter(id => !unlabeledOnly || unlabeledItemIds.indexOf(id) >= 0);
@@ -145,7 +159,6 @@ const getSimilarItemIds = (itemId, state, unlabeledOnly = true) => {
 export const getItemsSummary = (itemIds, state) => (
   [].concat(...itemIds.map(id => itemAnswersSelector(state).get(id))).map(answer => answer.data.unclear_type).filter(s => s.length > 0).join(', ')
 );
-
 
 /*
  * reducers
@@ -203,7 +216,14 @@ function InstructionsApp(state = initialState, action) {
       let similarItemIds = state.similarItemIds;
       if (action.itemId == null && currentItemId == null && state.primaryItemId == null) {
         // Choose next primaryItem.
-        primaryItemId = unlabeledSortedItemsSelector(state)[0].id;
+        if (state.systemVersion === 0) {
+          primaryItemId = unlabeledItemsSelector(state)[0].id
+        } else if (state.systemVersion === 1 || (state.systemVersion === 2 && state.clusterId === -1)) {
+          primaryItemId = unlabeledSortedItemsSelector(state)[0].id;
+        } else {
+          // TODO: Don't select first? Highest score? Most representative?
+          primaryItemId = unlabeledClusterItemsSelector(state)[0];
+        }
         currentItemId = primaryItemId;
         similarItemIds = getSimilarItemIds(primaryItemId, state);
       } else if (action.itemId == null && currentItemId == null && state.similarItemIds.length > 0) {
@@ -234,6 +254,7 @@ function InstructionsApp(state = initialState, action) {
         ...state,
         currentItemId: (action.itemId === state.currentItemId || action.itemId === state.primaryItemId) ? null : state.currentItemId,
         primaryItemId: action.itemId === state.primaryItemId ? null : state.primaryItemId,
+        clusterId: action.itemId === state.primaryItemId ? nextClusterSelector(state) : state.clusterId,
         similarItemIds: [...state.similarItemIds].filter(id => id !== action.itemId),
         entities: {
           ...state.entities,

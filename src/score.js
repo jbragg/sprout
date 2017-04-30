@@ -43,7 +43,7 @@ const getScore = (metric) => {
 };
 
 const defaultMetrics = {
-  'sort': 'confusion',
+  'sort': 'agreement',
   'color': 'answer',
 };
 

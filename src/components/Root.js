@@ -11,7 +11,7 @@ const propTypes = {
 const Root = ({ store }) => (
   <Provider store={store}>
     <Router>
-      <Route path="/:participantIndex?/:taskIndex?" component={App} />
+      <Route path="/:taskIndex?/:participantIndex?" component={App} />
     </Router>
   </Provider>
 );
