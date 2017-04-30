@@ -61,3 +61,12 @@
   margin-left: 0;
   margin-right: 0;
 }
+
+.slick-prev:before,
+.slick-next:before {
+  color: blue;
+}
+
+.slick-slider {
+  margin: 0px 20px 30px 0px;
+}
