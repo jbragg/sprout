@@ -12,10 +12,12 @@ import SimilarItemList from './SimilarItemList';
 import Progress from './Progress';
 import CustomDragLayer from '../CustomDragLayer';
 import { fetchExperiment } from '../actions';
+import conditions from '../experiment';
+import { experimentReady as isReady } from '../reducers/index';
 
 const propTypes = {
-  labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-  experimentState: PropTypes.string,
+  experimentReady: PropTypes.bool.isRequired,
+  labels: PropTypes.arrayOf(PropTypes.string.isRequired),
   currentItemId: PropTypes.number,
   initialize: PropTypes.func.isRequired,
   match: PropTypes.shape({
@@ -30,12 +32,15 @@ const propTypes = {
         path: PropTypes.string.isRequired,
       }).isRequired,
     }),
-  ).isRequired,
+  ),
+  useAnswers: PropTypes.bool,
 };
 
 const defaultProps = {
-  experimentState: null,
   currentItemId: null,
+  items: null,
+  labels: null,
+  useAnswers: true,
 };
 
 class App extends React.Component {
@@ -55,9 +60,9 @@ class App extends React.Component {
   }
 
   render() {
-    const { items, labels, experimentState, currentItemId } = this.props;
+    const { experimentReady, items, labels, ready, currentItemId, useAnswers, useReasons } = this.props;
     return (
-      experimentState !== 'loaded'
+      !experimentReady
       ? (
         <div className="container">
           <h1>Loading <span className="glyphicon glyphicon-refresh spinning" /></h1>
@@ -78,42 +83,47 @@ class App extends React.Component {
             <Col sm={4}>
               <PanelGroup>
                 <Progress />
-                {currentItemId == null ? null : <SimilarItemList />}
-                {currentItemId == null ? null : <DrillDownContainer />}
+                {useReasons && currentItemId != null ? <SimilarItemList /> : null}
+                {currentItemId != null ? <DrillDownContainer /> : null}
               </PanelGroup>
             </Col>
             <Col sm={4}>
-              <div>
-                <strong>Crowd answer</strong>
-                <img
-                  src="/static/RdYlGn.png"
-                  height="20"
-                  width="100%"
-                />
-                <Row>
-                  <Col
-                    className="no-gutter"
-                    sm={4}
-                  >
-                    <div>-1</div>
-                    <div>No</div>
-                  </Col>
-                  <Col
-                    className="no-gutter text-center"
-                    sm={4}
-                  >
-                    <div>0</div>
-                    <div>Maybe</div>
-                  </Col>
-                  <Col
-                    className="no-gutter text-right"
-                    sm={4}
-                  >
-                    <div>1</div>
-                    <div>Yes</div>
-                  </Col>
-                </Row>
-              </div>
+              {useAnswers
+                    ? (
+                      <div>
+                        <strong>Crowd answer</strong>
+                        <img
+                          src="/static/RdYlGn.png"
+                          height="20"
+                          width="100%"
+                        />
+                        <Row>
+                          <Col
+                            className="no-gutter"
+                            sm={4}
+                          >
+                            <div>-1</div>
+                            <div>No</div>
+                          </Col>
+                          <Col
+                            className="no-gutter text-center"
+                            sm={4}
+                          >
+                            <div>0</div>
+                            <div>Maybe</div>
+                          </Col>
+                          <Col
+                            className="no-gutter text-right"
+                            sm={4}
+                          >
+                            <div>1</div>
+                            <div>Yes</div>
+                          </Col>
+                        </Row>
+                      </div>
+                    )
+                  : null
+                }
               <PanelGroup>
                 {labels.map(label => <LabelSection label={label} key={label} />)}
               </PanelGroup>
@@ -128,12 +138,20 @@ class App extends React.Component {
 App.propTypes = propTypes;
 App.defaultProps = defaultProps;
 
-const mapStateToProps = state => ({
-  labels: state.labels,
-  items: [...state.entities.items.byId.values()],
-  currentItemId: state.currentItemId,
-  experimentState: state.experimentState,
-});
+const mapStateToProps = (state) => {
+  const experimentReady = isReady(state);
+  if (!experimentReady) {
+    return { experimentReady };
+  }
+  return {
+    experimentReady,
+    labels: state.labels,
+    items: [...state.entities.items.byId.values()],
+    currentItemId: state.currentItemId,
+    useAnswers: conditions[state.systemVersion].useAnswers,
+    useReasons: conditions[state.systemVersion].useReasons,
+  };
+};
 
 const mapDispatchToProps = dispatch => ({
   initialize: (params) => {

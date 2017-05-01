@@ -61,6 +61,7 @@ const cosineSimilarity = (vec1, vec2) => (
  * selectors
  */
 
+export const experimentReady = state => state.experimentState === 'loaded';
 export const itemsSelector = state => state.entities.items;
 export const groupsSelector = state => state.entities.groups;
 export const currentItemIdSelector = state => state.currentItemId;

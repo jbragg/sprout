@@ -167,6 +167,7 @@ export function fetchExperiment(params) {
       .then((result) => {
         const [experiment, answers] = result;
         const taskIndex = params.taskIndex || 0;
+        const systemVersion = params.systemVersion == null ? 2 : params.systemVersion;
         dispatch(receiveExperiment({
           ...setUpExperiment(
             experiment,
@@ -175,7 +176,7 @@ export function fetchExperiment(params) {
           taskIndex,
           participantIndex: params.participantIndex,
           systemVersion: (params.participantIndex == null
-            ? (params.systemVersion || 2)
+            ? systemVersion
             : getTreatment(params.participantIndex, taskIndex)
           ),
         }));

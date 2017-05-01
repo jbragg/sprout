@@ -21,21 +21,36 @@ const propTypes = {
   item: PropTypes.shape({
     id: PropTypes.number }).isRequired,
   metric: PropTypes.string,
-  connectDragSource: PropTypes.func.isRequired,
-  isDragging: PropTypes.bool.isRequired,
+  connectDragSource: PropTypes.func,
+  isDragging: PropTypes.bool,
+  useAnswers: PropTypes.bool,
 };
 
 const defaultProps = ({
   connectDragSource: x => x,
   isDragging: false,
   metric: defaultMetrics.color,
+  useAnswers: true,
 });
 
-const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, isDragging }) => {
+const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, isDragging, useAnswers }) => {
   const answerValues = answers.map(answer => answer.data.answer);
   const scores = getScore(metric)(...answerValues);
-  const backgroundColor = getColor(metric)(scores.color);
-  const textColor = getContrastColor(backgroundColor);
+  const backgroundColor = useAnswers ? getColor(metric)(scores.color) : '';
+  const textColor = useAnswers ? getContrastColor(backgroundColor) : '';
+  const visibleBtn = (
+    <button
+      className={`item-btn btn btn-default ${selected ? 'active' : ''}`}
+      onClick={(e) => { onClick(); e.preventDefault(); }}
+      style={{
+        color: textColor,
+        backgroundColor,
+        border: selected ? `2px ${textColor} solid` : '',
+      }}
+    >
+      {item.id}
+    </button>
+  );
   return connectDragSource(
     <div
       className="item-btn"
@@ -43,23 +58,18 @@ const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, 
         opacity: isDragging ? 0.5 : 1,
       }}
     >
-      <OverlayTrigger
-        overlay={<Tooltip id="tooltip">{scores.human.toFixed(2)}</Tooltip>}
-        placement="bottom"
-      >
-        <button
-          className={`item-btn btn btn-default ${selected ? 'active' : ''}`}
-          onClick={(e) => { onClick(); e.preventDefault(); }}
-          style={{
-            color: textColor,
-            backgroundColor,
-            border: selected ? `2px ${textColor} solid` : '',
-          }}
-        >
-          {item.id}
-        </button>
-      </OverlayTrigger>
-    </div>
+      {useAnswers
+          ? (
+            <OverlayTrigger
+              overlay={<Tooltip id="tooltip">{scores.human.toFixed(2)}</Tooltip>}
+              placement="bottom"
+            >
+              {visibleBtn}
+            </OverlayTrigger>
+          )
+          : visibleBtn
+      }
+    </div>,
   );
 };
 

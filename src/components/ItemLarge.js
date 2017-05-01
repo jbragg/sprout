@@ -25,12 +25,16 @@ const propTypes = {
   connectDragSource: PropTypes.func,
   connectDragPreview: PropTypes.func,
   isDragging: PropTypes.bool,
+  useReasons: PropTypes.bool,
+  useAnswers: PropTypes.bool,
 };
 
 const defaultProps = ({
   connectDragPreview: x => x,
   connectDragSource: x => x,
   isDragging: false,
+  useReasons: true,
+  useAnswers: true,
 });
 
 class ItemLarge extends React.Component {
@@ -44,7 +48,7 @@ class ItemLarge extends React.Component {
   }
 
   render() {
-    const { item, answers, onLoad, connectDragSource, isDragging } = this.props;
+    const { item, answers, onLoad, connectDragSource, isDragging, useReasons, useAnswers } = this.props;
     return connectDragSource(
       <div
         className="item-large"
@@ -59,16 +63,18 @@ class ItemLarge extends React.Component {
               src={item.data.path}
               onLoad={onLoad}
             />
-            <table className="table table-condensed">
-              <thead>
-                <tr>
-                  <td />
-                  <td>Answer</td>
-                  <td>Reason</td>
-                </tr>
-              </thead>
-              <tbody>
-                {answers
+            { useAnswers
+                ? (
+                  <table className="table table-condensed">
+                    <thead>
+                      <tr>
+                        <td />
+                        <td>Answer</td>
+                        {useReasons ? <td>Reason</td> : null}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {answers
                     .sort((a, b) => a.data.answer - b.data.answer)
                     .map(answer => (
                       <tr key={answer.assignmentid}>
@@ -83,15 +89,18 @@ class ItemLarge extends React.Component {
                             </div>
                           </OverlayTrigger>
                         </td>
-                        <td>{answer.data.unclearReasonString}</td>
+                        { useReasons ? <td>{answer.data.unclearReasonString}</td> : null}
                       </tr>
                     ))
                 }
-              </tbody>
-            </table>
+                    </tbody>
+                  </table>
+                )
+                : null
+            }
           </div>
         </div>
-      </div>
+      </div>,
     );
   }
 }

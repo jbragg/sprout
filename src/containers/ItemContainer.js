@@ -6,6 +6,7 @@ import ItemThumb from '../components/ItemThumb';
 import ItemBtn from '../components/ItemBtn';
 import { setCurrentItem } from '../actions';
 import { ItemTypes } from '../dragConstants';
+import conditions from '../experiment';
 
 /*
  * react-dnd
@@ -29,6 +30,8 @@ const mapStateToProps = (state, { itemId } ) => ({
   selected: state.currentItemId === itemId,
   item: state.entities.items.byId.get(itemId),
   answers: state.entities.items.byId.get(itemId).answers.map(id => state.entities.answers.byId.get(id)),
+  useReasons: conditions[state.systemVersion].useReasons,
+  useAnswers: conditions[state.systemVersion].useAnswers,
 });
 
 const mapDispatchToProps = (dispatch, { itemId }) => ({
