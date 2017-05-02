@@ -11,6 +11,7 @@ import Instructions from './Instructions';
 import SimilarItemList from './SimilarItemList';
 import Progress from './Progress';
 import CustomDragLayer from '../CustomDragLayer';
+import Master from './Master';
 import { fetchExperiment } from '../actions';
 import conditions from '../experiment';
 import { experimentReady as isReady } from '../reducers/index';
@@ -34,6 +35,7 @@ const propTypes = {
     }),
   ),
   useAnswers: PropTypes.bool,
+  masterView: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -41,6 +43,7 @@ const defaultProps = {
   items: null,
   labels: null,
   useAnswers: true,
+  masterView: false,
 };
 
 class App extends React.Component {
@@ -60,15 +63,17 @@ class App extends React.Component {
   }
 
   render() {
-    const { experimentReady, items, labels, ready, currentItemId, useAnswers, useReasons } = this.props;
-    return (
-      !experimentReady
-      ? (
-        <div className="container">
+    const { experimentReady, items, labels, ready, currentItemId, useAnswers, useReasons, masterView } = this.props;
+    if (!experimentReady) {
+      return (
+        <Grid>
           <h1>Loading <span className="glyphicon glyphicon-refresh spinning" /></h1>
-        </div>
-      )
-      : (
+        </Grid>
+      );
+    } else if (masterView) {
+      return <Grid fluid><Master /></Grid>;
+    } else {
+      return (
         <div id="app">
           <div className="hidden">
             {items.map(item => (
@@ -130,15 +135,15 @@ class App extends React.Component {
             </Col>
           </Grid>
         </div>
-      )
-    );
+      );
+    }
   }
 }
 
 App.propTypes = propTypes;
 App.defaultProps = defaultProps;
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, { location } ) => {
   const experimentReady = isReady(state);
   if (!experimentReady) {
     return { experimentReady };
@@ -150,6 +155,7 @@ const mapStateToProps = (state) => {
     currentItemId: state.currentItemId,
     useAnswers: conditions[state.systemVersion].useAnswers,
     useReasons: conditions[state.systemVersion].useReasons,
+    masterView: parse(location.search).master === undefined ? false : true,
   };
 };
 
