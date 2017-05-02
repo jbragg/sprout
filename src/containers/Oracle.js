@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Popover, OverlayTrigger, Row, Col, Panel } from 'react-bootstrap';
+import { Popover, OverlayTrigger, Panel } from 'react-bootstrap';
 import { DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
 import { queueItemOracle } from '../actions';
-import { ItemTypes } from '../dragConstants';
+import { DragItemTypes as ItemTypes } from '../constants';
 
 const propTypes = {
   queuedItems: PropTypes.arrayOf(
@@ -22,7 +22,7 @@ const propTypes = {
   connectDropTarget: PropTypes.func.isRequired,
   isOver: PropTypes.bool.isRequired,
   canDrop: PropTypes.bool.isRequired,
-  finalLabels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+  labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
 };
 
 const customerHelp = (
@@ -33,7 +33,7 @@ const customerHelp = (
   </div>
 );
 
-const Oracle = ({ queuedItems, answeredItems, finalLabels, connectDropTarget, isOver, canDrop }) => {
+const Oracle = ({ queuedItems, answeredItems, labels, connectDropTarget, isOver, canDrop }) => {
   const queuedItemIds = queuedItems.map(val => val.id);
   return connectDropTarget(
     <div className="panel">
@@ -54,22 +54,19 @@ const Oracle = ({ queuedItems, answeredItems, finalLabels, connectDropTarget, is
         <div>
           {queuedItemIds.length === 0 ? null : <ItemList itemIds={queuedItemIds} />}
         </div>
-        <Row>
-          {finalLabels.map((label) => {
-            const itemIds = answeredItems.filter(val => val.label === label).map(val => val.id);
-            return (
-              <Col sm={6} key={label}>
-                <Panel
-                  header={<span>{label}</span>}
-                >
-                  <div>
-                    {itemIds.length === 0 ? null : <ItemList itemIds={itemIds} />}
-                  </div>
-                </Panel>
-              </Col>
-            );
-          })}
-        </Row>
+        {labels.map((label) => {
+          const itemIds = answeredItems.filter(val => val.label === label).map(val => val.id);
+          return (
+            <Panel
+              header={<span>{label}</span>}
+              key={label}
+            >
+              <div>
+                {itemIds.length === 0 ? null : <ItemList itemIds={itemIds} />}
+              </div>
+            </Panel>
+          );
+        })}
       </Panel>
     </div>,
   );
@@ -101,7 +98,7 @@ const collect = (dndConnect, monitor) => ({
 const mapStateToProps = state => ({
   queuedItems: state.oracle.queuedItems,
   answeredItems: state.oracle.answeredItems,
-  finalLabels: state.finalLabels,
+  labels: state.labels,
 });
 
 const mapDispatchToProps = dispatch => ({

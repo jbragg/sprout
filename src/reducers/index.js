@@ -6,22 +6,25 @@ import {
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
   RECEIVE_EXPERIMENT } from '../actions';
 import getScore, { defaults as defaultMetrics } from '../score';
+import { Labels } from '../constants';
 
 const similarityThreshold = 0.5;
 
+const labels = [Labels.YES, Labels.MAYBE, Labels.NO];
+const finalLabels = [Labels.YES, Labels.NO];
+const uncertainLabel = Labels.MAYBE;
+
 const initialState = {
-  view: 'labeling',
   participantIndex: null,
   systemVersion: null,
-  suggestSimilar: true,  // TODO: Handle false case.
-  labels: ['yes', 'maybe', 'no'],
-  finalLabels: ['yes', 'no'],
+  labels,
+  finalLabels,
   oracle: {
     queuedItems: [],
     answerInterval: 1 * 60 * 1000,  // minutes to milliseconds
     answeredItems: [],
   },
-  uncertainLabel: 'maybe',
+  uncertainLabel,
   experimentState: null,
   currentItemId: null,
   primaryItemId: null,
@@ -32,11 +35,7 @@ const initialState = {
     groups: { byId: new Map() },
     items: { byId: new Map() },
     answers: { byId: new Map() },
-    labels: new Map([
-      ['yes', { itemIds: new Set() }],
-      ['maybe', { itemIds: new Set() }],
-      ['no', { itemIds: new Set() }],
-    ]),
+    labels: new Map(labels.map(label => [label, { itemIds: new Set() }])),
   },
   generalInstructions: null,
 };
@@ -183,7 +182,7 @@ function InstructionsApp(state = initialState, action) {
             {
               ...nextQueuedItem,
               answerTime: Date.now(),
-              label: state.finalLabels[Math.round(Math.random())],
+              label: state.entities.items.byId.get(nextQueuedItem.id).labelGT || state.uncertainLabel,
             },
           ]
           : state.oracle.answeredItems,

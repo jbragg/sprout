@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DragLayer } from 'react-dnd';
-import { ItemTypes } from './dragConstants';
+import { DragItemTypes as ItemTypes } from './constants';
 import { ItemThumbContainer } from './containers/ItemContainer';
 
 const layerStyles = {

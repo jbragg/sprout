@@ -5,7 +5,7 @@ import { DropTarget } from 'react-dnd';
 import { editGroup, createGroup, assignAndSetCurrentItem } from '../actions';
 import Group from './Group';
 import ItemList from '../components/ItemList';
-import { ItemTypes } from '../dragConstants';
+import { DragItemTypes as ItemTypes } from '../constants';
 
 const propTypes = {
   groupIds: PropTypes.arrayOf(PropTypes.number).isRequired,

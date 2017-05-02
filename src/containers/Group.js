@@ -5,7 +5,7 @@ import { DragSource, DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
 import { editGroup, mergeGroup, assignAndSetCurrentItem } from '../actions';
 import { recommendedGroupSelector, getItemsSummary } from '../reducers/index';
-import { ItemTypes } from '../dragConstants';
+import { DragItemTypes as ItemTypes } from '../constants';
 
 const propTypes = {
   group: PropTypes.shape({

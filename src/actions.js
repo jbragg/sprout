@@ -1,5 +1,7 @@
 import fetch from 'isomorphic-fetch';
-import latin3x3 from './latin/latin3x3';
+import latin3x3 from './rand/latin/latin3x3';
+import binary from './rand/binary/binary';
+import { Labels } from './constants';
 
 /*
  * action types
@@ -135,7 +137,11 @@ const getTreatment = (participantIndex, taskIndex) => {
   return latin3x3[squareIndex][participant % 3][task];
 };
 
-const setUpExperiment = (experiment, answers) => {
+const getCustomerClusterLabel = (cluster, taskIndex = 0) => (
+  binary[taskIndex][cluster] === 0 ? Labels.YES : Labels.NO
+);
+
+const setUpExperiment = (experiment, answers, taskIndex) => {
   const rootDirPrefix = experiment.data.root_dir;
   const items = experiment.data.data.map(item => ({
     ...item,
@@ -143,6 +149,10 @@ const setUpExperiment = (experiment, answers) => {
       ...item.data,
       path: `${rootDirPrefix}/${item.data.path}`,
     },
+    labelGT: ((item.cls === 'DontKnow' && item.subgroup >= 0)
+      ? getCustomerClusterLabel(item.subgroup, taskIndex)
+      : item.cls || null
+    ),
   }));
   const formattedAnswers = answers.map((answer, id) => ({
     ...answer,
@@ -173,6 +183,7 @@ export function fetchExperiment(params) {
           ...setUpExperiment(
             experiment,
             answers,
+            taskIndex,
           ),
           taskIndex,
           participantIndex: params.participantIndex,

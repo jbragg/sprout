@@ -5,7 +5,7 @@ import ItemLarge from '../components/ItemLarge';
 import ItemThumb from '../components/ItemThumb';
 import ItemBtn from '../components/ItemBtn';
 import { setCurrentItem } from '../actions';
-import { ItemTypes } from '../dragConstants';
+import { DragItemTypes as ItemTypes } from '../constants';
 import conditions from '../experiment';
 
 /*

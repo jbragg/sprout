@@ -84,10 +84,11 @@ object {
       object {
         integer id;
         integer cluster?;  # cluster item belongs to, based on vector embedding of worker answers
-        integer: label?;  # ground truth label for customer value
         array [
           integer*;
         ] vector?;  # aggregate embedding for answers associated with the item
+        integer: subgroup?;  # ground truth cluster
+        string: cls?;  # ground truth label
       }*;
     ] data;  # these are the items
   } data;
