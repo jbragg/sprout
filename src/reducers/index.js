@@ -222,6 +222,7 @@ function InstructionsApp(state = initialState, action) {
         } else if (state.systemVersion === 1 || (state.systemVersion === 2 && state.clusterId === -1)) {
           primaryItemId = unlabeledSortedItemsSelector(state)[0].id;
         } else {
+          // TODO: Don't go here if no clusters.
           // TODO: Don't select first? Highest score? Most representative?
           primaryItemId = unlabeledClusterItemsSelector(state)[0];
         }

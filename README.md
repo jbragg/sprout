@@ -100,9 +100,12 @@ Worker answers
 ```
 array [
   object {
-    string answer;
-    string unclear_type;
-    string unclear_reason;
+    object {
+      string answer;
+      string unclear_type;
+      string unclear_reason;
+      integer questionid;
+    } data;
   }*;
 ];
 ```

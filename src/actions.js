@@ -144,8 +144,9 @@ const setUpExperiment = (experiment, answers) => {
       path: `${rootDirPrefix}/${item.data.path}`,
     },
   }));
-  const formattedAnswers = answers.map(answer => ({
+  const formattedAnswers = answers.map((answer, id) => ({
     ...answer,
+    assignmentid: id,
     data: formatAnswerData(answer.data),
   }));
   return {
