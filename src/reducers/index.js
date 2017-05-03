@@ -90,9 +90,10 @@ export const itemSimilaritiesSelector = createSelector(
     return [id, new Map(otherItems)];
   })),
 );
+const isUnlabeled = item => (item.group == null && item.label == null);
 export const unlabeledItemsSelector = createSelector(
   itemsSelector,
-  items => [...items.byId.values()].filter(item => item.group == null && item.label == null),
+  items => [...items.byId.values()].filter(item => isUnlabeled(item)),
 );
 export const unlabeledClusterItemsSelector = createSelector(
   state => state.clusterId,
@@ -237,8 +238,8 @@ function InstructionsApp(state = initialState, action) {
         currentItemId = primaryItemId;
       } else if (action.itemId == null) {
         // Nothing to do.
-      } else if (action.itemId !== primaryItemId && state.similarItemIds.indexOf(action.itemId) < 0) {
-        // New item.
+      } else if (action.itemId !== primaryItemId && state.similarItemIds.indexOf(action.itemId) < 0 && isUnlabeled(state.entities.items.byId.get(action.itemId))) {
+        // New unlabeled item.
         primaryItemId = action.itemId;
         currentItemId = primaryItemId;
         similarItemIds = getSimilarItemIds(primaryItemId, state);

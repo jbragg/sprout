@@ -8,6 +8,11 @@ import { ItemThumbContainer } from '../containers/ItemContainer';
 const propTypes = {
   primaryItemId: PropTypes.number.isRequired,
   similarItemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
+  similar: PropTypes.bool,
+};
+
+const defaultProps = {
+  similar: true,
 };
 
 const sliderSettings = {
@@ -19,7 +24,7 @@ const sliderSettings = {
   swipe: false,
 };
 
-const SimilarItemList = ({ primaryItemId, similarItemIds }) => (
+const SimilarItemList = ({ primaryItemId, similarItemIds, similar }) => (
   <Panel>
     <Row>
       <Col sm={5}>
@@ -30,26 +35,29 @@ const SimilarItemList = ({ primaryItemId, similarItemIds }) => (
           <ItemThumbContainer draggable itemId={primaryItemId} />
         </div>
       </Col>
-      <Col sm={7}>
-        <div>
-          <strong>Similar</strong>
-        </div>
-        <Slider {...sliderSettings}>
-          {similarItemIds.length > 0
+      {!similar ? null : (
+        <Col sm={7}>
+          <div>
+            <strong>Similar</strong>
+          </div>
+          <Slider {...sliderSettings}>
+            {similarItemIds.length > 0
             ? similarItemIds.map(id => (
-            <div key={id}>
-              <ItemThumbContainer draggable itemId={id} />
-            </div>
+              <div key={id}>
+                <ItemThumbContainer draggable itemId={id} />
+              </div>
             ))
             : <div />
           }
-        </Slider>
-      </Col>
+          </Slider>
+        </Col>
+      )}
     </Row>
   </Panel>
 );
 
 SimilarItemList.propTypes = propTypes;
+SimilarItemList.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
   primaryItemId: state.primaryItemId,
