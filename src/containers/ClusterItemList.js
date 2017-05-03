@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Slider from 'react-slick';
 import { ItemThumbContainer } from '../containers/ItemContainer';
-import { clusterIdsSelector, unlabeledClusterItemsSelector, getItemsSummary } from '../reducers/index';
+import { clusterIdsSelector, unlabeledClusterItemsSelector, clusterItemsSelector, getItemsSummary } from '../reducers/index';
 import { setClusterId } from '../actions';
 import { defaults } from '../constants';
 
@@ -93,9 +93,10 @@ ClusterItemList.propTypes = propTypes;
 
 const mapStateToProps = (state) => {
   const itemIds = unlabeledClusterItemsSelector(state);
+  const allItemIds = clusterItemsSelector(state);
   return {
     itemIds,
-    summary: getItemsSummary(itemIds, state),
+    summary: getItemsSummary(allItemIds, state),
     clusterId: state.clusterId,
     nClusters: Math.max(...[...clusterIdsSelector(state).values()]) + 1,
   };

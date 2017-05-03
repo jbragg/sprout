@@ -90,7 +90,7 @@ class App extends React.Component {
             </Col>
             <Col sm={4}>
               <PanelGroup>
-                {currentItemId != null ? <ClusterItemList /> : null}
+                {currentItemId != null && useReasons ? <ClusterItemList /> : null}
                 <Progress />
                 {currentItemId != null ? <SimilarItemList similar={useReasons}/> : null}
                 {currentItemId != null ? <DrillDownContainer /> : null}

@@ -1,12 +1,13 @@
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import {
-  ANSWER_ORACLE, QUEUE_ITEM_ORACLE,
+  ANSWER_ORACLE, QUEUE_ITEM_ORACLE, SET_CLUSTER_ID,
   EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM,
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
   RECEIVE_EXPERIMENT } from '../actions';
 import getScore, { defaults as defaultMetrics } from '../score';
 import { Labels, defaults } from '../constants';
+import conditions from '../experiment';
 
 const labels = [Labels.YES, Labels.MAYBE, Labels.NO];
 const finalLabels = [Labels.YES, Labels.NO];
@@ -93,6 +94,11 @@ export const unlabeledItemsSelector = createSelector(
   itemsSelector,
   items => [...items.byId.values()].filter(item => isUnlabeled(item)),
 );
+export const clusterItemsSelector = createSelector(
+  state => state.clusterId,
+  itemsSelector,
+  (clusterId, items) => clusterId == null ? [] : [...items.byId.values()].filter(item => item.cluster === clusterId).map(item => item.id),
+);
 export const unlabeledClusterItemsSelector = createSelector(
   state => state.clusterId,
   unlabeledItemsSelector,
@@ -168,6 +174,12 @@ export const getItemsSummary = (itemIds, state) => (
 
 function InstructionsApp(state = initialState, action) {
   switch (action.type) {
+    case SET_CLUSTER_ID: {
+      return {
+        ...state,
+        clusterId: action.id,
+      };
+    }
     case ANSWER_ORACLE: {
       const nextQueuedItem = state.oracle.queuedItems.length > 0 ? state.oracle.queuedItems[0] : null;
       const lastAnswerTime = state.oracle.answeredItems.length > 0 ? state.oracle.answeredItems[state.oracle.answeredItems.length - 1].answerTime : null;
@@ -217,15 +229,12 @@ function InstructionsApp(state = initialState, action) {
       let primaryItemId = state.primaryItemId;
       let similarItemIds = state.similarItemIds;
       if (action.itemId == null && currentItemId == null && state.primaryItemId == null) {
+        const { useReasons, useAnswers } = conditions[state.systemVersion];
         // Choose next primaryItem.
-        if (state.systemVersion === 0) {
+        if (!useReasons && !useAnswers) {
           primaryItemId = unlabeledItemsSelector(state)[0].id
-        } else if (state.systemVersion === 1 || (state.systemVersion === 2 && state.clusterId === -1)) {
-          primaryItemId = unlabeledSortedItemsSelector(state)[0].id;
         } else {
-          // TODO: Don't go here if no clusters.
-          // TODO: Don't select first? Highest score? Most representative?
-          primaryItemId = unlabeledClusterItemsSelector(state)[0];
+          primaryItemId = unlabeledSortedItemsSelector(state)[0].id;
         }
         currentItemId = primaryItemId;
         similarItemIds = getSimilarItemIds(primaryItemId, state);
@@ -257,7 +266,6 @@ function InstructionsApp(state = initialState, action) {
         ...state,
         currentItemId: (action.itemId === state.currentItemId || action.itemId === state.primaryItemId) ? null : state.currentItemId,
         primaryItemId: action.itemId === state.primaryItemId ? null : state.primaryItemId,
-        clusterId: action.itemId === state.primaryItemId ? nextClusterSelector(state) : state.clusterId,
         similarItemIds: [...state.similarItemIds].filter(id => id !== action.itemId),
         entities: {
           ...state.entities,
