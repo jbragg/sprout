@@ -9,4 +9,12 @@ export const Labels = {
   NO: 'no',
 };
 
-export const similarityThreshold = 0.5;
+export const defaults = {
+  sliderSettings: {
+    dots: true,
+    infinite: false,
+    speed: 500,
+    swipe: false,
+  },
+  similarityThreshold: 0.5,
+}

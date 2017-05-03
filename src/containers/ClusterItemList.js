@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import Slider from 'react-slick';
 import { ItemThumbContainer } from '../containers/ItemContainer';
 import { clusterIdsSelector, unlabeledClusterItemsSelector, getItemsSummary } from '../reducers/index';
 import { setClusterId } from '../actions';
+import { defaults } from '../constants';
 
 const propTypes = {
   itemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
@@ -13,31 +15,78 @@ const propTypes = {
   onSetCluster: PropTypes.func.isRequired,
 };
 
+const sliderSettings = {
+  ...defaults.sliderSettings,
+  responsive: [
+    {
+      breakpoint: 768,
+      settings: {
+        slidesToShow: 2,
+        slidesToScroll: 2,
+      },
+    },
+    {
+      breakpoint: 992,
+      settings: {
+        slidesToShow: 2,
+        slidesToScroll: 2,
+      },
+    },
+    {
+      breakpoint: 1200,
+      settings: {
+        slidesToShow: 3,
+        slidesToScroll: 3,
+      },
+    },
+    {
+      breakpoint: 1600,
+      settings: {
+        slidesToShow: 4,
+        slidesToScroll: 4,
+      },
+    },
+    {
+      breakpoint: 10000,
+      settings: {
+        slidesToShow: 5,
+        slidesToScroll: 5,
+      },
+    },
+  ],
+};
+
 const ClusterItemList = ({ clusterId, nClusters, itemIds, summary, onSetCluster }) => {
   const noDecrement = clusterId === 0;
   const noIncrement = clusterId >= nClusters - 1;
   return (
     <div className="panel panel-default">
       <div className="panel-body">
-        <div className="pull-right">
-          <button
-            className={`btn btn-default glyphicon glyphicon-arrow-left ${noDecrement ? 'disabled' : ''}`}
-            onClick={() => (noDecrement || onSetCluster(clusterId - 1))}
-          />
-          <button
-            className={`btn btn-default glyphicon glyphicon-arrow-right ${noIncrement ? 'disabled' : ''}`}
-            onClick={() => (noIncrement || onSetCluster(clusterId + 1))}
-          />
+        <div className="clearfix">
+          <div className="pull-right">
+            <button
+              className={`btn btn-default glyphicon glyphicon-arrow-left ${noDecrement ? 'disabled' : ''}`}
+              onClick={() => (noDecrement || onSetCluster(clusterId - 1))}
+            />
+            <button
+              className={`btn btn-default glyphicon glyphicon-arrow-right ${noIncrement ? 'disabled' : ''}`}
+              onClick={() => (noIncrement || onSetCluster(clusterId + 1))}
+            />
+          </div>
+          <p><strong>Summary: </strong>{summary}</p>
         </div>
-        <p><strong>Summary: </strong>{summary}</p>
-        <div className="btn-group">
-          {itemIds.slice(null, 3).map(id => (
-            <ItemThumbContainer draggable itemId={id} key={id} />
-          ))}
-        </div>
+        {itemIds.length === 0 ? null : (
+          <Slider {...sliderSettings}>
+            {itemIds.map(id => (
+              <div key={id}>
+                <ItemThumbContainer draggable itemId={id} />
+              </div>
+            ))}
+          </Slider>
+          )}
       </div>
     </div>
-  )
+  );
 };
 
 ClusterItemList.propTypes = propTypes;

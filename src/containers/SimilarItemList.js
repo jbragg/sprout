@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { Row, Col, Panel } from 'react-bootstrap';
 import Slider from 'react-slick';
 import { ItemThumbContainer } from '../containers/ItemContainer';
+import { defaults } from '../constants';
 
 const propTypes = {
   primaryItemId: PropTypes.number.isRequired,
@@ -16,18 +17,50 @@ const defaultProps = {
 };
 
 const sliderSettings = {
-  dots: true,
-  infinite: false,
-  speed: 500,
-  slidesToShow: 2,
-  slidesToScroll: 2,
-  swipe: false,
+  ...defaults.sliderSettings,
+  responsive: [
+    {
+      breakpoint: 768,
+      settings: {
+        slidesToShow: 1,
+        slidesToScroll: 1,
+      },
+    },
+    {
+      breakpoint: 992,
+      settings: {
+        slidesToShow: 1,
+        slidesToScroll: 1,
+      },
+    },
+    {
+      breakpoint: 1200,
+      settings: {
+        slidesToShow: 2,
+        slidesToScroll: 2,
+      },
+    },
+    {
+      breakpoint: 1600,
+      settings: {
+        slidesToShow: 3,
+        slidesToScroll: 3,
+      },
+    },
+    {
+      breakpoint: 10000,
+      settings: {
+        slidesToShow: 4,
+        slidesToScroll: 4,
+      },
+    },
+  ],
 };
 
 const SimilarItemList = ({ primaryItemId, similarItemIds, similar }) => (
   <Panel>
     <Row>
-      <Col sm={5}>
+      <Col xs={6} sm={5} md={4} lg={3}>
         <div>
           <strong>Next</strong>
         </div>
@@ -36,20 +69,19 @@ const SimilarItemList = ({ primaryItemId, similarItemIds, similar }) => (
         </div>
       </Col>
       {!similar ? null : (
-        <Col sm={7}>
+        <Col xs={6} sm={7} md={8} lg={9}>
           <div>
             <strong>Similar</strong>
           </div>
-          <Slider {...sliderSettings}>
-            {similarItemIds.length > 0
-            ? similarItemIds.map(id => (
-              <div key={id}>
-                <ItemThumbContainer draggable itemId={id} />
-              </div>
-            ))
-            : <div />
-          }
-          </Slider>
+          {similarItemIds.length == 0 ? null : (
+            <Slider {...sliderSettings}>
+              {similarItemIds.map(id => (
+                <div key={id}>
+                  <ItemThumbContainer draggable itemId={id} />
+                </div>
+            ))}
+            </Slider>
+          )}
         </Col>
       )}
     </Row>

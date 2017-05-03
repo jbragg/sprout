@@ -6,7 +6,7 @@ import {
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
   RECEIVE_EXPERIMENT } from '../actions';
 import getScore, { defaults as defaultMetrics } from '../score';
-import { Labels, similarityThreshold } from '../constants';
+import { Labels, defaults } from '../constants';
 
 const labels = [Labels.YES, Labels.MAYBE, Labels.NO];
 const finalLabels = [Labels.YES, Labels.NO];
@@ -82,7 +82,7 @@ export const itemSimilaritiesSelector = createSelector(
     const otherItems = ([...itemVectors]
       .filter(([key, value]) => key !== id && value != null)
       .map(([key, otherVector]) => [key, cosineSimilarity(vector, otherVector)])
-      .filter(([, similarity]) => similarity >= similarityThreshold)
+      .filter(([, similarity]) => similarity >= defaults.similarityThreshold)
       .sort(([, similarity1], [, similarity2]) => similarity2 - similarity1)  // descending
     );
     return [id, new Map(otherItems)];
