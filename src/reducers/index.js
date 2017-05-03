@@ -6,9 +6,7 @@ import {
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
   RECEIVE_EXPERIMENT } from '../actions';
 import getScore, { defaults as defaultMetrics } from '../score';
-import { Labels } from '../constants';
-
-const similarityThreshold = 0.5;
+import { Labels, similarityThreshold } from '../constants';
 
 const labels = [Labels.YES, Labels.MAYBE, Labels.NO];
 const finalLabels = [Labels.YES, Labels.NO];
@@ -85,7 +83,7 @@ export const itemSimilaritiesSelector = createSelector(
       .filter(([key, value]) => key !== id && value != null)
       .map(([key, otherVector]) => [key, cosineSimilarity(vector, otherVector)])
       .filter(([, similarity]) => similarity >= similarityThreshold)
-      .sort(([, v1], [, v2]) => v2 - v1)  // descending
+      .sort(([, similarity1], [, similarity2]) => similarity2 - similarity1)  // descending
     );
     return [id, new Map(otherItems)];
   })),
@@ -130,13 +128,14 @@ export const recommendedGroupSelector = createSelector(
     if (itemId == null) {
       return -1;
     }
-    const groupSimilarityIndices = new Map([...groups]
-      .map(([groupId, itemIds]) => [groupId, [...similarities.get(itemId).keys()].findIndex(id => [...itemIds].indexOf(id) >= 0)])
-      .filter(([, similarity]) => similarity >= similarityThreshold)
+    const groupSimilarities = new Map([...groups]
+      .map(([groupId, itemIds]) => [groupId, [...similarities.get(itemId).keys()].findIndex(id => [...itemIds].indexOf(id) >= 0)])  // first index into similarities of item in group
+      .filter(([, index]) => index > -1)
+      .map(([groupId, index]) => [groupId, [...similarities.get(itemId).keys()][index]])
       .sort(([, i1], [, i2]) => i1 - i2)
     );
-    const closestGroupIndex = [...groupSimilarityIndices.values()].findIndex(i => i >= 0);
-    return closestGroupIndex >= 0 ? [...groupSimilarityIndices.keys()][closestGroupIndex] : -1;
+    //console.log(groupSimilarities);
+    return groupSimilarities.size === 0 ? -1 : [...groupSimilarities.keys()][0];
   },
 );
 

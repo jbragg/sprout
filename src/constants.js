@@ -8,3 +8,5 @@ export const Labels = {
   MAYBE: 'maybe',
   NO: 'no',
 };
+
+export const similarityThreshold = 0.5;

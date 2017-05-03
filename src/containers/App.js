@@ -9,6 +9,7 @@ import DrillDownContainer from './DrillDownContainer';
 import LabelSection from './LabelSection';
 import Instructions from './Instructions';
 import SimilarItemList from './SimilarItemList';
+import ClusterItemList from './ClusterItemList';
 import Progress from './Progress';
 import Countdown from './Countdown';
 import CustomDragLayer from '../CustomDragLayer';
@@ -89,6 +90,7 @@ class App extends React.Component {
             </Col>
             <Col sm={4}>
               <PanelGroup>
+                {currentItemId != null ? <ClusterItemList /> : null}
                 <Progress />
                 {currentItemId != null ? <SimilarItemList similar={useReasons}/> : null}
                 {currentItemId != null ? <DrillDownContainer /> : null}
