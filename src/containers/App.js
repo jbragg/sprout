@@ -10,6 +10,7 @@ import LabelSection from './LabelSection';
 import Instructions from './Instructions';
 import SimilarItemList from './SimilarItemList';
 import Progress from './Progress';
+import Countdown from './Countdown';
 import CustomDragLayer from '../CustomDragLayer';
 import Master from './Master';
 import { fetchExperiment } from '../actions';
@@ -83,6 +84,7 @@ class App extends React.Component {
           {currentItemId == null ? null : <CustomDragLayer />}
           <Grid fluid>
             <Col sm={4}>
+              <Countdown />
               <Instructions />
             </Col>
             <Col sm={4}>

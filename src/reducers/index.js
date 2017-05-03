@@ -26,6 +26,8 @@ const initialState = {
   },
   uncertainLabel,
   experimentState: null,
+  experimentDuration: 15 * 60 * 1000,  // minutes to milliseconds
+  experimentStartTime: null,
   currentItemId: null,
   primaryItemId: null,
   similarItemIds: [],
@@ -418,6 +420,7 @@ function InstructionsApp(state = initialState, action) {
       return {
         ...state,
         experimentState: 'loaded',
+        experimentStartTime: Date.now(),
         systemVersion: action.payload.systemVersion,
         participantIndex: action.payload.participantIndex,
         initialInstructions: action.payload.initialInstructions,
