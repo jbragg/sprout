@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Slider from 'react-slick';
+import { Panel, Clearfix } from 'react-bootstrap';
 import { ItemThumbContainer } from '../containers/ItemContainer';
 import { clusterIdsSelector, unlabeledClusterItemsSelector, clusterItemsSelector, getItemsSummary } from '../reducers/index';
 import { setClusterId } from '../actions';
@@ -60,34 +61,32 @@ const ClusterItemList = ({ clusterId, nClusters, itemIds, summary, onSetCluster 
   const noDecrement = clusterId === 0;
   const noIncrement = clusterId >= nClusters - 1;
   return (
-    <div className="panel panel-default">
-      <div className="panel-body">
-        <div className="clearfix">
-          <div className="pull-right">
-            <div className="text-center">{`${clusterId + 1} / ${nClusters}`}</div>
-            <div>
-              <button
-                className={`btn btn-default glyphicon glyphicon-arrow-left ${noDecrement ? 'disabled' : ''}`}
-                onClick={() => (noDecrement || onSetCluster(clusterId - 1))}
-              />
-              <button
-                className={`btn btn-default glyphicon glyphicon-arrow-right ${noIncrement ? 'disabled' : ''}`}
-                onClick={() => (noIncrement || onSetCluster(clusterId + 1))}
-              />
-            </div>
-          </div>
-          <p>{summary}</p>
+    <div className="clusters">
+      <Clearfix>
+        <strong className="page">{`Cluster ${clusterId + 1} / ${nClusters}`}</strong>
+        <div className="pull-right">
+          <button
+            className={`btn btn-default btn-xs glyphicon glyphicon-arrow-left ${noDecrement ? 'disabled' : ''}`}
+            onClick={() => (noDecrement || onSetCluster(clusterId - 1))}
+          />
+          <button
+            className={`btn btn-default btn-xs glyphicon glyphicon-arrow-right ${noIncrement ? 'disabled' : ''}`}
+            onClick={() => (noIncrement || onSetCluster(clusterId + 1))}
+          />
         </div>
+      </Clearfix>
+      <Panel>
+        <p>{summary}</p>
         {itemIds.length === 0 ? null : (
           <Slider {...sliderSettings}>
             {itemIds.map(id => (
               <div key={id}>
                 <ItemThumbContainer draggable itemId={id} />
               </div>
-            ))}
+          ))}
           </Slider>
-          )}
-      </div>
+        )}
+      </Panel>
     </div>
   );
 };

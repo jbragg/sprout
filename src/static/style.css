@@ -1,21 +1,21 @@
 @keyframes spin {
-    from { transform: scale(1) rotate(0deg); }
-    to { transform: scale(1) rotate(360deg); }
+  from { transform: scale(1) rotate(0deg); }
+  to { transform: scale(1) rotate(360deg); }
 }
 
 @-webkit-keyframes spin2 {
-    from { -webkit-transform: rotate(0deg); }
-    to { -webkit-transform: rotate(360deg); }
+  from { -webkit-transform: rotate(0deg); }
+  to { -webkit-transform: rotate(360deg); }
 }
 
 @keyframes wiggle {
-    0% { transform: rotate(0deg); }
-    3% { transform: rotate(5deg); }
-    7% { transform: rotate(-5deg); }
-   10% { transform: rotate(0deg); }
-   13% { transform: rotate(5deg); }
-   17% { transform: rotate(-5deg); }
-   20% { transform: rotate(0deg); }
+  0% { transform: rotate(0deg); }
+  3% { transform: rotate(5deg); }
+  7% { transform: rotate(-5deg); }
+  10% { transform: rotate(0deg); }
+  13% { transform: rotate(5deg); }
+  17% { transform: rotate(-5deg); }
+  20% { transform: rotate(0deg); }
 }
 
 .glyphicon.spinning {
@@ -69,4 +69,8 @@
 
 .slick-slider {
   margin: 0px 30px 30px;
+}
+
+.clusters .page {
+  margin-right: 1em;
 }
