@@ -64,14 +64,17 @@ const ClusterItemList = ({ clusterId, nClusters, itemIds, summary, onSetCluster 
       <div className="panel-body">
         <div className="clearfix">
           <div className="pull-right">
-            <button
-              className={`btn btn-default glyphicon glyphicon-arrow-left ${noDecrement ? 'disabled' : ''}`}
-              onClick={() => (noDecrement || onSetCluster(clusterId - 1))}
-            />
-            <button
-              className={`btn btn-default glyphicon glyphicon-arrow-right ${noIncrement ? 'disabled' : ''}`}
-              onClick={() => (noIncrement || onSetCluster(clusterId + 1))}
-            />
+            <div className="text-center">{`${clusterId + 1} / ${nClusters}`}</div>
+            <div>
+              <button
+                className={`btn btn-default glyphicon glyphicon-arrow-left ${noDecrement ? 'disabled' : ''}`}
+                onClick={() => (noDecrement || onSetCluster(clusterId - 1))}
+              />
+              <button
+                className={`btn btn-default glyphicon glyphicon-arrow-right ${noIncrement ? 'disabled' : ''}`}
+                onClick={() => (noIncrement || onSetCluster(clusterId + 1))}
+              />
+            </div>
           </div>
           <p><strong>Summary: </strong>{summary}</p>
         </div>
