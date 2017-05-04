@@ -30,8 +30,8 @@ class Countdown extends React.Component {
   render() {
     const { duration, startTime } = this.props;
     const remainingTime = Math.round((duration - (this.state.date - startTime)) / 1000);
-    const remainingMinutes = Math.floor(remainingTime / 60);
-    const remainingSeconds = remainingTime % 60;
+    const remainingMinutes = Math.max(Math.floor(remainingTime / 60), 0);
+    const remainingSeconds = Math.max(remainingTime % 60, 0);
     const formatNumber = number => (number < 10 ? `0${number}` : number);
     return (
       <div>{`Remaining Time: ${formatNumber(remainingMinutes)}:${formatNumber(remainingSeconds)}`}</div>
