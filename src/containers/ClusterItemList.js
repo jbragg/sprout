@@ -76,7 +76,7 @@ const ClusterItemList = ({ clusterId, nClusters, itemIds, summary, onSetCluster 
               />
             </div>
           </div>
-          <p><strong>Summary: </strong>{summary}</p>
+          <p>{summary}</p>
         </div>
         {itemIds.length === 0 ? null : (
           <Slider {...sliderSettings}>

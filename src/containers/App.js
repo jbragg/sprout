@@ -37,6 +37,7 @@ const propTypes = {
     }),
   ),
   useAnswers: PropTypes.bool,
+  useReasons: PropTypes.bool,
   masterView: PropTypes.bool,
 };
 
@@ -45,6 +46,7 @@ const defaultProps = {
   items: null,
   labels: null,
   useAnswers: true,
+  useReasons: true,
   masterView: false,
 };
 

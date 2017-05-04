@@ -6,6 +6,7 @@ import ItemList from '../components/ItemList';
 import { editGroup, mergeGroup, assignAndSetCurrentItem } from '../actions';
 import { recommendedGroupSelector, getItemsSummary } from '../reducers/index';
 import { DragItemTypes as ItemTypes } from '../constants';
+import conditions from '../experiment';
 
 const propTypes = {
   group: PropTypes.shape({
@@ -24,10 +25,12 @@ const propTypes = {
   recommended: PropTypes.bool.isRequired,
   isDragging: PropTypes.bool.isRequired,
   currentItemId: PropTypes.number,
+  useReasons: PropTypes.bool,
 };
 
 const defaultProps = {
   currentItemId: null,
+  useReasons: true,
 };
 
 class Group extends React.Component {
@@ -55,10 +58,11 @@ class Group extends React.Component {
   }
 
   render() {
-    const { group, connectDropTarget, connectDragSource, isOver, canDrop, isDragging, onGroupMergeOut, summary } = this.props;
+    const { group, connectDropTarget, connectDragSource, isOver, canDrop, isDragging, onGroupMergeOut, summary, useReasons } = this.props;
+    const recommended = this.state.recommended && useReasons;
     return connectDragSource(connectDropTarget(
       <div
-        className={`class-container panel panel-primary ${this.state.recommended ? 'recommended' : ''} ${(isOver && canDrop) ? 'target' : ''}`}
+        className={`class-container panel panel-primary ${recommended ? 'recommended' : ''} ${(isOver && canDrop) ? 'target' : ''}`}
         style={{
           opacity: isDragging ? 0.5 : 1,
         }}
@@ -78,7 +82,7 @@ class Group extends React.Component {
             className="form-inline"
             onSubmit={(e) => { e.preventDefault(); }}
           >
-            {this.state.recommended
+            {recommended
                 ? (
                   <span
                     className={`glyphicon glyphicon-star ${(isOver && canDrop) ? 'text-primary' : ''} pull-left`}
@@ -103,7 +107,7 @@ class Group extends React.Component {
           </form>
         </div>
         <div className="panel-body">
-          <p><strong>Summary: </strong>{summary}</p>
+          {useReasons ? <p>{summary}</p> : null}
           <ItemList itemIds={[...group.itemIds.values()]} />
         </div>
       </div>,
@@ -162,6 +166,7 @@ const mapStateToProps = (state, { groupId }) => ({
   summary: getItemsSummary([...state.entities.groups.byId.get(groupId).itemIds], state),
   recommended: recommendedGroupSelector(state) === groupId,
   currentItemId: state.currentItemId,
+  useReasons: conditions[state.systemVersion].useReasons,
 });
 
 const mapDispatchToProps = (dispatch, { groupId }) => ({
