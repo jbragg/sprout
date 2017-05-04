@@ -20,17 +20,11 @@ const sliderSettings = {
   ...defaults.sliderSettings,
   responsive: [
     {
-      breakpoint: 768,
-      settings: {
-        slidesToShow: 1,
-        slidesToScroll: 1,
-      },
-    },
-    {
       breakpoint: 992,
       settings: {
         slidesToShow: 1,
         slidesToScroll: 1,
+        dots: false,
       },
     },
     {
@@ -59,7 +53,7 @@ const sliderSettings = {
 
 const SimilarItemList = ({ primaryItemId, similarItemIds, similar }) => (
   <Panel>
-    <Row>
+    <Row className="no-gutter">
       <Col xs={6} sm={5} md={4} lg={3}>
         <div>
           <strong>Next</strong>

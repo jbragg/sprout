@@ -20,13 +20,6 @@ const sliderSettings = {
   ...defaults.sliderSettings,
   responsive: [
     {
-      breakpoint: 768,
-      settings: {
-        slidesToShow: 2,
-        slidesToScroll: 2,
-      },
-    },
-    {
       breakpoint: 992,
       settings: {
         slidesToShow: 2,
