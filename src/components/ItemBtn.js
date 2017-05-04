@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { Popover, OverlayTrigger } from 'react-bootstrap';
 import { getColor, getContrastColor } from '../color';
 import getScore, { defaults as defaultMetrics } from '../score';
+import { ItemThumbContainer } from '../containers/ItemContainer';
 
 const propTypes = {
   selected: PropTypes.bool.isRequired,
@@ -61,7 +62,7 @@ const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, 
       {useAnswers
           ? (
             <OverlayTrigger
-              overlay={<Tooltip id="tooltip">{scores.human.toFixed(2)}</Tooltip>}
+              overlay={<Popover id="popover">{<ItemThumbContainer itemId={item.id} />}</Popover>}
               placement="bottom"
             >
               {visibleBtn}
