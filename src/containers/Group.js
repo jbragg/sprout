@@ -44,8 +44,8 @@ class Group extends React.Component {
     /**
      * Need to remove css class before reapplying to ensure animation works.
      */
-    const { currentItemId } = this.props;
-    if (nextProps.currentItemId !== currentItemId) {
+    const { currentItemId, group } = this.props;
+    if (nextProps.currentItemId !== currentItemId || nextProps.group.itemIds.size !== group.itemIds.size) {
       this.setState({ recommended: false }, () => {
         setTimeout(() => this.setState({ recommended: nextProps.recommended }), 0);
       });
