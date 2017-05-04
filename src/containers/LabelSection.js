@@ -2,8 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
-import { editGroup, createGroup, assignAndSetCurrentItem } from '../actions';
+import { Panel } from 'react-bootstrap';
+import { editGroup, createGroupAssignAndSetCurrentItem, assignAndSetCurrentItem } from '../actions';
 import Group from './Group';
+import NewGroup from '../components/NewGroup';
 import ItemList from '../components/ItemList';
 import { DragItemTypes as ItemTypes } from '../constants';
 
@@ -14,71 +16,25 @@ const propTypes = {
   connectDropTarget: PropTypes.func.isRequired,
 };
 
-class LabelSection extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {newGroupName: ''};
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  handleChange(event) {
-    this.setState({[event.target.name]: event.target.value});
-  }
-
-  handleSubmit() {
-    this.props.onGroupCreate({
-      label: this.props.label,
-      name: this.state.newGroupName,
-      inInstructions: true,
-    });
-    this.setState({newGroupName: ''});
-  }
-
-  render() {
-    const { groupIds, label, onGroupCreate, connectDropTarget, isOver, canDrop, itemIds } = this.props;
-    return connectDropTarget(
-      <div className={`panel panel-default ${(isOver && canDrop) ? 'target' : ''}`}>
-        <div className="panel-heading">
-          <span className="panel-title">{label}</span>
+const LabelSection = ({ groupIds, label, onGroupCreate, connectDropTarget, isOver, canDrop, itemIds }) => (
+  connectDropTarget(
+    <div className="panel">
+      <Panel
+        className={`${(isOver && canDrop) ? 'target' : ''}`}
+        header={<span>{label}</span>}
+      >
+        <div>
+          <ItemList itemIds={[...itemIds.values()]} />
         </div>
-        <div className="panel-body">
-          <div>
-            <ItemList itemIds={[...itemIds.values()]} />
-          </div>
-          <div className="panel-group">
-            {groupIds.map(key => (
-              <Group groupId={key} key={key} />
-            ))}
-          </div>
-          <form className="form-inline">
-            <div className="form-group">
-              <label className="sr-only">New group name</label>
-              <input
-                className="form-control"
-                type="text"
-                name="newGroupName"
-                value={this.state.newGroupName}
-                onChange={this.handleChange}
-                placeholder="New group name"
-              />
-            </div>
-            {' '}
-            <button
-              className="btn btn-primary"
-              type="submit"
-              onClick={(e) => { e.preventDefault(); this.handleSubmit(); }}
-              disabled={this.state.newGroupName.length === 0}
-            >
-              Create
-            </button>
-          </form>
+        <div className="panel-group">
+          {groupIds.map(key => (
+            <Group groupId={key} key={key} />
+          ))}
         </div>
-      </div>
-    );
-  }
-}
+        <NewGroup onGroupCreate={onGroupCreate} />
+      </Panel>
+    </div>,
+));
 
 LabelSection.propTypes = propTypes;
 
@@ -86,7 +42,7 @@ LabelSection.propTypes = propTypes;
  * react-dnd
  */
 
-const labelSectionTarget = {
+const target = {
   drop: (props, monitor) => {
     if (monitor.isOver() && monitor.getItemType() === ItemTypes.ITEM) {
       props.onAssign(monitor.getItem().id);
@@ -109,8 +65,8 @@ const labelSectionTarget = {
   },
 };
 
-const collect = (connect, monitor) => ({
-  connectDropTarget: connect.dropTarget(),
+const collect = (dndConnect, monitor) => ({
+  connectDropTarget: dndConnect.dropTarget(),
   isOver: monitor.isOver({ shallow: true }),
   canDrop: monitor.canDrop(),
 });
@@ -125,8 +81,8 @@ const mapStateToProps = (state, { label }) => ({
 });
 
 const mapDispatchToProps = (dispatch, { label }) => ({
-  onGroupCreate: (keyValues) => {
-    dispatch(createGroup(keyValues));
+  onGroupCreate: (itemId) => {
+    dispatch(createGroupAssignAndSetCurrentItem(itemId, { label }));
   },
   onAssign: (itemId) => {
     dispatch(assignAndSetCurrentItem(itemId, { label }));
@@ -137,5 +93,5 @@ const mapDispatchToProps = (dispatch, { label }) => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(
-  DropTarget([ItemTypes.ITEM, ItemTypes.GROUP], labelSectionTarget, collect)(LabelSection)
+  DropTarget([ItemTypes.ITEM, ItemTypes.GROUP], target, collect)(LabelSection),
 );

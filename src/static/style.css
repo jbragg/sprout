@@ -53,7 +53,7 @@
   margin-bottom: 0;
 }
 
-.target > .panel-heading {
+.target > .panel-heading, .btn.target {
   background-color: yellow;
 }
 
@@ -79,4 +79,16 @@
 
 .clusters .page {
   margin-right: 1em;
+}
+
+.btn-nohover {
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc;
+  cursor:default !important;
+}
+
+.btn-nohover:active {
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
 }

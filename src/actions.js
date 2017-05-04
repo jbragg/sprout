@@ -2,6 +2,7 @@ import fetch from 'isomorphic-fetch';
 import latin3x3 from './rand/latin/latin3x3';
 import binary from './rand/binary/binary';
 import { Labels } from './constants';
+import { groupsSelector } from './reducers/index';
 
 /*
  * action types
@@ -78,6 +79,15 @@ export function createGroup(keyValues) {
   return {
     type: CREATE_GROUP,
     keyValues,
+  };
+}
+
+export function createGroupAssignAndSetCurrentItem(itemId, keyValues) {
+  return (dispatch, getState) => {
+    dispatch(createGroup(keyValues));
+    const groups = [...groupsSelector(getState()).byId.keys()];
+    const groupId = groups[groups.length - 1];
+    dispatch(assignAndSetCurrentItem(itemId, { group: groupId }));
   };
 }
 
