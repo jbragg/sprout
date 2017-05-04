@@ -110,21 +110,21 @@ class App extends React.Component {
                         />
                         <Row className="no-gutter">
                           <Col
-                            sm={4}
+                            xs={4}
                           >
                             <div>-1</div>
                             <div>No</div>
                           </Col>
                           <Col
                             className="text-center"
-                            sm={4}
+                            xs={4}
                           >
                             <div>0</div>
                             <div>Maybe</div>
                           </Col>
                           <Col
                             className="text-right"
-                            sm={4}
+                            xs={4}
                           >
                             <div>1</div>
                             <div>Yes</div>
