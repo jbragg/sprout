@@ -13,6 +13,7 @@ export const QUEUE_ITEM_ORACLE = 'QUEUE_ITEM_ORACLE';
 export const SET_CURRENT_ITEM = 'SET_CURRENT_ITEM';
 export const SET_CLUSTER_ID = 'SET_CLUSTER_ID';
 export const ASSIGN_ITEM = 'ASSIGN_ITEM';
+export const EDIT_ITEM = 'EDIT_ITEM';
 export const CREATE_GROUP = 'CREATE_GROUP';
 export const MERGE_GROUP = 'MERGE_GROUP';
 export const EDIT_GROUP = 'EDIT_GROUP';
@@ -56,7 +57,15 @@ export function assignItem(itemId, assignment) {
   return {
     type: ASSIGN_ITEM,
     itemId,
-    assignment,  // {label: labelName} or {group: groupId}
+    assignment,  // { label: labelName } or { group: groupId }
+  };
+}
+
+export function editItem(itemId, keyValues) {
+  return {
+    type: EDIT_ITEM,
+    itemId,
+    keyValues,  // { test: true } or { test: false }
   };
 }
 

@@ -1,75 +1,39 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { PanelGroup, Panel, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
-import ReactMarkdown from 'react-markdown';
-import { editGroup, editGeneralInstructions } from '../actions';
-import Oracle from '../containers/Oracle';
+import { PanelGroup, Panel } from 'react-bootstrap';
+import Oracle from './Oracle';
+import InstructionsEditor from './InstructionsEditor';
+import StructuredInstructionsEditor from './StructuredInstructionsEditor';
+import TestQuestions from './TestQuestions';
 
 const propTypes = {
-  onGroupEdit: PropTypes.func.isRequired,
-  onEditGeneralInstructions: PropTypes.func.isRequired,
   initialInstructions: PropTypes.string.isRequired,
-  generalInstructions: PropTypes.string.isRequired,
-  finalLabels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-  labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+  structured: PropTypes.bool,
 };
 
-const Instructions = ({ finalLabels, labels, groups, onGroupEdit, onEditGeneralInstructions, initialInstructions, generalInstructions }) => (
+const defaultProps = {
+  structured: false,
+};
+
+const Instructions = ({ initialInstructions, structured }) => (
   <PanelGroup>
-    <Panel
-      header={<span>Customer's instructions</span>}
-    >
+    <Panel header={<span>Customer instructions</span>}>
       <p>{initialInstructions}</p>
     </Panel>
     <Oracle />
-    <Panel
-      header={<span>Improved instructions</span>}
-    >
-      <FormGroup>
-        <FormControl
-          componentClass="textarea"
-          rows="6"
-          value={generalInstructions}
-          onChange={(e) => { onEditGeneralInstructions(e.target.value); }}
-        />
-      </FormGroup>
-      <span className="pull-right">
-        <span>Supports </span>
-        <a
-          href="http://commonmark.org/help/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Markdown
-        </a>
-      </span>
-    </Panel>
-    <Panel
-      header={<span>Preview</span>}
-    >
-      <ReactMarkdown source={generalInstructions} />
-    </Panel>
+    {structured
+        ? <StructuredInstructions />
+        : <InstructionsEditor />
+    }
+    <TestQuestions />
   </PanelGroup>
 );
 
 Instructions.propTypes = propTypes;
 
 const mapStateToProps = state => ({
-  finalLabels: state.finalLabels,
-  labels: state.labels,
-  groups: [...state.entities.groups.byId.values()],
   initialInstructions: state.initialInstructions,
-  generalInstructions: state.generalInstructions,
 });
 
-const mapDispatchToProps = dispatch => ({
-  onGroupEdit: (groupId, keyValues) => {
-    dispatch(editGroup(groupId, keyValues));
-  },
-  onEditGeneralInstructions: (markdown) => {
-    dispatch(editGeneralInstructions(markdown));
-  },
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(Instructions);
+export default connect(mapStateToProps)(Instructions);

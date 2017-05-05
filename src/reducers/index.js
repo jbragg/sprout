@@ -2,7 +2,7 @@ import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import {
   ANSWER_ORACLE, QUEUE_ITEM_ORACLE, SET_CLUSTER_ID,
-  EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM,
+  EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_ITEM,
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
   RECEIVE_EXPERIMENT } from '../actions';
 import getScore, { defaults as defaultMetrics } from '../score';
@@ -93,6 +93,10 @@ const isUnlabeled = item => (item.group == null && item.label == null);
 export const unlabeledItemsSelector = createSelector(
   itemsSelector,
   items => [...items.byId.values()].filter(item => isUnlabeled(item)),
+);
+export const testItemsSelector = createSelector(
+  itemsSelector,
+  items => [...items.byId.values()].filter(item => item.test),
 );
 export const clusterItemsSelector = createSelector(
   state => state.clusterId,
@@ -322,6 +326,24 @@ function InstructionsApp(state = initialState, action) {
               ],
             ),
           ),
+        },
+      };
+    }
+    case EDIT_ITEM: {
+      return {
+        ...state,
+        entities: {
+          ...state.entities,
+          items: {
+            ...state.entities.items,
+            byId: new Map([
+              ...state.entities.items.byId,
+              [action.itemId, {
+                ...state.entities.items.byId.get(action.itemId),
+                ...action.keyValues,
+              }],
+            ]),
+          },
         },
       };
     }

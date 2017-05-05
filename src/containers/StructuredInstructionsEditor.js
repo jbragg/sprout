@@ -13,7 +13,7 @@ const propTypes = {
   labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
 };
 
-const StructuredInstructions = ({ finalLabels, labels, groups, onGroupEdit, onEditGeneralInstructions, initialInstructions, generalInstructions }) => (
+const StructuredInstructionsEditor = ({ finalLabels, labels, groups, onGroupEdit, onEditGeneralInstructions, initialInstructions, generalInstructions }) => (
   <div className="panel-group">
     <div className="panel panel-default">
       <div className="panel-heading"><strong>Worker Instructions</strong></div>
@@ -31,7 +31,7 @@ const StructuredInstructions = ({ finalLabels, labels, groups, onGroupEdit, onEd
                     <span className="input-group-addon">
                       <input
                         type="checkbox"
-                        checked={group.inInstructions}
+                        checked={group.inInstructions || false}
                         onChange={(e) => {
                           onGroupEdit(
                             group.id,
@@ -103,7 +103,7 @@ const StructuredInstructions = ({ finalLabels, labels, groups, onGroupEdit, onEd
   </div>
 );
 
-StructuredInstructions.propTypes = propTypes;
+StructuredInstructionsEditor.propTypes = propTypes;
 
 const mapStateToProps = state => ({
   finalLabels: state.finalLabels,
@@ -122,4 +122,4 @@ const mapDispatchToProps = dispatch => ({
   },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(StructuredInstructions);
+export default connect(mapStateToProps, mapDispatchToProps)(StructuredInstructionsEditor);
