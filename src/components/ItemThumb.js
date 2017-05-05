@@ -51,11 +51,12 @@ class ItemThumb extends React.Component {
           opacity: isDragging ? 0.5 : 1,
         }}
       >
+        <div className="text-center small"><small>{item.id}</small></div>
         <img
           className="img-responsive"
           src={item.data.path}
         />
-      </button>
+      </button>,
     );
   }
 }
