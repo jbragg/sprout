@@ -132,24 +132,24 @@ function receiveExperiment(json) {
   return { type: RECEIVE_EXPERIMENT, payload: json };
 }
 
-const answerKey = [
-  'Definitely No',
-  'Probably No',
-  'No preference for Yes or No',
-  'Probably Yes',
-  'Definitely Yes',
-];
+const answerKey = new Map([
+  [1, 'Definitely No'],
+  [2, 'Probably No'],
+  [3, 'No preference for Yes or No'],
+  [4, 'Probably Yes'],
+  [5, 'Definitely Yes'],
+]);
 
 function formatAnswerData(answerData) {
   // TODO: Do this server-side.
-  const answerKeyIndex = answerKey.indexOf(answerData.answer);
+  const answerKeyIndex = [...answerKey.values()].indexOf(answerData.answer);
   let answerValue = (answerKeyIndex >= 0) ? answerKeyIndex + 1 : Number(answerData.answer);
   // Answers on the server go from Definitely Yes to Definitely No, but we reverse that.
   answerValue = ((answerValue - 3) * -1) + 3;
   return {
     ...answerData,
     answer: answerValue,
-    answerString: answerKey[answerValue - 1],
+    answerString: answerKey.get(answerValue),
     unclearReasonString: (answerData.unclear_type || answerData.unclear_reason) ? `Questions about ${answerData.unclear_type || '[MISSING]'} may be unclear because ${answerData.unclear_reason || '[MISSING]'}` : null,
   };
 }
@@ -187,6 +187,7 @@ const setUpExperiment = (experiment, answers, taskIndex) => {
     data: formatAnswerData(answer.data),
   }));
   return {
+    answerKey,
     items,
     answers: formattedAnswers,
     initialInstructions: experiment.data.initial_instructions,

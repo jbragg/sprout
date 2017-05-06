@@ -49,12 +49,16 @@
   margin-bottom: 5px;
 }
 
-.progress-bar {
+.labeling-progress .progress-bar {
   min-width: 2em;
 }
 
-.progress {
+.labeling-progress .progress {
   margin-bottom: 0;
+}
+
+.histogram .progress {
+  margin: 1px 1em;
 }
 
 .target > .panel-heading, .btn.target {

@@ -32,6 +32,7 @@ const mapStateToProps = (state, { itemId } ) => ({
   answers: state.entities.items.byId.get(itemId).answers.map(id => state.entities.answers.byId.get(id)),
   useReasons: conditions[state.systemVersion].useReasons,
   useAnswers: conditions[state.systemVersion].useAnswers,
+  answerKey: state.answerKey,
 });
 
 const mapDispatchToProps = (dispatch, { itemId }) => ({

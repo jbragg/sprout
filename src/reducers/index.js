@@ -16,6 +16,7 @@ const uncertainLabel = Labels.MAYBE;
 const initialState = {
   participantIndex: null,
   systemVersion: null,
+  answerKey: null,
   labels,
   finalLabels,
   oracle: {
@@ -455,6 +456,7 @@ function InstructionsApp(state = initialState, action) {
         participantIndex: action.payload.participantIndex,
         initialInstructions: action.payload.initialInstructions,
         generalInstructions: action.payload.initialInstructions,
+        answerKey: action.payload.answerKey,
         entities: {
           ...state.entities,
           items: {

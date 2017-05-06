@@ -10,7 +10,7 @@ const propTypes = {
 };
 
 const Progress = ({ labeledItems, totalItems }) => (
-  <div>
+  <div className="labeling-progress">
     <strong>Items labeled</strong>
     <ProgressBar
       now={labeledItems}
