@@ -58,7 +58,10 @@ class Group extends React.Component {
   }
 
   render() {
-    const { group, connectDropTarget, connectDragSource, isOver, canDrop, isDragging, onGroupMergeOut, summary, useReasons } = this.props;
+    const {
+      group, connectDropTarget, connectDragSource, isOver, canDrop,
+      isDragging, onGroupMergeOut, summary, useReasons
+    } = this.props;
     const recommended = this.state.recommended && useReasons;
     return connectDragSource(connectDropTarget(
       <div

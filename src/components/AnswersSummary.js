@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import getScore, { defaults as defaultMetrics } from '../score';
+import { Panel } from 'react-bootstrap';
 import Histogram from './Histogram';
 
 const propTypes = {
@@ -25,7 +26,9 @@ const AnswersSummary = ({ answers, answerKey }) => {
   // Transform values
   const answerCountsTransform = new Map([...answerCounts].map(([key, count]) => [[getScore(defaultMetrics.color)(key).human, answerKey.get(key)], count]));
   return (
-    <Histogram counts={answerCountsTransform} />
+    <Panel>
+      <Histogram counts={answerCountsTransform} />
+    </Panel>
   );
 };
 

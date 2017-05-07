@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { Panel, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import getScore, { defaults as defaultMetrics } from '../score';
 
 const propTypes = {
@@ -23,16 +23,17 @@ const defaultProps = ({
 });
 
 const AnswersTable = ({ answers, useReasons }) => (
-  <table className="table table-condensed">
-    <thead>
-      <tr>
-        <td />
-        <td>Answer</td>
-        {useReasons ? <td>Reason</td> : null}
-      </tr>
-    </thead>
-    <tbody>
-      {answers
+  <Panel>
+    <table className="table table-condensed">
+      <thead>
+        <tr>
+          <td />
+          <td>Answer</td>
+          {useReasons ? <td>Reason</td> : null}
+        </tr>
+      </thead>
+      <tbody>
+        {answers
         .sort((a, b) => a.data.answer - b.data.answer)
         .map(answer => (
           <tr key={answer.assignmentid}>
@@ -47,12 +48,13 @@ const AnswersTable = ({ answers, useReasons }) => (
                 </div>
               </OverlayTrigger>
             </td>
-            { useReasons ? <td>{answer.data.unclearReasonString}</td> : null}
+            {useReasons ? <td>{answer.data.unclearReasonString}</td> : null}
           </tr>
         ))
       }
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  </Panel>
 );
 
 AnswersTable.propTypes = propTypes;

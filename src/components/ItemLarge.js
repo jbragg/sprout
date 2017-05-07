@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import { Image } from 'react-bootstrap';
+import { PanelGroup, Image } from 'react-bootstrap';
 import AnswersTable from './AnswersTable';
+import ConfusionsTable from './ConfusionsTable';
 import AnswersSummary from './AnswersSummary';
 
 const propTypes = {
@@ -18,7 +19,7 @@ const propTypes = {
   isDragging: PropTypes.bool,
   useReasons: PropTypes.bool,
   useAnswers: PropTypes.bool,
-  summaryOnly: PropTypes.bool,
+  aggregateOnly: PropTypes.bool,
   answerKey: PropTypes.objectOf(PropTypes.string.isRequired).isRequired,
 };
 
@@ -28,7 +29,7 @@ const defaultProps = ({
   isDragging: false,
   useReasons: true,
   useAnswers: true,
-  summaryOnly: true,
+  aggregateOnly: true,
 });
 
 class ItemLarge extends React.Component {
@@ -44,7 +45,7 @@ class ItemLarge extends React.Component {
   render() {
     const {
       item, answers, onLoad, connectDragSource, isDragging, useReasons,
-      useAnswers, answerKey, summaryOnly,
+      useAnswers, answerKey, aggregateOnly,
     } = this.props;
     return connectDragSource(
       <div
@@ -52,14 +53,20 @@ class ItemLarge extends React.Component {
         style={{ opacity: isDragging ? 0.5 : 1 }}
       >
         <Image responsive thumbnail src={item.data.path} onLoad={onLoad} />
-        {useAnswers
-          ? <AnswersSummary answers={answers} answerKey={answerKey} />
-          : null
-        }
-        {useAnswers && !summaryOnly
-          ? <AnswersTable useReasons={useReasons} answers={answers} />
-          : null
-        }
+        <PanelGroup>
+          {useAnswers
+              ? <AnswersSummary answers={answers} answerKey={answerKey} />
+              : null
+          }
+          {useReasons && aggregateOnly
+              ? <ConfusionsTable answers={answers} />
+              : null
+          }
+          {useAnswers && !aggregateOnly
+              ? <AnswersTable useReasons={useReasons} answers={answers} />
+              : null
+          }
+        </PanelGroup>
       </div>,
     );
   }
