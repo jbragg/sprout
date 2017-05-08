@@ -65,7 +65,7 @@ export function editItem(itemId, keyValues) {
   return {
     type: EDIT_ITEM,
     itemId,
-    keyValues,  // { test: true } or { test: false }
+    keyValues,  // { test: true } or { reason: 'something' }
   };
 }
 

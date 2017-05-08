@@ -1,11 +1,17 @@
 import { connect } from 'react-redux';
-import { editLabelForm } from '../actions';
+import { editItem } from '../actions';
 import DrillDown from '../components/Drilldown';
 
 const mapStateToProps = state => ({
   item: state.entities.items.byId.get(state.currentItemId),
 });
 
-const DrillDownContainer = connect(mapStateToProps)(DrillDown);
+const mapDispatchToProps = dispatch => ({
+  onEditItem: (itemId, keyValues) => {
+    dispatch(editItem(itemId, keyValues));
+  },
+});
+
+const DrillDownContainer = connect(mapStateToProps, mapDispatchToProps)(DrillDown);
 
 export default DrillDownContainer;
