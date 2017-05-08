@@ -52,21 +52,19 @@ class ItemLarge extends React.Component {
         className="item-large"
         style={{ opacity: isDragging ? 0.5 : 1 }}
       >
+        {useAnswers
+            ? <AnswersSummary answers={answers} answerKey={answerKey} />
+            : null
+        }
+        {useReasons && aggregateOnly
+            ? <ConfusionsTable answers={answers} />
+            : null
+        }
+        {useAnswers && !aggregateOnly
+            ? <AnswersTable useReasons={useReasons} answers={answers} />
+            : null
+        }
         <Image responsive thumbnail src={item.data.path} onLoad={onLoad} />
-        <PanelGroup>
-          {useAnswers
-              ? <AnswersSummary answers={answers} answerKey={answerKey} />
-              : null
-          }
-          {useReasons && aggregateOnly
-              ? <ConfusionsTable answers={answers} />
-              : null
-          }
-          {useAnswers && !aggregateOnly
-              ? <AnswersTable useReasons={useReasons} answers={answers} />
-              : null
-          }
-        </PanelGroup>
       </div>,
     );
   }

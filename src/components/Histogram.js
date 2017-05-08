@@ -11,8 +11,7 @@ const Histogram = ({ counts }) => {
   const average = [...counts].reduce((acc, [[val], count]) => acc + (val * count), 0) / totalCount;
   return (
     <div>
-      <strong>Answer distribution</strong>
-      <div>{`Average answer: ${average.toFixed(2)} (${totalCount} workers)`}</div>
+      <p>{`Average answer: ${average.toFixed(2)} (${totalCount} workers)`}</p>
       <div className="histogram">
         {[...counts].map(([[value, name], count]) => (
           <Row className="no-gutter" key={value}>

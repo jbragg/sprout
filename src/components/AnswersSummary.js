@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import getScore, { defaults as defaultMetrics } from '../score';
-import { Panel } from 'react-bootstrap';
+import { OverlayTrigger, Popover } from 'react-bootstrap';
 import Histogram from './Histogram';
+import HistogramSummary from './HistogramSummary';
 
 const propTypes = {
   answers: PropTypes.arrayOf(
@@ -19,16 +20,30 @@ const propTypes = {
 };
 
 const AnswersSummary = ({ answers, answerKey }) => {
-  let answerCounts = new Map([...answerKey.keys()].map(key => [key, 0]));
+  const answerCounts = new Map([...answerKey.keys()].map(key => [key, 0]));
   // Compute totals.
   answers.forEach(answer => answerCounts.set(answer.data.answer, answerCounts.get(answer.data.answer) + 1));
 
   // Transform values
   const answerCountsTransform = new Map([...answerCounts].map(([key, count]) => [[getScore(defaultMetrics.color)(key).human, answerKey.get(key)], count]));
+  const scoredAnswers = answers.map(answer => ({
+    answer: getScore(defaultMetrics.color)(answer.data.answer).human
+  }));
   return (
-    <Panel>
-      <Histogram counts={answerCountsTransform} />
-    </Panel>
+    <div>
+      <OverlayTrigger
+        overlay={
+          <Popover id="popover">
+            <Histogram counts={answerCountsTransform} />
+          </Popover>
+        }
+        placement="bottom"
+      >
+        <div>
+          <HistogramSummary values={scoredAnswers} />
+        </div>
+      </OverlayTrigger>
+    </div>
   );
 };
 

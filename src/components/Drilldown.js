@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Panel } from 'react-bootstrap';
 import { ItemLargeContainer } from '../containers/ItemContainer';
 
 const propTypes = {
@@ -31,26 +32,19 @@ class DrillDown extends React.Component {
 
   render() {
     return (
-      <div className="drilldown-container panel panel-default">
-        <div className="panel-body">
-          <p>Assign the item to either an existing group or a general label by dragging it.</p>
-          <div className={this.state.imageStatus === 'loaded' ? '' : 'hidden'}>
-            <ItemLargeContainer
-              draggable
-              itemId={this.props.item.id}
-              onLoad={this.handleImageLoaded}
-            />
-          </div>
-          {this.state.imageStatus === 'loaded'
-              ? null
-              : (
-                <div className="panel panel-default panel-body">
-                  <h1>Loading <span className="glyphicon glyphicon-refresh spinning" /></h1>
-                </div>
-              )
-          }
+      <Panel className="drilldown-container">
+        <div className={this.state.imageStatus === 'loaded' ? '' : 'hidden'}>
+          <ItemLargeContainer
+            draggable
+            itemId={this.props.item.id}
+            onLoad={this.handleImageLoaded}
+          />
         </div>
-      </div>
+        {this.state.imageStatus === 'loaded'
+            ? null
+            : <h1>Loading <span className="glyphicon glyphicon-refresh spinning" /></h1>
+          }
+      </Panel>
     );
   }
 }

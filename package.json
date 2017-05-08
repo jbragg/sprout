@@ -10,6 +10,7 @@
     "build-prod": "./scripts/build-prod.sh",
     "watch": "./scripts/watch.sh"
   },
+  "browserify-shim": {},
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
@@ -28,6 +29,7 @@
     "react-redux": "5.0.4",
     "react-router-dom": "4.1.1",
     "react-slick": "0.14.11",
+    "react-vega-lite": "0.0.1",
     "redux": "3.6.0",
     "redux-logger": "3.0.1",
     "redux-thunk": "2.2.0",
@@ -39,12 +41,15 @@
     "babel-preset-react": "6.24.1",
     "babelify": "7.3.0",
     "browserify": "14.3.0",
+    "browserify-shim": "3.8.14",
+    "browserify-versionify": "1.0.6",
     "envify": "4.0.0",
     "eslint": "3.19.0",
     "eslint-config-airbnb": "14.1.0",
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-jsx-a11y": "4.0.0",
     "eslint-plugin-react": "6.10.3",
+    "jstransform": "11.0.3",
     "uglify": "0.1.5",
     "watchify": "3.9.0"
   }
