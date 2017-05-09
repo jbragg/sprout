@@ -12,7 +12,12 @@ const propTypes = {
 
 const NewGroup = ({ connectDropTarget, isOver, canDrop }) => (
   connectDropTarget(
-    <div className={`btn btn-nohover ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
+    <div
+      className={`btn btn-nohover ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
+      style={{
+        visibility: !canDrop ? 'hidden' : '',
+      }}
+    >
       <h5 className="glyphicon glyphicon-plus" />
       {' '}
       Drag here for new group

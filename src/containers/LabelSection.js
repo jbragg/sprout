@@ -26,11 +26,13 @@ const LabelSection = ({ groupIds, label, onGroupCreate, connectDropTarget, isOve
         <div>
           <ItemList itemIds={[...itemIds.values()]} />
         </div>
-        <div className="panel-group">
-          {groupIds.map(key => (
-            <Group groupId={key} key={key} />
-          ))}
-        </div>
+        {groupIds.length === 0 ? null : (
+          <div className="panel-group">
+            {groupIds.map(key => (
+              <Group groupId={key} key={key} />
+            ))}
+          </div>
+        )}
         <NewGroup onGroupCreate={onGroupCreate} />
       </Panel>
     </div>,
