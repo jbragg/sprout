@@ -7,13 +7,14 @@ import { ItemThumbContainer } from '../containers/ItemContainer';
 import { defaults } from '../constants';
 
 const propTypes = {
-  primaryItemId: PropTypes.number.isRequired,
+  primaryItemId: PropTypes.number,
   similarItemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
   similar: PropTypes.bool,
 };
 
 const defaultProps = {
   similar: true,
+  primaryItemId: null,
 };
 
 const sliderSettings = {
@@ -52,35 +53,36 @@ const sliderSettings = {
 };
 
 const SimilarItemList = ({ primaryItemId, similarItemIds, similar }) => (
-  <Panel>
-    <Row className="no-gutter">
-      <Col xs={6} sm={5} md={4} lg={3}>
-        <div>
-          <strong>Next</strong>
-        </div>
-        <div className="btn-group">
-          <ItemThumbContainer draggable itemId={primaryItemId} />
-        </div>
-      </Col>
-      {!similar ? null : (
-        <Col xs={6} sm={7} md={8} lg={9}>
+  primaryItemId == null ? <p>Loading...</p> : (
+    <Panel>
+      <Row className="no-gutter">
+        <Col xs={6} sm={5} md={4} lg={3}>
           <div>
-            <strong>Similar</strong>
+            <strong>Next</strong>
           </div>
-          {similarItemIds.length == 0 ? null : (
-            <Slider {...sliderSettings}>
-              {similarItemIds.map(id => (
-                <div key={id}>
-                  <ItemThumbContainer draggable itemId={id} />
-                </div>
-            ))}
-            </Slider>
-          )}
+          <div className="btn-group">
+            <ItemThumbContainer draggable itemId={primaryItemId} />
+          </div>
         </Col>
+        {!similar ? null : (
+          <Col xs={6} sm={7} md={8} lg={9}>
+            <div>
+              <strong>Similar</strong>
+            </div>
+            {similarItemIds.length === 0 ? null : (
+              <Slider {...sliderSettings}>
+                {similarItemIds.map(id => (
+                  <div key={id}>
+                    <ItemThumbContainer draggable itemId={id} />
+                  </div>
+            ))}
+              </Slider>
+          )}
+          </Col>
       )}
-    </Row>
-  </Panel>
-);
+      </Row>
+    </Panel>
+));
 
 SimilarItemList.propTypes = propTypes;
 SimilarItemList.defaultProps = defaultProps;

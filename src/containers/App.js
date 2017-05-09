@@ -8,9 +8,7 @@ import { Grid, Row, Col, PanelGroup } from 'react-bootstrap';
 import DrillDownContainer from './DrillDownContainer';
 import LabelSection from './LabelSection';
 import Instructions from './Instructions';
-import SimilarItemList from './SimilarItemList';
-import ClusterItemList from './ClusterItemList';
-import Progress from './Progress';
+import UnlabeledSection from '../components/UnlabeledSection';
 import Countdown from './Countdown';
 import CustomDragLayer from '../CustomDragLayer';
 import Master from './Master';
@@ -92,9 +90,7 @@ class App extends React.Component {
             </Col>
             <Col sm={4}>
               <PanelGroup>
-                {currentItemId != null && useReasons ? <ClusterItemList /> : null}
-                <Progress />
-                {currentItemId != null ? <SimilarItemList similar={useReasons}/> : null}
+                <UnlabeledSection useReasons={useReasons} />
                 {currentItemId != null ? <DrillDownContainer /> : null}
               </PanelGroup>
             </Col>

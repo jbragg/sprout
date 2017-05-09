@@ -56,7 +56,6 @@ const ClusterItemList = ({ clusterId, nClusters, itemIds, summary, onSetCluster 
   return (
     <div className="clusters">
       <Clearfix>
-        <strong className="page">{`Cluster ${clusterId + 1} / ${nClusters}`}</strong>
         <div className="pull-right">
           <button
             className={`btn btn-default btn-xs glyphicon glyphicon-arrow-left ${noDecrement ? 'disabled' : ''}`}
@@ -67,6 +66,7 @@ const ClusterItemList = ({ clusterId, nClusters, itemIds, summary, onSetCluster 
             onClick={() => (noIncrement || onSetCluster(clusterId + 1))}
           />
         </div>
+        <strong className="page pull-right">{`${clusterId + 1} / ${nClusters}`}</strong>
       </Clearfix>
       <Panel>
         <p>{summary}</p>
