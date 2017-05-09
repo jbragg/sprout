@@ -21,7 +21,7 @@ const LabelSection = ({ groupIds, label, onGroupCreate, connectDropTarget, isOve
     <div className="panel">
       <Panel
         className={`${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
-        header={<span>{label}</span>}
+        header={<h4>{label}</h4>}
       >
         <div>
           <ItemList itemIds={[...itemIds.values()]} />

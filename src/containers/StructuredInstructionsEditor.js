@@ -16,7 +16,7 @@ const propTypes = {
 const StructuredInstructionsEditor = ({ finalLabels, labels, groups, onGroupEdit, onEditGeneralInstructions, initialInstructions, generalInstructions }) => (
   <div className="panel-group">
     <div className="panel panel-default">
-      <div className="panel-heading"><strong>Worker Instructions</strong></div>
+      <div className="panel-heading"><h4>Worker Instructions</h4></div>
       <div className="panel-body">
         <form
           className="form"

@@ -10,6 +10,7 @@ import { groupsSelector } from './reducers/index';
 
 export const ANSWER_ORACLE = 'ANSWER_ORACLE';
 export const QUEUE_ITEM_ORACLE = 'QUEUE_ITEM_ORACLE';
+export const UNQUEUE_ITEM_ORACLE = 'UNQUEUE_ITEM_ORACLE';
 export const SET_CURRENT_ITEM = 'SET_CURRENT_ITEM';
 export const SET_CLUSTER_ID = 'SET_CLUSTER_ID';
 export const ASSIGN_ITEM = 'ASSIGN_ITEM';
@@ -42,6 +43,13 @@ function answerOracle() {
 export function queueItemOracle(itemId) {
   return {
     type: QUEUE_ITEM_ORACLE,
+    itemId,
+  };
+}
+
+export function unqueueItemOracle(itemId) {
+  return {
+    type: UNQUEUE_ITEM_ORACLE,
     itemId,
   };
 }

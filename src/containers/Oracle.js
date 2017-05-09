@@ -4,11 +4,12 @@ import { connect } from 'react-redux';
 import { Popover, OverlayTrigger, Panel } from 'react-bootstrap';
 import { DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
-import { queueItemOracle } from '../actions';
+import RemoveTarget from '../components/RemoveTarget';
+import { queueItemOracle, unqueueItemOracle } from '../actions';
 import { DragItemTypes as ItemTypes } from '../constants';
 
 const propTypes = {
-  queuedItems: PropTypes.arrayOf(
+  queuedItems: PropTypes.objectOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,
     }).isRequired,
@@ -23,6 +24,7 @@ const propTypes = {
   isOver: PropTypes.bool.isRequired,
   canDrop: PropTypes.bool.isRequired,
   labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+  onUnqueue: PropTypes.func.isRequired,
 };
 
 const customerHelp = (
@@ -33,26 +35,31 @@ const customerHelp = (
   </div>
 );
 
-const Oracle = ({ queuedItems, answeredItems, labels, connectDropTarget, isOver, canDrop }) => {
-  const queuedItemIds = queuedItems.map(val => val.id);
+const Oracle = ({ queuedItems, answeredItems, labels, connectDropTarget, isOver, canDrop, onUnqueue }) => {
   return connectDropTarget(
-    <div className="panel">
-      <Panel
-        className={`${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
-        header={
-          <span>
-          Ask for a clarification
-          <OverlayTrigger
-            overlay={<Popover id="popover" title="Help">{customerHelp}</Popover>}
-            placement="bottom"
-          >
-            <span className="glyphicon glyphicon-question-sign" />
-          </OverlayTrigger>
-          </span>
-        }
+    <div className={`panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
+      <RemoveTarget
+        onDrop={(_, monitor) => { onUnqueue(monitor.getItem().id); }}
+        onCanDrop={(_, monitor) => queuedItems.has(monitor.getItem().id)}
       >
+        <div className="panel-heading">
+          <h4 className="panel-title">
+            Ask for a clarification
+            {' '}
+            <OverlayTrigger
+              overlay={
+                <Popover id="popover" title="Help">{customerHelp}</Popover>
+              }
+              placement="bottom"
+            >
+              <span className="glyphicon glyphicon-question-sign" />
+            </OverlayTrigger>
+          </h4>
+        </div>
+      </RemoveTarget>
+      <div className="panel-body">
         <div>
-          {queuedItemIds.length === 0 ? null : <ItemList itemIds={queuedItemIds} />}
+          {queuedItems.size === 0 ? null : <ItemList itemIds={[...queuedItems.keys()]} />}
         </div>
         {labels.map((label) => {
           const itemIds = answeredItems.filter(val => val.label === label).map(val => val.id);
@@ -67,7 +74,7 @@ const Oracle = ({ queuedItems, answeredItems, labels, connectDropTarget, isOver,
             </Panel>
           );
         })}
-      </Panel>
+      </div>
     </div>,
   );
 };
@@ -82,7 +89,7 @@ const oracleTarget = {
   drop: (props, monitor) => {
     props.onQueue(monitor.getItem().id);
   },
-  canDrop: (props, monitor) => (props.queuedItems.findIndex(val => val.id === monitor.getItem().id) < 0 && props.answeredItems.findIndex(val => val.id === monitor.getItem().id) < 0),
+  canDrop: (props, monitor) => (!props.queuedItems.has(monitor.getItem().id) && props.answeredItems.findIndex(val => val.id === monitor.getItem().id) < 0),
 };
 
 const collect = (dndConnect, monitor) => ({
@@ -96,7 +103,7 @@ const collect = (dndConnect, monitor) => ({
  */
 
 const mapStateToProps = state => ({
-  queuedItems: state.oracle.queuedItems,
+  queuedItems: new Map(state.oracle.queuedItems.map(item => [item.id, item])),
   answeredItems: state.oracle.answeredItems,
   labels: state.labels,
 });
@@ -104,6 +111,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   onQueue: (itemId) => {
     dispatch(queueItemOracle(itemId));
+  },
+  onUnqueue: (itemId) => {
+    dispatch(unqueueItemOracle(itemId));
   },
 });
 

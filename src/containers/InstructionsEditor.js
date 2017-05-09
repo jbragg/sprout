@@ -12,7 +12,7 @@ const propTypes = {
 
 const InstructionsEditor = ({ generalInstructions, onEditGeneralInstructions }) => (
   <Panel
-    header={<span>Improved instructions</span>}
+    header={<h4>Improved instructions</h4>}
   >
     <Tabs defaultActiveKey={0} id="instructions-editor">
       <Tab eventKey={0} title="Write">

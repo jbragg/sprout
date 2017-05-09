@@ -1,7 +1,6 @@
-import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import {
-  ANSWER_ORACLE, QUEUE_ITEM_ORACLE, SET_CLUSTER_ID,
+  ANSWER_ORACLE, QUEUE_ITEM_ORACLE, UNQUEUE_ITEM_ORACLE, SET_CLUSTER_ID,
   EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_ITEM,
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
   RECEIVE_EXPERIMENT } from '../actions';
@@ -70,7 +69,7 @@ export const answersSelector = state => state.entities.answers;
 export const clusterIdsSelector = createSelector(
   itemsSelector,
   items => new Set([...items.byId.values()].map(item => item.cluster)),
-)
+);
 export const itemVectorsSelector = createSelector(
   itemsSelector,
   items => new Map([...items.byId].map(([key, item]) => [key, item.vector])),
@@ -145,7 +144,6 @@ export const recommendedGroupSelector = createSelector(
       .map(([groupId, index]) => [groupId, [...similarities.get(itemId).keys()][index]])
       .sort(([, i1], [, i2]) => i1 - i2)
     );
-    //console.log(groupSimilarities);
     return groupSimilarities.size === 0 ? -1 : [...groupSimilarities.keys()][0];
   },
 );
@@ -158,9 +156,8 @@ const nextClusterSelector = createSelector(
       return -1;
     } else if (clusterId >= 0) {
       return clusterId + 1;
-    } else {
-      return clusterId;
     }
+    return clusterId;
   },
 );
 
@@ -186,8 +183,12 @@ function InstructionsApp(state = initialState, action) {
       };
     }
     case ANSWER_ORACLE: {
-      const nextQueuedItem = state.oracle.queuedItems.length > 0 ? state.oracle.queuedItems[0] : null;
-      const lastAnswerTime = state.oracle.answeredItems.length > 0 ? state.oracle.answeredItems[state.oracle.answeredItems.length - 1].answerTime : null;
+      const nextQueuedItem = state.oracle.queuedItems.length > 0
+        ? state.oracle.queuedItems[0]
+        : null;
+      const lastAnswerTime = state.oracle.answeredItems.length > 0
+        ? state.oracle.answeredItems[state.oracle.answeredItems.length - 1].answerTime
+        : null;
       const longEnoughSinceLastAnswer = lastAnswerTime == null || (Date.now() - lastAnswerTime > state.oracle.answerInterval);
       const longEnoughSinceQueued = nextQueuedItem != null && (Date.now() - nextQueuedItem.queryTime > state.oracle.answerInterval);
       const shouldAnswer = longEnoughSinceQueued && longEnoughSinceLastAnswer;
@@ -223,6 +224,16 @@ function InstructionsApp(state = initialState, action) {
         },
       };
     }
+    case UNQUEUE_ITEM_ORACLE: {
+      return {
+        ...state,
+        oracle: {
+          ...state.oracle,
+          queuedItems: state.oracle.queuedItems
+            .filter(item => item.id !== action.itemId),
+        },
+      };
+    }
     case EDIT_GENERAL_INSTRUCTIONS: {
       return {
         ...state,
@@ -237,7 +248,7 @@ function InstructionsApp(state = initialState, action) {
         const { useReasons, useAnswers } = conditions[state.systemVersion];
         // Choose next primaryItem.
         if (!useReasons && !useAnswers) {
-          primaryItemId = unlabeledItemsSelector(state)[0].id
+          primaryItemId = unlabeledItemsSelector(state)[0].id;
         } else {
           primaryItemId = unlabeledSortedItemsSelector(state)[0].id;
         }

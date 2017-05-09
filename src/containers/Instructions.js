@@ -18,7 +18,7 @@ const defaultProps = {
 
 const Instructions = ({ initialInstructions, structured }) => (
   <PanelGroup>
-    <Panel header={<span>Customer instructions</span>}>
+    <Panel header={<h4>Customer instructions</h4>}>
       <p>{initialInstructions}</p>
     </Panel>
     <Oracle />

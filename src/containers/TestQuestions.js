@@ -4,6 +4,7 @@ import { Panel } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
+import RemoveTarget from '../components/RemoveTarget';
 import { testItemsSelector } from '../reducers/index';
 import { DragItemTypes as ItemTypes } from '../constants';
 import { editItem } from '../actions';
@@ -30,16 +31,24 @@ const propTypes = {
 
 const TestQuestions = ({
   items, groups, labels, isOver, canDrop, connectDropTarget, uncertainLabel,
+  onEditTest,
 }) => {
   const unlabeledItemIds = [...items.values()]
     .filter(item => item.label == null && item.group == null)
     .map(item => item.id);
   return connectDropTarget(
-    <div className="panel">
-      <Panel
-        className={`${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
-        header={<span>Test questions</span>}
+    <div className={`panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
+      <RemoveTarget
+        onDrop={(_, monitor) => { onEditTest(monitor.getItem().id, false); }}
+        onCanDrop={(_, monitor) => items.has(monitor.getItem().id)}
       >
+        <div className="panel-heading">
+          <h4 className="panel-title">
+            Test questions
+          </h4>
+        </div>
+      </RemoveTarget>
+      <div className="panel-body">
         {unlabeledItemIds.length === 0 ? null : (
           <div>
             <p className="text-danger">
@@ -75,7 +84,7 @@ const TestQuestions = ({
           }
           return null;
         })}
-      </Panel>
+      </div>
     </div>,
   );
 };
@@ -88,7 +97,7 @@ TestQuestions.propTypes = propTypes;
 
 const target = {
   drop: (props, monitor) => {
-    props.onCreateTest(monitor.getItem().id);
+    props.onEditTest(monitor.getItem().id, true);
   },
   canDrop: (props, monitor) => !props.items.has(monitor.getItem().id),
 };
@@ -111,8 +120,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onCreateTest: (itemId) => {
-    dispatch(editItem(itemId, { test: true }));
+  onEditTest: (itemId, testValue) => {
+    dispatch(editItem(itemId, { test: testValue }));
   },
 });
 
