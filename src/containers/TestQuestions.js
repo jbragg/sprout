@@ -24,7 +24,7 @@ const TestQuestions = ({ items, finalLabels, isOver, canDrop, connectDropTarget 
   connectDropTarget(
     <div className="panel">
       <Panel
-        className={(isOver && canDrop) ? 'target' : ''}
+        className={`${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
         header={<span>Test questions</span>}
       >
         {finalLabels.map((label) => {

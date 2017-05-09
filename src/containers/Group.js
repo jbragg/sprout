@@ -65,7 +65,7 @@ class Group extends React.Component {
     const recommended = this.state.recommended && useReasons;
     return connectDragSource(connectDropTarget(
       <div
-        className={`class-container panel panel-primary ${recommended ? 'recommended' : ''} ${(isOver && canDrop) ? 'target' : ''}`}
+        className={`class-container panel panel-primary ${recommended ? 'recommended' : ''} ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
         style={{
           opacity: isDragging ? 0.5 : 1,
         }}

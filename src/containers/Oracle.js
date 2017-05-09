@@ -38,7 +38,7 @@ const Oracle = ({ queuedItems, answeredItems, labels, connectDropTarget, isOver,
   return connectDropTarget(
     <div className="panel">
       <Panel
-        className={(isOver && canDrop) ? 'target' : ''}
+        className={`${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
         header={
           <span>
           Ask for a clarification

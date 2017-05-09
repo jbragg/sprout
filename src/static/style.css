@@ -61,7 +61,11 @@
   margin: 1px 1em;
 }
 
-.target > .panel-heading, .btn.target {
+.target.panel, .btn.target {
+  border: 2px dotted red;
+}
+
+.target.over > .panel-heading, .btn.target.over {
   background-color: yellow;
 }
 

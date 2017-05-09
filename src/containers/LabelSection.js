@@ -20,7 +20,7 @@ const LabelSection = ({ groupIds, label, onGroupCreate, connectDropTarget, isOve
   connectDropTarget(
     <div className="panel">
       <Panel
-        className={`${(isOver && canDrop) ? 'target' : ''}`}
+        className={`${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
         header={<span>{label}</span>}
       >
         <div>
@@ -51,9 +51,6 @@ const target = {
     }
   },
   canDrop: (props, monitor) => {
-    if (!monitor.isOver({ shallow: true })) {
-      return false;
-    }
     switch (monitor.getItemType()) {
       case ItemTypes.ITEM: {
         return !props.itemIds.has(monitor.getItem().id);
