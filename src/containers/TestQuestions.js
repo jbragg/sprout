@@ -9,41 +9,76 @@ import { DragItemTypes as ItemTypes } from '../constants';
 import { editItem } from '../actions';
 
 const propTypes = {
-  items: PropTypes.arrayOf(
+  items: PropTypes.objectOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,
+      label: PropTypes.string,
+      group: PropTypes.number,
     }).isRequired,
   ).isRequired,
-  finalLabels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+  groups: PropTypes.objectOf(
+    PropTypes.shape({
+      label: PropTypes.string.isRequired,
+    }).isRequired,
+  ).isRequired,
+  labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+  uncertainLabel: PropTypes.string.isRequired,
   isOver: PropTypes.bool.isRequired,
   canDrop: PropTypes.bool.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
 };
 
-const TestQuestions = ({ items, finalLabels, isOver, canDrop, connectDropTarget }) => (
-  connectDropTarget(
+const TestQuestions = ({
+  items, groups, labels, isOver, canDrop, connectDropTarget, uncertainLabel,
+}) => {
+  const unlabeledItemIds = [...items.values()]
+    .filter(item => item.label == null && item.group == null)
+    .map(item => item.id);
+  return connectDropTarget(
     <div className="panel">
       <Panel
         className={`${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
         header={<span>Test questions</span>}
       >
-        {finalLabels.map((label) => {
-          const itemIds = items.filter(item => item.label === label).map(item => item.id);
-          return (
-            <Panel
-              header={<span>{label}</span>}
-              key={label}
-            >
-              <div>
-                {itemIds.length === 0 ? null : <ItemList itemIds={itemIds} />}
-              </div>
-            </Panel>
-          );
+        {unlabeledItemIds.length === 0 ? null : (
+          <div>
+            <p className="text-danger">
+              Unlabeled items will not be included as test questions.
+            </p>
+            <ItemList itemIds={unlabeledItemIds} />
+          </div>
+        )}
+        {labels.map((label) => {
+          const itemIds = [...items.values()]
+            .filter(item => (
+              item.label === label ||
+              (item.group != null && groups.get(item.group).label === label)),
+            )
+            .map(item => item.id);
+          if (label !== uncertainLabel || itemIds.length > 0) {
+            return (
+              <Panel
+                header={<span>{label}</span>}
+                key={label}
+                bsStyle={label === uncertainLabel ? 'danger' : 'default'}
+              >
+                <div>
+                  {label !== uncertainLabel ? null : (
+                    <p className="text-danger">
+                      {`Items marked ${uncertainLabel} will not be included as test questions.`}
+                    </p>
+                  )}
+                  {itemIds.length === 0 ? null : <ItemList itemIds={itemIds} />}
+                </div>
+              </Panel>
+            );
+          }
+          return null;
         })}
       </Panel>
     </div>,
-  )
-);
+  );
+};
 
 TestQuestions.propTypes = propTypes;
 
@@ -55,6 +90,7 @@ const target = {
   drop: (props, monitor) => {
     props.onCreateTest(monitor.getItem().id);
   },
+  canDrop: (props, monitor) => !props.items.has(monitor.getItem().id),
 };
 
 const collect = (dndConnect, monitor) => ({
@@ -68,8 +104,10 @@ const collect = (dndConnect, monitor) => ({
  */
 
 const mapStateToProps = state => ({
-  items: testItemsSelector(state),
-  finalLabels: state.finalLabels,
+  items: new Map(testItemsSelector(state).map(item => [item.id, item])),
+  groups: state.entities.groups.byId,
+  labels: state.labels,
+  uncertainLabel: state.uncertainLabel,
 });
 
 const mapDispatchToProps = dispatch => ({
