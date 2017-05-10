@@ -61,8 +61,8 @@
   margin: 1px 1em;
 }
 
-.target{
-  border: 2px dotted red;
+.target {
+  border: 2px dotted red !important;
 }
 
 .target.over > .panel-heading, .target.over > div > .panel-heading, .target.over.btn {
