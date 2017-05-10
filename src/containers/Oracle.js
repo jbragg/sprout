@@ -27,11 +27,11 @@ const propTypes = {
   onUnqueue: PropTypes.func.isRequired,
 };
 
-const customerHelp = (
+const help = (
   <div>
     <p>Drag items here to ask the customer.</p>
-    <p>Items will be queued until the customer reviews them, usually after a few minutes.</p>
-    <p>Based on the customer&apos;s answer, reviewed items will appear in the yes / no sections.</p>
+    <p>Items will be queued until the customer reviews them, which may take a few minutes.</p>
+    <p>The customer&apos;s yes / no answer will appear below upon review.</p>
   </div>
 );
 
@@ -48,7 +48,7 @@ const Oracle = ({ queuedItems, answeredItems, labels, connectDropTarget, isOver,
             {' '}
             <OverlayTrigger
               overlay={
-                <Popover id="popover" title="Help">{customerHelp}</Popover>
+                <Popover id="popover" title="Help">{help}</Popover>
               }
               placement="bottom"
             >
@@ -63,16 +63,17 @@ const Oracle = ({ queuedItems, answeredItems, labels, connectDropTarget, isOver,
         </div>
         {labels.map((label) => {
           const itemIds = answeredItems.filter(val => val.label === label).map(val => val.id);
-          return (
-            <Panel
-              header={<span>{label}</span>}
-              key={label}
-            >
-              <div>
-                {itemIds.length === 0 ? null : <ItemList itemIds={itemIds} />}
-              </div>
-            </Panel>
-          );
+          if (itemIds.length > 0) {
+            return (
+              <Panel
+                header={<span>{label}</span>}
+                key={label}
+              >
+                <ItemList itemIds={itemIds} />
+              </Panel>
+            );
+          }
+          return null;
         })}
       </div>
     </div>,

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Panel } from 'react-bootstrap';
+import { Panel, OverlayTrigger, Popover } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
@@ -29,6 +29,16 @@ const propTypes = {
   connectDropTarget: PropTypes.func.isRequired,
 };
 
+const help = (
+  <div>
+    <p>Drag items here to include them as test questions.</p>
+    <ol>
+      <li>Select questions that test understanding of your instructions (they shouldn&#39;t be too hard or too easy).</li>
+      <li>Try to select the smallest useful set of items (each worker will only see a few of them).</li>
+    </ol>
+  </div>
+);
+
 const TestQuestions = ({
   items, groups, labels, isOver, canDrop, connectDropTarget, uncertainLabel,
   onEditTest,
@@ -45,6 +55,15 @@ const TestQuestions = ({
         <div className="panel-heading">
           <h4 className="panel-title">
             Test questions
+            {' '}
+            <OverlayTrigger
+              overlay={
+                <Popover id="popover" title="Help">{help}</Popover>
+              }
+              placement="top"
+            >
+              <span className="glyphicon glyphicon-question-sign" />
+            </OverlayTrigger>
           </h4>
         </div>
       </RemoveTarget>
@@ -64,7 +83,7 @@ const TestQuestions = ({
               (item.group != null && groups.get(item.group).label === label)),
             )
             .map(item => item.id);
-          if (label !== uncertainLabel || itemIds.length > 0) {
+          if (itemIds.length > 0) {
             return (
               <Panel
                 header={<span>{label}</span>}

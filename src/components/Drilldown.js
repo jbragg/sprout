@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Panel, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import {
+  Panel, FormGroup, FormControl, ControlLabel, OverlayTrigger, Popover,
+} from 'react-bootstrap';
 import { ItemLargeContainer } from '../containers/ItemContainer';
 
 const propTypes = {
@@ -9,9 +11,22 @@ const propTypes = {
     data: PropTypes.shape({
       path: PropTypes.string.isRequired,
     }).isRequired,
+    reason: PropTypes.string,
   }).isRequired,
   onEditItem: PropTypes.func.isRequired,
 };
+
+const help = (
+  <div>
+    <p>If you drag this item to the test questions section, your reason will be shown to test and teach workers. For these items, you should:</p>
+    <ol>
+      <li>Explain why the label you assigned is correct and possibly why the other label is wrong.</li>
+      <li>Refer to your instructions.</li>
+      <li><strong>Don&#39;t</strong> refer to other items or external knowledge. You should not assume a worker has completed any other items in the task.</li>
+      <li>Use straightforward, simple language.</li>
+    </ol>
+  </div>
+);
 
 class DrillDown extends React.Component {
   constructor(props) {
@@ -43,12 +58,23 @@ class DrillDown extends React.Component {
             />
           </FormGroup>
           <FormGroup>
-            <ControlLabel>Reason</ControlLabel>
+            <ControlLabel>
+              Reason
+              {' '}
+              <OverlayTrigger
+                overlay={
+                  <Popover id="popover" title="Help">{help}</Popover>
+                }
+                placement="top"
+              >
+                <span className="glyphicon glyphicon-question-sign" />
+              </OverlayTrigger>
+            </ControlLabel>
             <FormControl
               componentClass="textarea"
               rows="5"
               value={this.props.item.reason || ''}
-              placeholder="Enter a reason for the label. If you drag this item to the test questions section, the reason will also be shown to workers who answer this question incorrectly."
+              placeholder="Enter the reason for your label (optional unless you make the item a test question)"
               onChange={(e) => {
                 this.props.onEditItem(
                   this.props.item.id,
