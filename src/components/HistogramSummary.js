@@ -29,8 +29,36 @@ const HistogramSummary = ({ values }) => (
   <div>
     <Row className="no-gutter">
       <Col sm={8}>
+        <div style={{ width: '130px', padding: '0 15px' }}>
+          <img
+            src="/static/RdYlGn.png"
+            height="10"
+            width="100%"
+          />
+        </div>
         <div>
           <VegaLite spec={spec} data={{ values }} />
+        </div>
+        <div style={{ width: '130px', padding: '0 5px' }}>
+          <Row className="no-gutter">
+            <Col
+              xs={4}
+            >
+              <div>No</div>
+            </Col>
+            <Col
+              className="text-center"
+              xs={4}
+            >
+              <div>Maybe</div>
+            </Col>
+            <Col
+              className="text-right"
+              xs={4}
+            >
+              <div>Yes</div>
+            </Col>
+          </Row>
         </div>
       </Col>
       <Col sm={4}>

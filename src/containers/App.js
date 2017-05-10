@@ -95,41 +95,6 @@ class App extends React.Component {
               </PanelGroup>
             </Col>
             <Col sm={4}>
-              {useAnswers
-                    ? (
-                      <div>
-                        <strong>Crowd answer</strong>
-                        <img
-                          src="/static/RdYlGn.png"
-                          height="20"
-                          width="100%"
-                        />
-                        <Row className="no-gutter">
-                          <Col
-                            xs={4}
-                          >
-                            <div>-1</div>
-                            <div>No</div>
-                          </Col>
-                          <Col
-                            className="text-center"
-                            xs={4}
-                          >
-                            <div>0</div>
-                            <div>Maybe</div>
-                          </Col>
-                          <Col
-                            className="text-right"
-                            xs={4}
-                          >
-                            <div>1</div>
-                            <div>Yes</div>
-                          </Col>
-                        </Row>
-                      </div>
-                    )
-                  : null
-                }
               <PanelGroup>
                 {labels.map(label => <LabelSection label={label} key={label} />)}
               </PanelGroup>
