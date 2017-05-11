@@ -70,6 +70,11 @@ export const clusterIdsSelector = createSelector(
   itemsSelector,
   items => new Set([...items.byId.values()].map(item => item.cluster)),
 );
+export const itemLabelsSelector = createSelector(
+  itemsSelector,
+  groupsSelector,
+  (items, groups) => new Map([...items.byId.values()].map(item => [item.id, item.group == null ? item.label : groups.byId.get(item.group).label])),
+);
 export const itemVectorsSelector = createSelector(
   itemsSelector,
   items => new Map([...items.byId].map(([key, item]) => [key, item.vector])),

@@ -7,7 +7,7 @@ import ConfusionsTable from './ConfusionsTable';
 import AnswersSummary from './AnswersSummary';
 
 const propTypes = {
-  onLoad: PropTypes.func.isRequired,
+  onLoad: PropTypes.func,
   answers: PropTypes.array.isRequired,
   item: PropTypes.shape({
     data: PropTypes.shape({
@@ -30,6 +30,7 @@ const defaultProps = ({
   useReasons: true,
   useAnswers: true,
   aggregateOnly: true,
+  onLoad: null,
 });
 
 class ItemLarge extends React.Component {
@@ -56,7 +57,7 @@ class ItemLarge extends React.Component {
             ? <AnswersSummary answers={answers} answerKey={answerKey} />
             : null
         }
-        {useReasons && aggregateOnly
+        {useAnswers && useReasons && aggregateOnly
             ? <ConfusionsTable answers={answers} />
             : null
         }

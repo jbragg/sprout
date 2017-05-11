@@ -26,19 +26,20 @@ const collect = (dndConnect, monitor) => ({
  * redux
  */
 
-const mapStateToProps = (state, { itemId } ) => ({
+const mapStateToProps = (state, { itemId, useReasons, useAnswers } ) => ({
   selected: state.currentItemId === itemId,
   item: state.entities.items.byId.get(itemId),
   answers: state.entities.items.byId.get(itemId).answers.map(id => state.entities.answers.byId.get(id)),
-  useReasons: conditions[state.systemVersion].useReasons,
-  useAnswers: conditions[state.systemVersion].useAnswers,
+  useReasons: useReasons == null ? conditions[state.systemVersion].useReasons : useReasons,
+  useAnswers: useAnswers == null ? conditions[state.systemVersion].useAnswers : useAnswers,
   answerKey: state.answerKey,
 });
 
-const mapDispatchToProps = (dispatch, { itemId }) => ({
-  onClick: () => {
-    dispatch(setCurrentItem(itemId));
-  },
+const mapDispatchToProps = (dispatch, { itemId, onClick }) => ({
+  onClick: (onClick != null
+    ? () => onClick(itemId)
+    : () => { dispatch(setCurrentItem(itemId)); }
+  ),
 });
 
 const connectOptionallyDraggable = x => {

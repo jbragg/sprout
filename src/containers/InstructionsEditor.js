@@ -2,47 +2,49 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
-import { Panel, Tabs, Tab, FormGroup, FormControl } from 'react-bootstrap';
+import { Tabs, Tab, FormGroup, FormControl } from 'react-bootstrap';
 import { editGeneralInstructions } from '../actions';
 
 const propTypes = {
   onEditGeneralInstructions: PropTypes.func.isRequired,
   generalInstructions: PropTypes.string.isRequired,
+  defaultActiveKey: PropTypes.number,
 };
 
-const InstructionsEditor = ({ generalInstructions, onEditGeneralInstructions }) => (
-  <Panel
-    header={<h4>Improved instructions</h4>}
-  >
-    <Tabs defaultActiveKey={0} id="instructions-editor">
-      <Tab eventKey={0} title="Write">
-        <FormGroup>
-          <FormControl
-            componentClass="textarea"
-            rows="6"
-            value={generalInstructions}
-            onChange={(e) => { onEditGeneralInstructions(e.target.value); }}
-          />
-        </FormGroup>
-        <span className="pull-right">
-          <span>Supports </span>
-          <a
-            href="http://commonmark.org/help/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-              Markdown
-            </a>
-        </span>
-      </Tab>
-      <Tab eventKey={1} title="Preview">
-        <ReactMarkdown source={generalInstructions} />
-      </Tab>
-    </Tabs>
-  </Panel>
+const defaultProps = {
+  defaultActiveKey: 0,
+};
+
+const InstructionsEditor = ({ generalInstructions, onEditGeneralInstructions, defaultActiveKey }) => (
+  <Tabs defaultActiveKey={defaultActiveKey} id="instructions-editor">
+    <Tab eventKey={0} title="Write">
+      <FormGroup>
+        <FormControl
+          componentClass="textarea"
+          rows="6"
+          value={generalInstructions}
+          onChange={(e) => { onEditGeneralInstructions(e.target.value); }}
+        />
+      </FormGroup>
+      <span className="pull-right">
+        <span>Supports </span>
+        <a
+          href="http://commonmark.org/help/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+            Markdown
+          </a>
+      </span>
+    </Tab>
+    <Tab eventKey={1} title="Preview">
+      <ReactMarkdown source={generalInstructions} />
+    </Tab>
+  </Tabs>
 );
 
 InstructionsEditor.propTypes = propTypes;
+InstructionsEditor.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
   generalInstructions: state.generalInstructions,

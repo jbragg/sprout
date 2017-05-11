@@ -4,20 +4,27 @@ import { ItemBtnContainer } from '../containers/ItemContainer';
 
 const propTypes = {
   itemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
+  onClick: PropTypes.func,
 };
 
-const ItemList = ({ itemIds }) => (
+const defaultProps = {
+  onClick: null,
+};
+
+const ItemList = ({ itemIds, onClick }) => (
   <div className="form-group itemlist">
     {itemIds.map(itemId => (
       <ItemBtnContainer
         draggable
         itemId={itemId}
         key={itemId}
+        onClick={onClick}
       />
     ))}
   </div>
 );
 
 ItemList.propTypes = propTypes;
+ItemList.defaultProps = defaultProps;
 
 export default ItemList;

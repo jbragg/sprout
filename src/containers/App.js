@@ -5,7 +5,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { parse } from 'query-string';
 import { connect } from 'react-redux';
 import { Grid, Row, Col, PanelGroup } from 'react-bootstrap';
-import DrillDownContainer from './DrillDownContainer';
+import DrillDown from './DrillDown';
 import LabelSection from './LabelSection';
 import Instructions from './Instructions';
 import UnlabeledSection from '../components/UnlabeledSection';
@@ -91,7 +91,7 @@ class App extends React.Component {
             <Col sm={4}>
               <PanelGroup>
                 <UnlabeledSection useReasons={useReasons} />
-                {currentItemId != null ? <DrillDownContainer /> : null}
+                {currentItemId != null ? <DrillDown /> : null}
               </PanelGroup>
             </Col>
             <Col sm={4}>

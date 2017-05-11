@@ -23,8 +23,12 @@ const Instructions = ({ initialInstructions, structured }) => (
     </Panel>
     <Oracle />
     {structured
-        ? <StructuredInstructions />
-        : <InstructionsEditor />
+        ? <StructuredInstructionsEditor />
+        : (
+          <Panel header={<h4>Improved instructions</h4>}>
+            <InstructionsEditor />
+          </Panel>
+        )
     }
     <TestQuestions />
   </PanelGroup>

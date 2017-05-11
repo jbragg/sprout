@@ -27,16 +27,10 @@ const propTypes = {
   onUnqueue: PropTypes.func.isRequired,
 };
 
-const help = (
-  <div>
-    <p>Drag items here to ask the customer.</p>
-    <p>Items will be queued until the customer reviews them, which may take a few minutes.</p>
-    <p>The customer&apos;s yes / no answer will appear below upon review.</p>
-  </div>
-);
-
-const Oracle = ({ queuedItems, answeredItems, labels, connectDropTarget, isOver, canDrop, onUnqueue }) => {
-  return connectDropTarget(
+const Oracle = ({
+  queuedItems, answeredItems, labels, connectDropTarget, isOver, canDrop,
+  onUnqueue,
+}) => connectDropTarget(
     <div className={`panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
       <RemoveTarget
         onDrop={(_, monitor) => { onUnqueue(monitor.getItem().id); }}
@@ -48,7 +42,11 @@ const Oracle = ({ queuedItems, answeredItems, labels, connectDropTarget, isOver,
             {' '}
             <OverlayTrigger
               overlay={
-                <Popover id="popover" title="Help">{help}</Popover>
+                <Popover id="popover">
+                  <p>Drag items here to ask the customer.</p>
+                  <p>Items will be queued until the customer reviews them, which may take a few minutes.</p>
+                  <p>The customer&apos;s yes / no answer will appear below upon review.</p>
+                </Popover>
               }
               placement="bottom"
             >
@@ -77,8 +75,7 @@ const Oracle = ({ queuedItems, answeredItems, labels, connectDropTarget, isOver,
         })}
       </div>
     </div>,
-  );
-};
+);
 
 Oracle.propTypes = propTypes;
 
