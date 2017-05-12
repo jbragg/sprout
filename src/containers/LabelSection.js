@@ -48,8 +48,11 @@ const target = {
   drop: (props, monitor) => {
     if (monitor.isOver() && monitor.getItemType() === ItemTypes.ITEM) {
       props.onAssign(monitor.getItem().id);
-    } else if (monitor.isOver()) {
+    } else if (monitor.isOver() && monitor.getItemType() === ItemTypes.GROUP) {
       props.onGroupMove(monitor.getItem().id);
+    } else if (monitor.isOver()) {  // Must be cluster.
+      console.log(monitor.getItem());
+      props.onGroupCreate(monitor.getItem().ids);
     }
   },
   canDrop: (props, monitor) => {
@@ -57,8 +60,11 @@ const target = {
       case ItemTypes.ITEM: {
         return !props.itemIds.has(monitor.getItem().id);
       }
-      default: {
+      case ItemTypes.GROUP: {
         return props.groupIds.indexOf(monitor.getItem().id) < 0;
+      }
+      default: {
+        return true;
       }
     }
   },
@@ -80,8 +86,8 @@ const mapStateToProps = (state, { label }) => ({
 });
 
 const mapDispatchToProps = (dispatch, { label }) => ({
-  onGroupCreate: (itemId) => {
-    dispatch(createGroupAssignAndSetCurrentItem([itemId], { label }));
+  onGroupCreate: (itemIds) => {
+    dispatch(createGroupAssignAndSetCurrentItem(itemIds, { label }));
   },
   onAssign: (itemId) => {
     dispatch(assignAndSetCurrentItem([itemId], { label }));
@@ -92,5 +98,9 @@ const mapDispatchToProps = (dispatch, { label }) => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(
-  DropTarget([ItemTypes.ITEM, ItemTypes.GROUP], target, collect)(LabelSection),
+  DropTarget(
+    [ItemTypes.ITEM, ItemTypes.GROUP, ItemTypes.CLUSTER],
+    target,
+    collect,
+  )(LabelSection),
 );

@@ -1,12 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { DragSource } from 'react-dnd';
 import { connect } from 'react-redux';
 import Slider from 'react-slick';
 import { Panel, Clearfix } from 'react-bootstrap';
 import { ItemThumbContainer } from '../containers/ItemContainer';
 import { clusterIdsSelector, unlabeledClusterItemsSelector, clusterItemsSelector, getItemsSummary } from '../reducers/index';
 import { setClusterId } from '../actions';
-import { defaults } from '../constants';
+import { defaults, DragItemTypes as ItemTypes } from '../constants';
 
 const propTypes = {
   itemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
@@ -14,6 +15,7 @@ const propTypes = {
   clusterId: PropTypes.number.isRequired,
   nClusters: PropTypes.number.isRequired,
   onSetCluster: PropTypes.func.isRequired,
+  connectDragSource: PropTypes.func.isRequired,
 };
 
 const sliderSettings = {
@@ -50,7 +52,9 @@ const sliderSettings = {
   ],
 };
 
-const ClusterItemList = ({ clusterId, nClusters, itemIds, summary, onSetCluster }) => {
+const ClusterItemList = ({
+  clusterId, nClusters, itemIds, summary, onSetCluster, connectDragSource,
+}) => {
   const noDecrement = clusterId === 0;
   const noIncrement = clusterId >= nClusters - 1;
   return (
@@ -68,23 +72,45 @@ const ClusterItemList = ({ clusterId, nClusters, itemIds, summary, onSetCluster 
         </div>
         <strong className="page pull-right">{`${clusterId + 1} / ${nClusters}`}</strong>
       </Clearfix>
-      <Panel>
-        <p>{summary}</p>
-        {itemIds.length === 0 ? null : (
-          <Slider {...sliderSettings}>
-            {itemIds.map(id => (
-              <div key={id}>
-                <ItemThumbContainer draggable itemId={id} />
-              </div>
-          ))}
-          </Slider>
-        )}
-      </Panel>
+      {connectDragSource(
+        <div>
+          <Panel>
+            <p>{summary}</p>
+            {itemIds.length === 0 ? null : (
+              <Slider {...sliderSettings}>
+                {itemIds.map(id => (
+                  <div key={id}>
+                    <ItemThumbContainer draggable itemId={id} />
+                  </div>
+              ))}
+              </Slider>
+            )}
+          </Panel>
+        </div>,
+      )}
     </div>
   );
 };
 
 ClusterItemList.propTypes = propTypes;
+
+/*
+ * react-dnd
+ */
+
+const source = {
+  beginDrag: props => ({ ids: props.itemIds }),
+  canDrag: props => props.itemIds.length > 0,
+};
+
+const collect = (dndConnect, monitor) => ({
+  connectDragSource: dndConnect.dragSource(),
+  isDragging: monitor.isDragging(),
+});
+
+/*
+ * react-redux
+ */
 
 const mapStateToProps = (state) => {
   const itemIds = unlabeledClusterItemsSelector(state);
@@ -103,4 +129,6 @@ const mapDispatchToProps = dispatch => ({
   },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(ClusterItemList);
+export default connect(mapStateToProps, mapDispatchToProps)(
+  DragSource(ItemTypes.CLUSTER, source, collect)(ClusterItemList),
+);

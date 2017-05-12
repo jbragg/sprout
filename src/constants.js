@@ -1,6 +1,7 @@
 export const DragItemTypes = {
   ITEM: 'item',
   GROUP: 'group',
+  CLUSTER: 'cluster',
 };
 
 export const Labels = {

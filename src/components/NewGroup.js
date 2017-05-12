@@ -26,7 +26,7 @@ NewGroup.propTypes = propTypes;
 
 const target = {
   drop: (props, monitor) => {
-    props.onGroupCreate(monitor.getItem().id);
+    props.onGroupCreate([monitor.getItem().id]);
   },
 };
 
