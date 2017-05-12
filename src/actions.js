@@ -13,7 +13,7 @@ export const QUEUE_ITEM_ORACLE = 'QUEUE_ITEM_ORACLE';
 export const UNQUEUE_ITEM_ORACLE = 'UNQUEUE_ITEM_ORACLE';
 export const SET_CURRENT_ITEM = 'SET_CURRENT_ITEM';
 export const SET_CLUSTER_ID = 'SET_CLUSTER_ID';
-export const ASSIGN_ITEM = 'ASSIGN_ITEM';
+export const ASSIGN_ITEMS = 'ASSIGN_ITEMS';
 export const EDIT_ITEM = 'EDIT_ITEM';
 export const CREATE_GROUP = 'CREATE_GROUP';
 export const MERGE_GROUP = 'MERGE_GROUP';
@@ -61,10 +61,10 @@ export function setCurrentItem(itemId = null) {
   };
 }
 
-export function assignItem(itemId, assignment) {
+export function assignItems(itemIds, assignment) {
   return {
-    type: ASSIGN_ITEM,
-    itemId,
+    type: ASSIGN_ITEMS,
+    itemIds,
     assignment,  // { label: labelName } or { group: groupId }
   };
 }
@@ -77,9 +77,9 @@ export function editItem(itemId, keyValues) {
   };
 }
 
-export function assignAndSetCurrentItem(itemId, assignment) {
+export function assignAndSetCurrentItem(itemIds, assignment) {
   return (dispatch) => {
-    dispatch(assignItem(itemId, assignment));
+    dispatch(assignItems(itemIds, assignment));
     dispatch(setCurrentItem());
   };
 }
@@ -99,12 +99,12 @@ export function createGroup(keyValues) {
   };
 }
 
-export function createGroupAssignAndSetCurrentItem(itemId, keyValues) {
+export function createGroupAssignAndSetCurrentItem(itemIds, keyValues) {
   return (dispatch, getState) => {
     dispatch(createGroup(keyValues));
     const groups = [...groupsSelector(getState()).byId.keys()];
     const groupId = groups[groups.length - 1];
-    dispatch(assignAndSetCurrentItem(itemId, { group: groupId }));
+    dispatch(assignAndSetCurrentItem(itemIds, { group: groupId }));
   };
 }
 

@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 import {
   ANSWER_ORACLE, QUEUE_ITEM_ORACLE, UNQUEUE_ITEM_ORACLE, SET_CLUSTER_ID,
-  EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEM, EDIT_ITEM,
+  EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEMS, EDIT_ITEM,
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
   RECEIVE_EXPERIMENT } from '../actions';
 import getScore, { defaults as defaultMetrics } from '../score';
@@ -282,24 +282,27 @@ function InstructionsApp(state = initialState, action) {
         similarItemIds,
       };
     }
-    case ASSIGN_ITEM: {
+    case ASSIGN_ITEMS: {
       return {
         ...state,
-        currentItemId: (action.itemId === state.currentItemId || action.itemId === state.primaryItemId) ? null : state.currentItemId,
-        primaryItemId: action.itemId === state.primaryItemId ? null : state.primaryItemId,
-        similarItemIds: [...state.similarItemIds].filter(id => id !== action.itemId),
+        currentItemId: action.itemIds.indexOf(state.currentItemId) >= 0 || action.itemIds.indexOf(state.primaryItemId) >= 0 ? null : state.currentItemId,
+        primaryItemId: action.itemIds.indexOf(state.primaryItemId) >= 0 ? null : state.primaryItemId,
+        similarItemIds: [...state.similarItemIds].filter(id => action.itemIds.indexOf(id) < 0),
         entities: {
           ...state.entities,
           items: {
             ...state.entities.items,
             byId: new Map([
               ...state.entities.items.byId,
-              [action.itemId, {
-                ...state.entities.items.byId.get(action.itemId),
-                label: null,
-                group: null,
-                ...action.assignment,
-              }],
+              ...action.itemIds.map(id => [
+                id,
+                {
+                  ...state.entities.items.byId.get(id),
+                  label: null,
+                  group: null,
+                  ...action.assignment,
+                }
+              ]),
             ]),
           },
           groups: {
@@ -313,12 +316,12 @@ function InstructionsApp(state = initialState, action) {
                     ...value,
                     itemIds: new Set([
                       ...value.itemIds.values(),
-                      action.itemId]),
+                      ...action.itemIds]),
                   }
                   : {
                     ...value,
                     itemIds: new Set(
-                      [...value.itemIds.values()].filter(id => id !== action.itemId)),
+                      [...value.itemIds.values()].filter(id => action.itemIds.indexOf(id) < 0)),
                   },
                 ],
               ),
@@ -333,12 +336,12 @@ function InstructionsApp(state = initialState, action) {
                   ...value,
                   itemIds: new Set([
                     ...value.itemIds.values(),
-                    action.itemId]),
+                    ...action.itemIds]),
                 }
                 : {
                   ...value,
                   itemIds: new Set(
-                    [...value.itemIds.values()].filter(id => id !== action.itemId)),
+                    [...value.itemIds.values()].filter(id => action.itemIds.indexOf(id) < 0)),
                 },
               ],
             ),

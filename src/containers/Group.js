@@ -180,7 +180,7 @@ const mapDispatchToProps = (dispatch, { groupId }) => ({
     dispatch(editGroup(groupId, keyValues));
   },
   onAssign: (itemId) => {
-    dispatch(assignAndSetCurrentItem(itemId, { group: groupId }));
+    dispatch(assignAndSetCurrentItem([itemId], { group: groupId }));
   },
   onGroupMergeIn: (sourceGroupId) => {
     dispatch(mergeGroup(sourceGroupId, { group: groupId }));

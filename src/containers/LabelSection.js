@@ -81,10 +81,10 @@ const mapStateToProps = (state, { label }) => ({
 
 const mapDispatchToProps = (dispatch, { label }) => ({
   onGroupCreate: (itemId) => {
-    dispatch(createGroupAssignAndSetCurrentItem(itemId, { label }));
+    dispatch(createGroupAssignAndSetCurrentItem([itemId], { label }));
   },
   onAssign: (itemId) => {
-    dispatch(assignAndSetCurrentItem(itemId, { label }));
+    dispatch(assignAndSetCurrentItem([itemId], { label }));
   },
   onGroupMove: (groupId) => {
     dispatch(editGroup(groupId, { label }));
