@@ -104,10 +104,19 @@ class TestQuestions extends React.Component {
             </div>
           )}
           {labels.map((label) => {
-            const itemIds = [...items.values()]
+            const needsReview = new Map([...items.values()]
               .filter(item => itemLabels.get(item.id) === label)
-              .map(item => item.id);
-            if (itemIds.length > 0) {
+              .map(item => [
+                item.id,
+                item.reason == null || item.reason.text.length === 0 || itemLabels.get(item.id) !== item.reason.label,
+              ]));
+            const itemsReview = [...needsReview]
+              .filter(([, value]) => value)
+              .map(([itemid]) => itemid);
+            const itemsNoReview = [...needsReview]
+              .filter(([, value]) => !value)
+              .map(([itemid]) => itemid);
+            if (needsReview.size > 0) {
               return (
                 <Panel
                   header={<span>{label}</span>}
@@ -115,13 +124,34 @@ class TestQuestions extends React.Component {
                   bsStyle={label === uncertainLabel ? 'danger' : 'default'}
                 >
                   <div>
-                    {label !== uncertainLabel ? null : warning}
-                    {itemIds.length === 0 ? null : (
-                      <ItemList
-                        itemIds={itemIds}
-                        onClick={(itemId) => { this.setState({ current: itemId }); }}
-                      />
-                    )}
+                    {label === uncertainLabel ? warning : null}
+                    {label === uncertainLabel
+                        ? (
+                          <ItemList
+                            itemIds={[...needsReview.keys()]}
+                            onClick={(itemId) => { this.setState({ current: itemId }); }}
+                          />
+                        )
+                        : (
+                          <div>
+                            {itemsNoReview.length === 0 ? null : (
+                              <ItemList
+                                itemIds={itemsNoReview}
+                                onClick={(itemId) => { this.setState({ current: itemId }); }}
+                              />
+                            )}
+                            {itemsReview.length === 0 ? null : (
+                              <div>
+                                <Alert bsStyle="danger">Explanations for the following items need review.</Alert>
+                                <ItemList
+                                  itemIds={itemsReview}
+                                  onClick={(itemId) => { this.setState({ current: itemId }); }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )
+                    }
                   </div>
                 </Panel>
               );
