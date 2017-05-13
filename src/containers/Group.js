@@ -136,7 +136,12 @@ const groupTarget = {
         props.onAssign(monitor.getItem().id);
       }
     } else {  // ItemTypes.GROUP
-      props.onGroupMergeIn(monitor.getItem().id);
+      const id = monitor.getItem().id;
+      if (props.confirmMerge == null) {
+        props.onGroupMergeIn(id);
+      } else {
+        props.confirmMerge(() => props.onGroupMergeIn(id));
+      }
     }
   },
   canDrop: (props, monitor) => {
