@@ -34,7 +34,7 @@ const Oracle = ({
     <div className={`panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
       <RemoveTarget
         onDrop={(_, monitor) => { onUnqueue(monitor.getItem().id); }}
-        onCanDrop={(_, monitor) => queuedItems.has(monitor.getItem().id)}
+        onCanDrop={(_, monitor) => monitor.getItemType() === ItemTypes.ITEM && queuedItems.has(monitor.getItem().id)}
       >
         <div className="panel-heading">
           <h4 className="panel-title">

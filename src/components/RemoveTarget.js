@@ -42,4 +42,4 @@ const collect = (dndConnect, monitor) => ({
   canDrop: monitor.canDrop(),
 });
 
-export default DropTarget([ItemTypes.ITEM], target, collect)(RemoveTarget);
+export default DropTarget([ItemTypes.ITEM, ItemTypes.GROUP], target, collect)(RemoveTarget);

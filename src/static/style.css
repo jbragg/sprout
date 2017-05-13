@@ -27,7 +27,7 @@
   animation: wiggle 2s 3;
 }
 
-.class-container.recommended .panel-heading .glyphicon {
+.class-container .panel-heading .glyphicon {
   font-size: 24px;
 }
 
@@ -65,7 +65,7 @@
   border: 2px dotted red !important;
 }
 
-.target.over > .panel-heading, .target.over > div > .panel-heading, .target.over.btn {
+.target.over > .panel-heading, .target.over > div > .panel-heading, .target > div.over > .panel-heading, .target.over.btn {
   background-color: yellow;
 }
 

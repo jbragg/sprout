@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Panel, OverlayTrigger, Popover, Alert } from 'react-bootstrap';
+import { Panel, OverlayTrigger, Popover } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
 import RemoveTarget from '../components/RemoveTarget';
 import InstructionsModal from './InstructionsModal';
+import Alert from '../components/Alert';
 import { testItemsSelector, itemLabelsSelector } from '../reducers/index';
 import { DragItemTypes as ItemTypes } from '../constants';
 import { editItem } from '../actions';
@@ -59,7 +60,7 @@ class TestQuestions extends React.Component {
       .filter(item => item.label == null && item.group == null)
       .map(item => item.id);
     const warning = (
-      <Alert bsStyle="danger">
+      <Alert>
         Label these items {finalLabels.join(' / ')} to include them as test questions.
       </Alert>
     );
@@ -72,7 +73,7 @@ class TestQuestions extends React.Component {
         />
         <RemoveTarget
           onDrop={(_, monitor) => { onEditTest(monitor.getItem().id, false); }}
-          onCanDrop={(_, monitor) => items.has(monitor.getItem().id)}
+          onCanDrop={(_, monitor) => monitor.getItemType() === ItemTypes.ITEM && items.has(monitor.getItem().id)}
         >
           <div className="panel-heading">
             <h4 className="panel-title">
@@ -142,7 +143,7 @@ class TestQuestions extends React.Component {
                             )}
                             {itemsReview.length === 0 ? null : (
                               <div>
-                                <Alert bsStyle="danger">Explanations for the following items need review.</Alert>
+                                <Alert>Explanations for the following items need review.</Alert>
                                 <ItemList
                                   itemIds={itemsReview}
                                   onClick={(itemId) => { this.setState({ current: itemId }); }}

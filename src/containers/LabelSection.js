@@ -3,10 +3,14 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
 import { Panel } from 'react-bootstrap';
-import { editGroup, createGroupAssignAndSetCurrentItem, assignAndSetCurrentItem } from '../actions';
+import {
+  editGroup, createGroupAssignAndSetCurrentItem, assignAndSetCurrentItem,
+  mergeGroup,
+} from '../actions';
 import Group from './Group';
 import NewGroup from '../components/NewGroup';
 import ItemList from '../components/ItemList';
+import RemoveTarget from '../components/RemoveTarget';
 import { DragItemTypes as ItemTypes } from '../constants';
 
 const propTypes = {
@@ -14,15 +18,25 @@ const propTypes = {
   isOver: PropTypes.bool.isRequired,
   canDrop: PropTypes.bool.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
+  onGroupCreate: PropTypes.func.isRequired,
+  onGroupDelete: PropTypes.func.isRequired,
 };
 
-const LabelSection = ({ groupIds, label, onGroupCreate, connectDropTarget, isOver, canDrop, itemIds }) => (
+const LabelSection = ({
+  groupIds, label, onGroupCreate, connectDropTarget, isOver, canDrop, itemIds,
+  onGroupDelete,
+}) => (
   connectDropTarget(
-    <div className="panel">
-      <Panel
-        className={`${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
-        header={<h4>{label}</h4>}
+    <div className={`panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
+      <RemoveTarget
+        onDrop={(_, monitor) => { onGroupDelete(monitor.getItem().id); }}
+        onCanDrop={(_, monitor) => monitor.getItemType() === ItemTypes.GROUP && groupIds.indexOf(monitor.getItem().id) >= 0}
       >
+        <div className="panel-heading">
+          <h4 className="panel-title">{label}</h4>
+        </div>
+      </RemoveTarget>
+      <div className="panel-body">
         <div>
           <ItemList itemIds={[...itemIds.values()]} />
         </div>
@@ -34,7 +48,7 @@ const LabelSection = ({ groupIds, label, onGroupCreate, connectDropTarget, isOve
           </div>
         )}
         <NewGroup onGroupCreate={onGroupCreate} />
-      </Panel>
+      </div>
     </div>,
 ));
 
@@ -46,12 +60,13 @@ LabelSection.propTypes = propTypes;
 
 const target = {
   drop: (props, monitor) => {
-    if (monitor.isOver() && monitor.getItemType() === ItemTypes.ITEM) {
-      props.onAssign(monitor.getItem().id);
-    } else if (monitor.isOver() && monitor.getItemType() === ItemTypes.GROUP) {
+    if (monitor.getItemType() === ItemTypes.ITEM) {
+      if (!monitor.didDrop()) {  // Check if a group already handled the event.
+        props.onAssign(monitor.getItem().id);
+      }
+    } else if (monitor.getItemType() === ItemTypes.GROUP) {
       props.onGroupMove(monitor.getItem().id);
-    } else if (monitor.isOver()) {  // Must be cluster.
-      console.log(monitor.getItem());
+    } else {  // ItemTypes.CLUSTER
       props.onGroupCreate(monitor.getItem().ids);
     }
   },
@@ -86,6 +101,9 @@ const mapStateToProps = (state, { label }) => ({
 });
 
 const mapDispatchToProps = (dispatch, { label }) => ({
+  onGroupDelete: (groupId) => {
+    dispatch(mergeGroup(groupId, { label }));
+  },
   onGroupCreate: (itemIds) => {
     dispatch(createGroupAssignAndSetCurrentItem(itemIds, { label }));
   },

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { Row, Col, FormControl } from 'react-bootstrap';
 import { DragSource, DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
 import { editGroup, mergeGroup, assignAndSetCurrentItem } from '../actions';
@@ -15,7 +16,6 @@ const propTypes = {
     description: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
   }).isRequired,
-  onGroupMergeOut: PropTypes.func.isRequired,
   onGroupEdit: PropTypes.func.isRequired,
   summary: PropTypes.string.isRequired,
   isOver: PropTypes.bool.isRequired,
@@ -26,18 +26,19 @@ const propTypes = {
   isDragging: PropTypes.bool.isRequired,
   currentItemId: PropTypes.number,
   useReasons: PropTypes.bool,
+  monitorItemId: PropTypes.number,
 };
 
 const defaultProps = {
   currentItemId: null,
   useReasons: true,
+  monitorItemId: null,
 };
 
 class Group extends React.Component {
   constructor(props) {
     super(props);
     this.state = { recommended: props.recommended };
-    this.handleChange = this.handleChange.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -52,62 +53,49 @@ class Group extends React.Component {
     }
   }
 
-  handleChange(event) {
-    this.props.onGroupEdit({ [event.target.name]: event.target.value });
-    event.preventDefault();
-  }
-
   render() {
     const {
       group, connectDropTarget, connectDragSource, isOver, canDrop,
-      isDragging, onGroupMergeOut, summary, useReasons
+      isDragging, summary, useReasons, monitorItemId, onGroupEdit,
     } = this.props;
     const recommended = this.state.recommended && useReasons;
+    // canDrop is not sufficient here because a group should catch but
+    // ignore its own items to prevent the parent label from handling.
+    const isTarget = canDrop && !group.itemIds.has(monitorItemId);
     return connectDragSource(connectDropTarget(
       <div
-        className={`class-container panel panel-primary ${recommended ? 'recommended' : ''} ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
+        className={`class-container panel panel-primary ${recommended ? 'recommended' : ''} ${isOver ? 'over' : ''} ${isTarget ? 'target' : ''}`}
         style={{
           opacity: isDragging ? 0.5 : 1,
         }}
       >
         <div className="panel-heading">
-          <div className="pull-right">
-            <button
-              className="btn btn-default text-danger"
-              onClick={() => {
-                onGroupMergeOut({ label: group.label });
-              }}
-            >
-              <span className="text-danger">Delete</span>
-            </button>
-          </div>
-          <form
-            className="form-inline"
-            onSubmit={(e) => { e.preventDefault(); }}
-          >
-            {recommended
+          <Row className="no-gutter">
+            <Col xs={1}>
+              {recommended
                 ? (
                   <span
-                    className={`glyphicon glyphicon-star ${(isOver && canDrop) ? 'text-primary' : ''} pull-left`}
+                    className={`glyphicon glyphicon-star ${(isOver && canDrop) ? 'text-primary' : ''}`}
                     style={{
                       color: (isOver && canDrop) ? '' : 'yellow',
                     }}
                   />
                 )
                 : null
-            }
-            <div className="form-group form-group-sm">
-              <label className="sr-only">Group Name</label>
-              <input
-                className="form-control"
+              }
+            </Col>
+            <Col xs={10}>
+              <FormControl
                 type="text"
-                name="name"
+                bsSize="sm"
                 value={group.name}
-                onChange={this.handleChange}
-                placeholder="Group name"
+                onChange={(e) => { onGroupEdit({ name: e.target.value }); }}
               />
-            </div>
-          </form>
+            </Col>
+            <Col className="text-right" xs={1}>
+              <span className="glyphicon glyphicon-move" />
+            </Col>
+          </Row>
         </div>
         <div className="panel-body">
           {useReasons ? <p>{summary}</p> : null}
@@ -137,18 +125,24 @@ const collectSource = (dndConnect, monitor) => ({
 const groupTarget = {
   drop: (props, monitor) => {
     if (monitor.getItemType() === ItemTypes.ITEM) {
-      props.onAssign(monitor.getItem().id);
-    } else {
+      if (!props.group.itemIds.has(monitor.getItem().id)) {
+        /* This check is here instead of in canDrop() so a group handles
+         * (by ignoring but still catching)
+         * drop events of its own items rather than the parent label.
+         */
+        props.onAssign(monitor.getItem().id);
+      }
+    } else {  // ItemTypes.GROUP
       props.onGroupMergeIn(monitor.getItem().id);
     }
   },
   canDrop: (props, monitor) => {
     switch (monitor.getItemType()) {
-      case ItemTypes.ITEM: {
-        return !props.group.itemIds.has(monitor.getItem().id);
+      case ItemTypes.GROUP: {
+        return props.groupId !== monitor.getItem().id;
       }
       default: {
-        return props.groupId !== monitor.getItem().id;
+        return true;
       }
     }
   },
@@ -158,6 +152,7 @@ const collectTarget = (dndConnect, monitor) => ({
   connectDropTarget: dndConnect.dropTarget(),
   isOver: monitor.isOver(),
   canDrop: monitor.canDrop(),
+  monitorItemId: monitor.getItem() == null ? null : monitor.getItem().id,
 });
 
 /*
@@ -173,9 +168,6 @@ const mapStateToProps = (state, { groupId }) => ({
 });
 
 const mapDispatchToProps = (dispatch, { groupId }) => ({
-  onGroupMergeOut: (target) => {
-    dispatch(mergeGroup(groupId, target));
-  },
   onGroupEdit: (keyValues) => {
     dispatch(editGroup(groupId, keyValues));
   },
