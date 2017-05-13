@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { DragSource } from 'react-dnd';
 import { connect } from 'react-redux';
 import Slider from 'react-slick';
-import { Panel, Clearfix } from 'react-bootstrap';
+import { Clearfix, Glyphicon } from 'react-bootstrap';
 import { ItemThumbContainer } from '../containers/ItemContainer';
 import { clusterIdsSelector, unlabeledClusterItemsSelector, clusterItemsSelector, getItemsSummary } from '../reducers/index';
 import { setClusterId } from '../actions';
@@ -73,8 +73,16 @@ const ClusterItemList = ({
         <strong className="page pull-right">{`${clusterId + 1} / ${nClusters}`}</strong>
       </Clearfix>
       {connectDragSource(
-        <div>
-          <Panel>
+        <div
+          className={`panel panel-primary ${itemIds.length === 0 ? 'disabled' : ''}`}
+          style={{
+            opacity: itemIds.length === 0 ? 0.5 : 1,
+          }}
+        >
+          <div className="panel-heading panel-heading-less-padding text-right">
+            <Glyphicon className="large" glyph="move" />
+          </div>
+          <div className="panel-body">
             <p>{summary}</p>
             {itemIds.length === 0 ? null : (
               <Slider {...sliderSettings}>
@@ -85,7 +93,7 @@ const ClusterItemList = ({
               ))}
               </Slider>
             )}
-          </Panel>
+          </div>
         </div>,
       )}
     </div>

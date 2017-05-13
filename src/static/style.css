@@ -27,8 +27,16 @@
   animation: wiggle 2s 3;
 }
 
-.class-container .panel-heading .glyphicon {
+.large {
   font-size: 24px;
+}
+
+.panel-heading-less-padding {
+  padding: 4px !important;
+}
+
+.disabled {
+  cursor: not-allowed;
 }
 
 .item-btn {

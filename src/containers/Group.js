@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Row, Col, FormControl } from 'react-bootstrap';
+import { Row, Col, FormControl, Glyphicon } from 'react-bootstrap';
 import { DragSource, DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
 import { editGroup, mergeGroup, assignAndSetCurrentItem } from '../actions';
@@ -69,13 +69,16 @@ class Group extends React.Component {
           opacity: isDragging ? 0.5 : 1,
         }}
       >
-        <div className="panel-heading">
+        <div
+          className="panel-heading panel-heading-less-padding"
+        >
           <Row className="no-gutter">
-            <Col xs={1}>
+            <Col xs={2}>
               {recommended
                 ? (
-                  <span
-                    className={`glyphicon glyphicon-star ${(isOver && canDrop) ? 'text-primary' : ''}`}
+                  <Glyphicon
+                    className={`large ${(isOver && canDrop) ? 'text-primary' : ''}`}
+                    glyph="star"
                     style={{
                       color: (isOver && canDrop) ? '' : 'yellow',
                     }}
@@ -84,7 +87,7 @@ class Group extends React.Component {
                 : null
               }
             </Col>
-            <Col xs={10}>
+            <Col xs={8}>
               <FormControl
                 type="text"
                 bsSize="sm"
@@ -92,8 +95,8 @@ class Group extends React.Component {
                 onChange={(e) => { onGroupEdit({ name: e.target.value }); }}
               />
             </Col>
-            <Col className="text-right" xs={1}>
-              <span className="glyphicon glyphicon-move" />
+            <Col className="text-right" xs={2}>
+              <Glyphicon className="large" glyph="move" />
             </Col>
           </Row>
         </div>

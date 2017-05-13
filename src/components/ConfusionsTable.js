@@ -49,10 +49,10 @@ const ConfusionsTable = ({ answers }) => {
               placement="bottom"
             >
               <Row className="no-gutter">
-                <Col sm={8}>
+                <Col xs={8}>
                   {confusionsToTable(confusions.slice(0, 1), false)}
                 </Col>
-                <Col sm={4}>
+                <Col xs={4}>
                   <span className="glyphicon glyphicon-triangle-bottom" />
                   <span className="pull-right">
                     {confusions.length}

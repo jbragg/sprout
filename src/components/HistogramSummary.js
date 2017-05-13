@@ -28,7 +28,7 @@ const spec = {
 const HistogramSummary = ({ values }) => (
   <div>
     <Row className="no-gutter">
-      <Col sm={8}>
+      <Col xs={8}>
         <div style={{ width: '130px', padding: '0 15px' }}>
           <img
             src="/static/RdYlGn.png"
@@ -61,7 +61,7 @@ const HistogramSummary = ({ values }) => (
           </Row>
         </div>
       </Col>
-      <Col sm={4}>
+      <Col xs={4}>
         <span className="glyphicon glyphicon-triangle-bottom" />
         <span className="pull-right">
           {values.length}
