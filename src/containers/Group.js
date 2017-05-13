@@ -133,15 +133,17 @@ const groupTarget = {
          * (by ignoring but still catching)
          * drop events of its own items rather than the parent label.
          */
-        props.onAssign(monitor.getItem().id);
+        props.onAssign([monitor.getItem().id]);
       }
-    } else {  // ItemTypes.GROUP
+    } else if (monitor.getItemType() === ItemTypes.GROUP) {
       const id = monitor.getItem().id;
       if (props.confirmMerge == null) {
         props.onGroupMergeIn(id);
       } else {
         props.confirmMerge(() => props.onGroupMergeIn(id));
       }
+    } else {  // ItemTypes.CLUSTER
+      props.onAssign(monitor.getItem().ids);
     }
   },
   canDrop: (props, monitor) => {
@@ -179,8 +181,8 @@ const mapDispatchToProps = (dispatch, { groupId }) => ({
   onGroupEdit: (keyValues) => {
     dispatch(editGroup(groupId, keyValues));
   },
-  onAssign: (itemId) => {
-    dispatch(assignAndSetCurrentItem([itemId], { group: groupId }));
+  onAssign: (itemIds) => {
+    dispatch(assignAndSetCurrentItem(itemIds, { group: groupId }));
   },
   onGroupMergeIn: (sourceGroupId) => {
     dispatch(mergeGroup(sourceGroupId, { group: groupId }));
@@ -189,6 +191,10 @@ const mapDispatchToProps = (dispatch, { groupId }) => ({
 
 export default connect(mapStateToProps, mapDispatchToProps)(
   DragSource(ItemTypes.GROUP, groupSource, collectSource)(
-    DropTarget([ItemTypes.ITEM, ItemTypes.GROUP], groupTarget, collectTarget)(Group),
+    DropTarget(
+      [ItemTypes.ITEM, ItemTypes.GROUP, ItemTypes.CLUSTER],
+      groupTarget,
+      collectTarget,
+    )(Group),
   ),
 );
