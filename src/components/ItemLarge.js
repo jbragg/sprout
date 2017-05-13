@@ -25,6 +25,7 @@ const propTypes = {
   aggregateOnly: PropTypes.bool,
   answerKey: PropTypes.objectOf(PropTypes.string.isRequired).isRequired,
   editReason: PropTypes.bool,
+  draggable: PropTypes.bool.isRequired,
 };
 
 const defaultProps = ({
@@ -66,7 +67,7 @@ class ItemLarge extends React.Component {
   render() {
     const {
       item, answers, connectDragSource, isDragging, useReasons,
-      useAnswers, answerKey, aggregateOnly, editReason,
+      useAnswers, answerKey, aggregateOnly, editReason, draggable,
     } = this.props;
     const { imageStatus } = this.state;
     const itemComponent = (
@@ -96,9 +97,11 @@ class ItemLarge extends React.Component {
         className="panel panel-default item-large"
         style={{ opacity: isDragging ? 0.5 : 1 }}
       >
-        <div className="panel-heading panel-heading-less-padding text-right">
-          <Glyphicon className="large" glyph="move" />
-        </div>
+        {!draggable ? null : (
+          <div className="panel-heading panel-heading-less-padding text-right">
+            <Glyphicon className="large" glyph="move" />
+          </div>
+        )}
         <div className="panel-body">
           <div className={imageStatus === 'loaded' ? '' : 'hidden'}>
             {editReason

@@ -36,6 +36,7 @@ class InstructionsModal extends React.Component {
      */
     this.props.onEditItem({
       reason: {
+        text: '',
         ...this.props.item.reason,
         label: this.props.itemLabel,
       },

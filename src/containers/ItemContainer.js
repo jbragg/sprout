@@ -42,10 +42,13 @@ const mapDispatchToProps = (dispatch, { itemId, onClick }) => ({
   ),
 });
 
-const connectOptionallyDraggable = x => {
+const connectOptionallyDraggable = (x) => {
   const Component = connect(mapStateToProps, mapDispatchToProps)(x);
   const DraggableComponent = DragSource(ItemTypes.ITEM, itemSource, collect)(Component);
-  return ({ draggable, ...props}) => draggable ? <DraggableComponent {...props} /> : <Component {...props} />;
+  return ({ draggable, ...props }) => (draggable
+    ? <DraggableComponent draggable {...props} />
+    : <Component draggable={false} {...props} />
+  );
 };
 
 const ItemThumbContainer = connectOptionallyDraggable(ItemThumb);
