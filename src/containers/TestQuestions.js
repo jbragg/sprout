@@ -34,10 +34,20 @@ const defaultProps = {
   // dropResult: null,
 };
 
+const errors = {
+  tooShort: 'These items are missing explanations.',
+  label: 'Labels for these items have changed.',
+};
+
 class TestQuestions extends React.Component {
   constructor(props) {
     super(props);
     this.state = { current: null };
+    this.setCurrent = this.setCurrent.bind(this);
+  }
+
+  setCurrent(id) {
+    this.setState({ current: id });
   }
 
   /*
@@ -73,7 +83,9 @@ class TestQuestions extends React.Component {
         />
         <RemoveTarget
           onDrop={(_, monitor) => { onEditTest(monitor.getItem().id, false); }}
-          onCanDrop={(_, monitor) => monitor.getItemType() === ItemTypes.ITEM && items.has(monitor.getItem().id)}
+          onCanDrop={(_, monitor) => (
+            monitor.getItemType() === ItemTypes.ITEM && items.has(monitor.getItem().id)
+          )}
         >
           <div className="panel-heading">
             <h4 className="panel-title">
@@ -100,22 +112,32 @@ class TestQuestions extends React.Component {
               {warning}
               <ItemList
                 itemIds={unlabeledItemIds}
-                onClick={(itemId) => { this.setState({ current: itemId }); }}
+                onClick={this.setCurrent}
               />
             </div>
           )}
           {labels.map((label) => {
+            const getError = (item) => {
+              if (item.reason == null || item.reason.text.length === 0) {
+                return 'tooShort';
+              } else if (itemLabels.get(item.id) !== item.reason.label) {
+                return 'label';
+              }
+              return null;
+            };
             const needsReview = new Map([...items.values()]
               .filter(item => itemLabels.get(item.id) === label)
               .map(item => [
                 item.id,
-                item.reason == null || item.reason.text.length === 0 || itemLabels.get(item.id) !== item.reason.label,
-              ]));
-            const itemsReview = [...needsReview]
-              .filter(([, value]) => value)
-              .map(([itemid]) => itemid);
-            const itemsNoReview = [...needsReview]
-              .filter(([, value]) => !value)
+                getError(item),
+              ]),
+            );
+            const itemsByError = {
+              tooShort: [...needsReview].filter(([, value]) => value === 'tooShort').map(([id]) => id),
+              label: [...needsReview].filter(([, value]) => value === 'label').map(([id]) => id),
+            };
+            const itemsNoError = [...needsReview]
+              .filter(([, value]) => value == null)
               .map(([itemid]) => itemid);
             if (needsReview.size > 0) {
               return (
@@ -130,26 +152,29 @@ class TestQuestions extends React.Component {
                         ? (
                           <ItemList
                             itemIds={[...needsReview.keys()]}
-                            onClick={(itemId) => { this.setState({ current: itemId }); }}
+                            onClick={this.setCurrent}
                           />
                         )
                         : (
                           <div>
-                            {itemsNoReview.length === 0 ? null : (
+                            {itemsNoError.length === 0 ? null : (
                               <ItemList
-                                itemIds={itemsNoReview}
-                                onClick={(itemId) => { this.setState({ current: itemId }); }}
+                                itemIds={itemsNoError}
+                                onClick={this.setCurrent}
                               />
                             )}
-                            {itemsReview.length === 0 ? null : (
-                              <div>
-                                <Alert>Explanations for the following items need review.</Alert>
-                                <ItemList
-                                  itemIds={itemsReview}
-                                  onClick={(itemId) => { this.setState({ current: itemId }); }}
-                                />
-                              </div>
-                            )}
+                            {[...Object.keys(itemsByError)].map(error => (
+                              (itemsByError[error].length === 0) ? null : (
+                                <div key={error}>
+                                  <Alert>
+                                    {errors[error]} Edit your explanations for these items by clicking on them.
+                                </Alert>
+                                  <ItemList
+                                    itemIds={itemsByError[error]}
+                                    onClick={this.setCurrent}
+                                  />
+                                </div>
+                              )))}
                           </div>
                         )
                     }
