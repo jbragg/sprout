@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import {
-  Image, Glyphicon, FormGroup, ControlLabel,
+  Image, Glyphicon, FormGroup, ControlLabel, Row, Col,
 } from 'react-bootstrap';
 import AnswersTable from './AnswersTable';
 import ConfusionsTable from './ConfusionsTable';
@@ -98,8 +98,16 @@ class ItemLarge extends React.Component {
         style={{ opacity: isDragging ? 0.5 : 1 }}
       >
         {!draggable ? null : (
-          <div className="panel-heading panel-heading-less-padding text-right">
-            <Glyphicon className="large" glyph="move" />
+          <div className="panel-heading panel-heading-less-padding">
+            <Row className="no-gutter">
+              <Col xs={2} />
+              <Col className="text-center panel-title" xs={8}>
+                {item.id}
+              </Col>
+              <Col className="text-right" xs={2}>
+                <Glyphicon className="large" glyph="move" />
+              </Col>
+            </Row>
           </div>
         )}
         <div className="panel-body">
