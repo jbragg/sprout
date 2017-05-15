@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { PanelGroup, Panel } from 'react-bootstrap';
+import { Well } from 'react-bootstrap';
 import Oracle from './Oracle';
 import InstructionsEditor from './InstructionsEditor';
 import StructuredInstructionsEditor from './StructuredInstructionsEditor';
@@ -17,21 +17,22 @@ const defaultProps = {
 };
 
 const Instructions = ({ initialInstructions, structured }) => (
-  <PanelGroup>
-    <Panel header={<h4>Customer instructions</h4>}>
-      <p>{initialInstructions}</p>
-    </Panel>
+  <div>
+    <h3>Customer Instructions</h3>
+    <p>Your task is to improve these instructions:</p>
+    <Well bsSize="sm">{initialInstructions}</Well>
     <Oracle />
     {structured
         ? <StructuredInstructionsEditor />
         : (
-          <Panel header={<h4>Improved instructions</h4>}>
+          <div>
+            <h3>Improved Instructions</h3>
             <InstructionsEditor />
-          </Panel>
+          </div>
         )
     }
     <TestQuestions />
-  </PanelGroup>
+  </div>
 );
 
 Instructions.propTypes = propTypes;

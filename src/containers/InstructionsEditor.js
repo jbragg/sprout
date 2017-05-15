@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
-import { Tabs, Tab, FormGroup, FormControl } from 'react-bootstrap';
+import { Tabs, Tab, FormGroup, FormControl, Clearfix } from 'react-bootstrap';
 import { editGeneralInstructions } from '../actions';
 
 const propTypes = {
@@ -26,16 +26,18 @@ const InstructionsEditor = ({ generalInstructions, onEditGeneralInstructions, de
           onChange={(e) => { onEditGeneralInstructions(e.target.value); }}
         />
       </FormGroup>
-      <span className="pull-right">
-        <span>Supports </span>
-        <a
-          href="http://commonmark.org/help/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-            Markdown
-          </a>
-      </span>
+      <Clearfix>
+        <span className="pull-right">
+          <span>Supports </span>
+          <a
+            href="http://commonmark.org/help/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+              Markdown
+            </a>
+        </span>
+      </Clearfix>
     </Tab>
     <Tab eventKey={1} title="Preview">
       <ReactMarkdown source={generalInstructions} />

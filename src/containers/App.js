@@ -85,8 +85,8 @@ class App extends React.Component {
           {currentItemId == null ? null : <CustomDragLayer />}
           <Grid fluid>
             <Col sm={4}>
-              <Countdown />
               <Instructions />
+              <Countdown />
             </Col>
             <Col sm={4}>
               <PanelGroup>
