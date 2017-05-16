@@ -3,7 +3,7 @@ import {
   ANSWER_ORACLE, QUEUE_ITEM_ORACLE, UNQUEUE_ITEM_ORACLE, SET_CLUSTER_ID,
   EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEMS, EDIT_ITEM,
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
-  RECEIVE_EXPERIMENT } from '../actions';
+  RECEIVE_EXPERIMENT, CHANGE_EXPERIMENT_PHASE } from '../actions';
 import getScore, { defaults as defaultMetrics } from '../score';
 import { Labels, defaults } from '../constants';
 import conditions from '../experiment';
@@ -61,7 +61,6 @@ const cosineSimilarity = (vec1, vec2) => (
  * selectors
  */
 
-export const experimentReady = state => state.experimentState === 'loaded';
 export const itemsSelector = state => state.entities.items;
 export const groupsSelector = state => state.entities.groups;
 export const currentItemIdSelector = state => state.currentItemId;
@@ -472,6 +471,7 @@ function InstructionsApp(state = initialState, action) {
         experimentState: 'loaded',
         experimentStartTime: Date.now(),
         systemVersion: action.payload.systemVersion,
+        participantId: action.payload.participantId,
         participantIndex: action.payload.participantIndex,
         initialInstructions: action.payload.initialInstructions,
         generalInstructions: action.payload.initialInstructions,
@@ -490,6 +490,12 @@ function InstructionsApp(state = initialState, action) {
             byId: new Map(action.payload.answers.map(value => [value.assignmentid, value])),
           },
         },
+      };
+    }
+    case CHANGE_EXPERIMENT_PHASE: {
+      return {
+        ...state,
+        experimentState: action.phase,
       };
     }
     default: {

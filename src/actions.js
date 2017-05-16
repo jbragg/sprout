@@ -22,6 +22,7 @@ export const EDIT_GENERAL_INSTRUCTIONS = 'EDIT_GENERAL_INSTRUCTIONS';
 export const REQUEST_EXPERIMENT = 'REQUEST_EXPERIMENT';
 export const RECEIVE_EXPERIMENT = 'RECEIVE_EXPERIMENT';
 export const FETCH_EXPERIMENT = 'FETCH_EXPERIMENT';
+export const CHANGE_EXPERIMENT_PHASE = 'CHANGE_EXPERIMENT_PHASE';
 
 /*
  * action creators
@@ -222,6 +223,7 @@ export function fetchExperiment(params) {
             taskIndex,
           ),
           taskIndex,
+          participantId: params.participantId,
           participantIndex: params.participantIndex,
           systemVersion: (params.participantIndex == null
             ? systemVersion
@@ -231,5 +233,13 @@ export function fetchExperiment(params) {
         dispatch(setCurrentItem());
         dispatch(startOracle());
       });
+  };
+}
+
+export function changeExperimentPhase(phase, payload = null) {
+  return {
+    type: CHANGE_EXPERIMENT_PHASE,
+    phase,
+    payload,
   };
 }

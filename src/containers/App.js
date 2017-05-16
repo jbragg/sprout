@@ -10,14 +10,14 @@ import LabelSection from './LabelSection';
 import Instructions from './Instructions';
 import UnlabeledSection from '../components/UnlabeledSection';
 import Countdown from './Countdown';
+import Survey from './Survey';
 import CustomDragLayer from '../CustomDragLayer';
 import Master from './Master';
 import { fetchExperiment } from '../actions';
 import conditions from '../experiment';
-import { experimentReady as isReady } from '../reducers/index';
 
 const propTypes = {
-  experimentReady: PropTypes.bool.isRequired,
+  experimentState: PropTypes.string,
   labels: PropTypes.arrayOf(PropTypes.string.isRequired),
   currentItemId: PropTypes.number,
   initialize: PropTypes.func.isRequired,
@@ -40,6 +40,7 @@ const propTypes = {
 };
 
 const defaultProps = {
+  experimentState: null,
   currentItemId: null,
   items: null,
   labels: null,
@@ -65,16 +66,14 @@ class App extends React.Component {
   }
 
   render() {
-    const { experimentReady, items, labels, ready, currentItemId, useAnswers, useReasons, masterView } = this.props;
-    if (!experimentReady) {
-      return (
-        <Grid>
-          <h1>Loading <span className="glyphicon glyphicon-refresh spinning" /></h1>
-        </Grid>
-      );
+    const { experimentState, items, labels, ready, currentItemId, useAnswers, useReasons, masterView } = this.props;
+    if (experimentState === 'survey') {
+      return <Grid><Survey /></Grid>;
+    } else if (experimentState === 'thanks') {
+      return <Grid><h1>Thanks!!</h1></Grid>
     } else if (masterView) {
       return <Grid fluid><Master /></Grid>;
-    } else {
+    } else if (experimentState === 'loaded') {
       return (
         <div id="app">
           <div className="hidden">
@@ -107,6 +106,12 @@ class App extends React.Component {
           </Grid>
         </div>
       );
+    } else {
+      return (
+        <Grid>
+          <h1>Loading <span className="glyphicon glyphicon-refresh spinning" /></h1>
+        </Grid>
+      );
     }
   }
 }
@@ -115,12 +120,12 @@ App.propTypes = propTypes;
 App.defaultProps = defaultProps;
 
 const mapStateToProps = (state, { location } ) => {
-  const experimentReady = isReady(state);
-  if (!experimentReady) {
-    return { experimentReady };
+  const { experimentState } = state;
+  if (experimentState !== 'loaded' && experimentState !== 'survey') {
+    return { experimentState };
   }
   return {
-    experimentReady,
+    experimentState,
     labels: state.labels,
     items: [...state.entities.items.byId.values()],
     currentItemId: state.currentItemId,
