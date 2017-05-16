@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import { Row, Col, FormControl, Glyphicon } from 'react-bootstrap';
 import { DragSource, DropTarget } from 'react-dnd';
 import ItemList from '../components/ItemList';
@@ -22,6 +23,7 @@ const propTypes = {
   canDrop: PropTypes.bool.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
   connectDragSource: PropTypes.func.isRequired,
+  connectDragPreview: PropTypes.func.isRequired,
   recommended: PropTypes.bool.isRequired,
   isDragging: PropTypes.bool.isRequired,
   currentItemId: PropTypes.number,
@@ -39,6 +41,14 @@ class Group extends React.Component {
   constructor(props) {
     super(props);
     this.state = { recommended: props.recommended };
+  }
+
+  componentDidMount() {
+    this.props.connectDragPreview(getEmptyImage(), {
+      // IE fallback: specify that we'd rather screenshot the node
+      // when it already knows it's being dragged so we can hide it with CSS.
+      captureDraggingState: true,
+    });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -117,11 +127,15 @@ Group.defaultProps = defaultProps;
  */
 
 const groupSource = {
-  beginDrag: props => ({ id: props.groupId }),
+  beginDrag: props => ({
+    id: props.groupId,
+    itemIds: [...props.group.itemIds.keys()],
+  }),
 };
 
 const collectSource = (dndConnect, monitor) => ({
   connectDragSource: dndConnect.dragSource(),
+  connectDragPreview: dndConnect.dragPreview(),
   isDragging: monitor.isDragging(),
 });
 

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { DragLayer } from 'react-dnd';
 import { DragItemTypes as ItemTypes } from './constants';
 import { ItemThumbContainer } from './containers/ItemContainer';
+import GroupDrag from './components/GroupDrag';
 
 const layerStyles = {
   position: 'fixed',
@@ -37,6 +38,10 @@ class CustomDragLayer extends React.Component {
     switch (type) {
       case ItemTypes.ITEM:
         return (<ItemThumbContainer itemId={item.id} />);
+      case ItemTypes.CLUSTER:
+        return (<GroupDrag n={item.ids.length} />);
+      case ItemTypes.GROUP:
+        return (<GroupDrag n={item.itemIds.length} />);
       default:
         return null;
     }

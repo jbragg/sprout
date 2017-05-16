@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DragSource } from 'react-dnd';
 import { connect } from 'react-redux';
 import Slider from 'react-slick';
@@ -16,6 +17,7 @@ const propTypes = {
   nClusters: PropTypes.number.isRequired,
   onSetCluster: PropTypes.func.isRequired,
   connectDragSource: PropTypes.func.isRequired,
+  connectDragPreview: PropTypes.func.isRequired,
 };
 
 const sliderSettings = {
@@ -52,53 +54,64 @@ const sliderSettings = {
   ],
 };
 
-const ClusterItemList = ({
-  clusterId, nClusters, itemIds, summary, onSetCluster, connectDragSource,
-}) => {
-  const noDecrement = clusterId === 0;
-  const noIncrement = clusterId >= nClusters - 1;
-  return (
-    <div className="clusters">
-      <Clearfix>
-        <div className="pull-right">
-          <button
-            className={`btn btn-default btn-xs glyphicon glyphicon-arrow-left ${noDecrement ? 'disabled' : ''}`}
-            onClick={() => (noDecrement || onSetCluster(clusterId - 1))}
-          />
-          <button
-            className={`btn btn-default btn-xs glyphicon glyphicon-arrow-right ${noIncrement ? 'disabled' : ''}`}
-            onClick={() => (noIncrement || onSetCluster(clusterId + 1))}
-          />
-        </div>
-        <strong className="page pull-right">{`${clusterId + 1} / ${nClusters}`}</strong>
-      </Clearfix>
-      {connectDragSource(
-        <div
-          className={`panel panel-primary ${itemIds.length === 0 ? 'disabled' : ''}`}
-          style={{
-            opacity: itemIds.length === 0 ? 0.5 : 1,
-          }}
-        >
-          <div className="panel-heading panel-heading-less-padding text-right">
-            <Glyphicon className="large" glyph="move" />
+class ClusterItemList extends React.Component {
+  componentDidMount() {
+    this.props.connectDragPreview(getEmptyImage(), {
+      // IE fallback: specify that we'd rather screenshot the node
+      // when it already knows it's being dragged so we can hide it with CSS.
+      captureDraggingState: true,
+    });
+  }
+
+  render() {
+    const {
+      clusterId, nClusters, itemIds, summary, onSetCluster, connectDragSource,
+    } = this.props;
+    const noDecrement = clusterId === 0;
+    const noIncrement = clusterId >= nClusters - 1;
+    return (
+      <div className="clusters">
+        <Clearfix>
+          <div className="pull-right">
+            <button
+              className={`btn btn-default btn-xs glyphicon glyphicon-arrow-left ${noDecrement ? 'disabled' : ''}`}
+              onClick={() => (noDecrement || onSetCluster(clusterId - 1))}
+            />
+            <button
+              className={`btn btn-default btn-xs glyphicon glyphicon-arrow-right ${noIncrement ? 'disabled' : ''}`}
+              onClick={() => (noIncrement || onSetCluster(clusterId + 1))}
+            />
           </div>
-          <div className="panel-body">
-            <p>{summary}</p>
-            {itemIds.length === 0 ? null : (
-              <Slider {...sliderSettings}>
-                {itemIds.map(id => (
-                  <div key={id}>
-                    <ItemThumbContainer draggable itemId={id} />
-                  </div>
-              ))}
-              </Slider>
-            )}
-          </div>
-        </div>,
-      )}
-    </div>
-  );
-};
+          <strong className="page pull-right">{`${clusterId + 1} / ${nClusters}`}</strong>
+        </Clearfix>
+        {connectDragSource(
+          <div
+            className={`panel panel-primary ${itemIds.length === 0 ? 'disabled' : ''}`}
+            style={{
+              opacity: itemIds.length === 0 ? 0.5 : 1,
+            }}
+          >
+            <div className="panel-heading panel-heading-less-padding text-right">
+              <Glyphicon className="large" glyph="move" />
+            </div>
+            <div className="panel-body">
+              <p>{summary}</p>
+              {itemIds.length === 0 ? null : (
+                <Slider {...sliderSettings}>
+                  {itemIds.map(id => (
+                    <div key={id}>
+                      <ItemThumbContainer draggable itemId={id} />
+                    </div>
+                ))}
+                </Slider>
+              )}
+            </div>
+          </div>,
+        )}
+      </div>
+    );
+  }
+}
 
 ClusterItemList.propTypes = propTypes;
 
@@ -113,6 +126,7 @@ const source = {
 
 const collect = (dndConnect, monitor) => ({
   connectDragSource: dndConnect.dragSource(),
+  connectDragPreview: dndConnect.dragPreview(),
   isDragging: monitor.isDragging(),
 });
 
