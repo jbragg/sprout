@@ -9,17 +9,19 @@ const propTypes = {
   onEditGeneralInstructions: PropTypes.func.isRequired,
   generalInstructions: PropTypes.string.isRequired,
   defaultActiveKey: PropTypes.number,
+  help: PropTypes.bool,
 };
 
 const defaultProps = {
   defaultActiveKey: 0,
+  help: true,
 };
 
 const instructions = 'Your instructions for workers go here. To reference an item, use the notation `[](itemid)`. For example, `[](0)` refers to item 0 and will preview as [](0). You may also use other types of [Markdown](http://commonmark.org/help/).';
 
-const InstructionsEditor = ({ generalInstructions, onEditGeneralInstructions, defaultActiveKey }) => (
+const InstructionsEditor = ({ generalInstructions, onEditGeneralInstructions, defaultActiveKey, help }) => (
   <div>
-    <Markdown source={instructions} />
+    {help ? <Markdown source={instructions} /> : null}
     <Tabs defaultActiveKey={defaultActiveKey} id="instructions-editor">
       <Tab eventKey={0} title="Write">
         <FormGroup>
