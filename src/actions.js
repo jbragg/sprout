@@ -177,6 +177,24 @@ const getCustomerClusterLabel = (cluster, taskIndex = 0) => (
   binary[taskIndex][cluster] === 0 ? Labels.YES : Labels.NO
 );
 
+// TODO: Don't define clusters in code.
+const birdClusterMapHack = new Map([
+  [-1, Labels.YES],
+  [0, Labels.NO],
+  [1, Labels.YES],
+  [2, Labels.NO],
+  [3, Labels.YES],
+  [4, Labels.NO],
+  [5, Labels.YES],
+  [6, Labels.NO],
+  [7, Labels.NO],
+  [8, Labels.NO],
+  [9, Labels.NO],
+  [10, Labels.YES],
+  [11, Labels.NO],
+  [12, Labels.NO],
+]);
+
 const setUpExperiment = (experiment, answers, taskIndex) => {
   const rootDirPrefix = experiment.data.root_dir;
   const items = experiment.data.data.map(item => ({
@@ -185,10 +203,7 @@ const setUpExperiment = (experiment, answers, taskIndex) => {
       ...item.data,
       path: `${rootDirPrefix}/${item.data.path}`,
     },
-    labelGT: ((item.cls === 'DontKnow' && item.subgroup >= 0)
-      ? getCustomerClusterLabel(item.subgroup, taskIndex)
-      : item.cls || null
-    ),
+    labelGT: birdClusterMapHack.get(item.subgroup),
   }));
   const formattedAnswers = answers.map((answer, id) => ({
     ...answer,
