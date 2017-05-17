@@ -54,11 +54,13 @@ const store = createStore(
   applyMiddleware(...middlewares),
 );
 
-/*
-window.addEventListener("beforeunload", function(event) {
-  event.returnValue = "Please check with the experimenter before closing the window";
-});
-*/
+if (process.env.NODE_ENV === 'production') {
+  window.addEventListener("beforeunload", function(event) {
+    const message = 'Please check with the experimenter before changing the page or closing the window';
+    event.returnValue = message;
+    return message;
+  });
+}
 
 ReactDOM.render(
   <Root store={store} />,
