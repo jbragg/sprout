@@ -16,7 +16,8 @@ import Root from './components/Root';
  * TODO: Perform this logging only during experiments.
  */
 const productionLogger = store => next => (action) => {
-  if (store.getState().participantIndex == null) {
+  const { participantIndex, participantId } = store.getState();
+  if (participantIndex == null && participantId == null) {
     return next(action);
   }
   const logEntry = {};
