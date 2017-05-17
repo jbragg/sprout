@@ -1,7 +1,6 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { List, OrderedMap } from 'immutable';
+import { List } from 'immutable';
 import { ItemThumbContainer } from './ItemContainer';
 
 const Clusters = ({ clusters, itemToVal }) => (
@@ -25,8 +24,12 @@ const Master = ({ clustersGT, clusters }) => (
 );
 
 const mapStateToProps = state => ({
-  clustersGT: List([...state.entities.items.byId.values()]).groupBy(item => item.subgroup).sortBy(([item]) => item.subgroup),
-  clusters: List([...state.entities.items.byId.values()]).groupBy(item => item.cluster).sortBy(([item]) => item.cluster),
+  clustersGT: List([...state.entities.items.byId.values()])
+    .groupBy(item => item.subgroup)
+    .sortBy(([item]) => item.subgroup),
+  clusters: List([...state.entities.items.byId.values()])
+    .groupBy(item => item.cluster)
+    .sortBy(([item]) => item.cluster),
 });
 
 export default connect(mapStateToProps)(Master);
