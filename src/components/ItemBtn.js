@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
 import { getColor, getContrastColor } from '../color';
 import getScore, { defaults as defaultMetrics } from '../score';
@@ -23,48 +24,64 @@ const propTypes = {
     id: PropTypes.number }).isRequired,
   metric: PropTypes.string,
   connectDragSource: PropTypes.func,
+  connectDragPreview: PropTypes.func,
   isDragging: PropTypes.bool,
   useAnswers: PropTypes.bool,
 };
 
 const defaultProps = ({
   connectDragSource: x => x,
+  connectDragPreview: x => x,
   isDragging: false,
   metric: defaultMetrics.color,
   useAnswers: true,
 });
 
-const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, isDragging, useAnswers }) => {
-  const answerValues = answers.map(answer => answer.data.answer);
-  const scores = getScore(metric)(...answerValues);
-  const backgroundColor = useAnswers ? getColor(metric)(scores.color) : '';
-  const textColor = useAnswers ? getContrastColor(backgroundColor) : '';
-  return connectDragSource(
-    <span
-      className="item-btn"
-      style={{
-        opacity: isDragging ? 0.5 : 1,
-      }}
-    >
-      <OverlayTrigger
-        overlay={<Popover id="popover">{<ItemThumbContainer itemId={item.id} />}</Popover>}
-        placement="bottom"
+class ItemBtn extends React.Component {
+  componentDidMount() {
+    this.props.connectDragPreview(getEmptyImage(), {
+      // IE fallback: specify that we'd rather screenshot the node
+      // when it already knows it's being dragged so we can hide it with CSS.
+      captureDraggingState: true,
+    });
+  }
+
+  render() {
+    const {
+      selected, item, answers, onClick, metric,
+      connectDragSource, isDragging, useAnswers,
+    } = this.props;
+    const answerValues = answers.map(answer => answer.data.answer);
+    const scores = getScore(metric)(...answerValues);
+    const backgroundColor = useAnswers ? getColor(metric)(scores.color) : '';
+    const textColor = useAnswers ? getContrastColor(backgroundColor) : '';
+    return connectDragSource(
+      <span
+        className="item-btn"
+        style={{
+          opacity: isDragging ? 0.5 : 1,
+        }}
       >
-        <button
-          className={`item-btn btn btn-default ${selected ? 'active' : ''}`}
-          onClick={(e) => { onClick(); e.preventDefault(); }}
-          style={{
-            color: textColor,
-            backgroundColor,
-            border: selected ? `2px ${textColor} solid` : '',
-          }}
+        <OverlayTrigger
+          overlay={<Popover id="popover">{<ItemThumbContainer itemId={item.id} />}</Popover>}
+          placement="bottom"
         >
-          {item.id}
-        </button>
-      </OverlayTrigger>
-    </span>,
-  );
-};
+          <button
+            className={`item-btn btn btn-default ${selected ? 'active' : ''}`}
+            onClick={(e) => { onClick(); e.preventDefault(); }}
+            style={{
+              color: textColor,
+              backgroundColor,
+              border: selected ? `2px ${textColor} solid` : '',
+            }}
+          >
+            {item.id}
+          </button>
+        </OverlayTrigger>
+      </span>,
+    );
+  }
+}
 
 ItemBtn.propTypes = propTypes;
 ItemBtn.defaultProps = defaultProps;
