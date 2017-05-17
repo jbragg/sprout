@@ -63,7 +63,7 @@ def main(project_id, data_dir=DATA_DIR):
         with open(os.path.join(data_dir, fname), 'w') as f:
             print 'fetching {}...'.format(fname)
             records = [
-                rec.to_dict() for rec in fetch_all(entity_type.query())]
+                rec.to_dict() for rec in fetch_all(entity_type.query().order(entity_type.date))]
             json.dump(records, f, default=json_serial)
 
 
