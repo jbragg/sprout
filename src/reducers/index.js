@@ -20,7 +20,7 @@ const initialState = {
   finalLabels,
   oracle: {
     queuedItems: [],
-    answerInterval: 1 * 60 * 1000,  // minutes to milliseconds
+    answerInterval: 30 * 1000,  // seconds to milliseconds
     answeredItems: [],
   },
   uncertainLabel,
