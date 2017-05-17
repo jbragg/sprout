@@ -39,38 +39,30 @@ const ItemBtn = ({ selected, item, answers, onClick, metric, connectDragSource, 
   const scores = getScore(metric)(...answerValues);
   const backgroundColor = useAnswers ? getColor(metric)(scores.color) : '';
   const textColor = useAnswers ? getContrastColor(backgroundColor) : '';
-  const visibleBtn = (
-    <button
-      className={`item-btn btn btn-default ${selected ? 'active' : ''}`}
-      onClick={(e) => { onClick(); e.preventDefault(); }}
-      style={{
-        color: textColor,
-        backgroundColor,
-        border: selected ? `2px ${textColor} solid` : '',
-      }}
-    >
-      {item.id}
-    </button>
-  );
   return connectDragSource(
-    <div
+    <span
       className="item-btn"
       style={{
         opacity: isDragging ? 0.5 : 1,
       }}
     >
-      {useAnswers
-          ? (
-            <OverlayTrigger
-              overlay={<Popover id="popover">{<ItemThumbContainer itemId={item.id} />}</Popover>}
-              placement="bottom"
-            >
-              {visibleBtn}
-            </OverlayTrigger>
-          )
-          : visibleBtn
-      }
-    </div>,
+      <OverlayTrigger
+        overlay={<Popover id="popover">{<ItemThumbContainer itemId={item.id} />}</Popover>}
+        placement="bottom"
+      >
+        <button
+          className={`item-btn btn btn-default ${selected ? 'active' : ''}`}
+          onClick={(e) => { onClick(); e.preventDefault(); }}
+          style={{
+            color: textColor,
+            backgroundColor,
+            border: selected ? `2px ${textColor} solid` : '',
+          }}
+        >
+          {item.id}
+        </button>
+      </OverlayTrigger>
+    </span>,
   );
 };
 
