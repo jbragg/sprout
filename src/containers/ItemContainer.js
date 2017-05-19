@@ -9,6 +9,7 @@ import { DragItemTypes as ItemTypes } from '../constants';
 import conditions from '../experiment';
 import {
   itemDataSelector, itemsSelector, itemAnswersSelector,
+  recommendedGroupSelector,
 } from '../reducers/index';
 
 /*
@@ -39,6 +40,7 @@ const mapStateToProps = (state, { itemId, useReasons, useAnswers }) => ({
   useReasons: useReasons == null ? conditions[state.systemVersion].useReasons : useReasons,
   useAnswers: useAnswers == null ? conditions[state.systemVersion].useAnswers : useAnswers,
   answerKey: state.answerKey,
+  recommendedGroup: recommendedGroupSelector(state),
 });
 
 const mapDispatchToProps = (dispatch, { itemId, onClick }) => ({

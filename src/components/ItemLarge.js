@@ -26,6 +26,7 @@ const propTypes = {
   answerKey: PropTypes.objectOf(PropTypes.string.isRequired).isRequired,
   editReason: PropTypes.bool,
   draggable: PropTypes.bool.isRequired,
+  recommendedGroup: PropTypes.number,
 };
 
 const defaultProps = ({
@@ -36,6 +37,7 @@ const defaultProps = ({
   useAnswers: true,
   aggregateOnly: true,
   editReason: false,
+  recommendedGroup: null,
 });
 
 class ItemLarge extends React.Component {
@@ -68,6 +70,7 @@ class ItemLarge extends React.Component {
     const {
       item, answers, connectDragSource, isDragging, useReasons,
       useAnswers, answerKey, aggregateOnly, editReason, draggable,
+      recommendedGroup,
     } = this.props;
     const { imageStatus } = this.state;
     const itemComponent = (
@@ -94,7 +97,7 @@ class ItemLarge extends React.Component {
     );
     return connectDragSource(
       <div
-        className="panel panel-default item-large"
+        className={`panel panel-default item-large ${imageStatus === 'loaded' && recommendedGroup >= 0 ? 'recommended' : ''}`}
         style={{ opacity: isDragging ? 0.5 : 1 }}
       >
         {!draggable ? null : (
