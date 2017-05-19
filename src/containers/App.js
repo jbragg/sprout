@@ -14,6 +14,7 @@ import Survey from './Survey';
 import CustomDragLayer from '../CustomDragLayer';
 import Master from './Master';
 import { fetchExperiment } from '../actions';
+import { itemDataSelector } from '../reducers/index';
 import conditions from '../experiment';
 
 const propTypes = {
@@ -127,7 +128,7 @@ const mapStateToProps = (state, { location } ) => {
   return {
     experimentState,
     labels: state.labels,
-    items: [...state.entities.items.byId.values()],
+    items: [...itemDataSelector(state).byId.values()],
     currentItemId: state.currentItemId,
     useAnswers: conditions[state.systemVersion].useAnswers,
     useReasons: conditions[state.systemVersion].useReasons,

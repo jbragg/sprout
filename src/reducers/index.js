@@ -13,6 +13,8 @@ const labels = [Labels.YES, Labels.MAYBE, Labels.NO];
 const finalLabels = [Labels.YES, Labels.NO];
 const uncertainLabel = Labels.MAYBE;
 
+// TODO: Refactor item & answer data that doesn't change and don't send
+// with state.
 const initialState = {
   participantIndex: null,
   systemVersion: null,
@@ -35,6 +37,7 @@ const initialState = {
   initialInstructions: null,
   entities: {
     groups: { byId: new Map() },
+    itemData: { byId: new Map() },
     items: { byId: new Map() },
     answers: { byId: new Map() },
     labels: new Map(labels.map(label => [label, { itemIds: new Set() }])),
@@ -62,12 +65,13 @@ const cosineSimilarity = (vec1, vec2) => (
  * selectors
  */
 
+export const itemDataSelector = state => state.entities.itemData;
 export const itemsSelector = state => state.entities.items;
 export const groupsSelector = state => state.entities.groups;
 export const currentItemIdSelector = state => state.currentItemId;
 export const answersSelector = state => state.entities.answers;
 export const clusterIdsSelector = createSelector(
-  itemsSelector,
+  itemDataSelector,
   items => new Set([...items.byId.values()].map(item => item.cluster)),
 );
 export const itemLabelsSelector = createSelector(
@@ -76,7 +80,7 @@ export const itemLabelsSelector = createSelector(
   (items, groups) => new Map([...items.byId.values()].map(item => [item.id, item.group == null ? item.label : groups.byId.get(item.group).label])),
 );
 export const itemVectorsSelector = createSelector(
-  itemsSelector,
+  itemDataSelector,
   items => new Map([...items.byId].map(([key, item]) => [key, item.vector])),
 );
 export const itemSimilaritiesSelector = createSelector(
@@ -95,9 +99,11 @@ export const itemSimilaritiesSelector = createSelector(
   })),
 );
 const isUnlabeled = item => (item.group == null && item.label == null);
-export const unlabeledItemsSelector = createSelector(
+export const unlabeledItemIdsSelector = createSelector(
   itemsSelector,
-  items => [...items.byId.values()].filter(item => isUnlabeled(item)),
+  items => [...items.byId.values()]
+    .filter(item => isUnlabeled(item))
+    .map(item => item.id),
 );
 export const testItemsSelector = createSelector(
   itemsSelector,
@@ -110,23 +116,24 @@ export const clusterItemsSelector = createSelector(
 );
 export const unlabeledClusterItemsSelector = createSelector(
   state => state.clusterId,
-  unlabeledItemsSelector,
-  (clusterId, items) => clusterId == null ? [] : items.filter(item => item.cluster === clusterId).map(item => item.id),
+  unlabeledItemIdsSelector,
+  itemDataSelector,
+  (clusterId, itemIds, items) => clusterId == null ? [] : itemIds.filter(id => items.byId.get(id).cluster === clusterId),
 );
 export const itemAnswersSelector = createSelector(
-  itemsSelector,
+  itemDataSelector,
   answersSelector,
   (items, answers) => new Map([...items.byId].map(([id, item]) => [id, item.answers.map(answerId => answers.byId.get(answerId))])),
 );
 export const unlabeledItemScoresSelector = createSelector(
-  unlabeledItemsSelector,
+  unlabeledItemIdsSelector,
   itemAnswersSelector,
-  (items, answers) => new Map(items.map(item => [item.id, getScore(defaultMetrics.sort)(...answers.get(item.id).map(answer => answer.data.answer)).color])),
+  (itemIds, answers) => new Map(itemIds.map(id => [id, getScore(defaultMetrics.sort)(...answers.get(id).map(answer => answer.data.answer)).color])),
 );
-export const unlabeledSortedItemsSelector = createSelector(
-  unlabeledItemsSelector,
+export const unlabeledSortedItemIdsSelector = createSelector(
+  unlabeledItemIdsSelector,
   unlabeledItemScoresSelector,
-  (items, scores) => [...items].sort((item1, item2) => scores.get(item1.id) - scores.get(item2.id)),
+  (itemIds, scores) => [...itemIds].sort((id1, id2) => scores.get(id1) - scores.get(id2)),
 );
 export const groupItemsSelector = createSelector(
   groupsSelector,
@@ -147,7 +154,7 @@ export const recommendedGroupSelector = createSelector(
       .map(([groupId, itemIds]) => [groupId, [...similarities.get(itemId).keys()].findIndex(id => [...itemIds].indexOf(id) >= 0)])  // first index into similarities of item in group
       .filter(([, index]) => index > -1)
       .map(([groupId, index]) => [groupId, [...similarities.get(itemId).keys()][index]])
-      .sort(([, i1], [, i2]) => i1 - i2)
+      .sort(([, i1], [, i2]) => i1 - i2),
     );
     return groupSimilarities.size === 0 ? -1 : [...groupSimilarities.keys()][0];
   },
@@ -167,7 +174,7 @@ const nextClusterSelector = createSelector(
 );
 
 const getSimilarItemIds = (itemId, state, unlabeledOnly = true) => {
-  const unlabeledItemIds = unlabeledItemsSelector(state).map(item => item.id);
+  const unlabeledItemIds = unlabeledItemIdsSelector(state);
   return [...itemSimilaritiesSelector(state).get(itemId).keys()].filter(id => !unlabeledOnly || unlabeledItemIds.indexOf(id) >= 0);
 };
 
@@ -253,9 +260,9 @@ function InstructionsApp(state = initialState, action) {
         const { useReasons, useAnswers } = conditions[state.systemVersion];
         // Choose next primaryItem.
         if (!useReasons && !useAnswers) {
-          primaryItemId = unlabeledItemsSelector(state)[0].id;
+          primaryItemId = unlabeledItemIdsSelector(state)[0];
         } else {
-          primaryItemId = unlabeledSortedItemsSelector(state)[0].id;
+          primaryItemId = unlabeledSortedItemIdsSelector(state)[0];
         }
         currentItemId = primaryItemId;
         similarItemIds = getSimilarItemIds(primaryItemId, state);
@@ -301,7 +308,7 @@ function InstructionsApp(state = initialState, action) {
                   label: null,
                   group: null,
                   ...action.assignment,
-                }
+                },
               ]),
             ]),
           },
@@ -479,12 +486,17 @@ function InstructionsApp(state = initialState, action) {
         answerKey: action.payload.answerKey,
         entities: {
           ...state.entities,
-          items: {
+          itemData: {
             byId: new Map(action.payload.items.map(value => [value.id, {
               ...value,
               answers: action.payload.answers
-              .filter(answer => answer.data.questionid === value.id)
-              .map(answer => answer.assignmentid),
+                .filter(answer => answer.data.questionid === value.id)
+                .map(answer => answer.assignmentid),
+            }])),
+          },
+          items: {
+            byId: new Map(action.payload.items.map(value => [value.id, {
+              id: value.id,
             }])),
           },
           answers: {

@@ -7,6 +7,9 @@ import ItemBtn from '../components/ItemBtn';
 import { setCurrentItem } from '../actions';
 import { DragItemTypes as ItemTypes } from '../constants';
 import conditions from '../experiment';
+import {
+  itemDataSelector, itemsSelector, itemAnswersSelector,
+} from '../reducers/index';
 
 /*
  * react-dnd
@@ -26,10 +29,13 @@ const collect = (dndConnect, monitor) => ({
  * redux
  */
 
-const mapStateToProps = (state, { itemId, useReasons, useAnswers } ) => ({
+const mapStateToProps = (state, { itemId, useReasons, useAnswers }) => ({
   selected: state.currentItemId === itemId,
-  item: state.entities.items.byId.get(itemId),
-  answers: state.entities.items.byId.get(itemId).answers.map(id => state.entities.answers.byId.get(id)),
+  item: {
+    ...itemsSelector(state).byId.get(itemId),
+    ...itemDataSelector(state).byId.get(itemId),
+  },
+  answers: itemAnswersSelector(state).get(itemId),
   useReasons: useReasons == null ? conditions[state.systemVersion].useReasons : useReasons,
   useAnswers: useAnswers == null ? conditions[state.systemVersion].useAnswers : useAnswers,
   answerKey: state.answerKey,
