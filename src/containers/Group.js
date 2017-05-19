@@ -157,7 +157,12 @@ const groupTarget = {
         props.confirmMerge(() => props.onGroupMergeIn(id));
       }
     } else {  // ItemTypes.CLUSTER
-      props.onAssign(monitor.getItem().ids);
+      const ids = monitor.getItem().ids;
+      if (props.confirmMerge == null) {
+        props.onAssign(ids);
+      } else {
+        props.confirmMerge(() => props.onAssign(ids));
+      }
     }
   },
   canDrop: (props, monitor) => {

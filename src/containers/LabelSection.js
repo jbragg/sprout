@@ -47,7 +47,7 @@ class LabelSection extends React.Component {
       groupIds, label, onGroupCreate, connectDropTarget,
       isOver, canDrop, itemIds, onGroupDelete,
     } = this.props;
-    const mergeMessage = 'Are you sure? All items from the dragged group will be moved to the target group. This action is not reversible.';
+    const mergeMessage = 'Are you sure? All items being dragged will be moved to the target group. This action is not reversible.';
     const deleteMessage = 'Are you sure you want to delete the group? All items in the group will keep their label. This action is not reversible.';
     return connectDropTarget(
       <div className={`panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
