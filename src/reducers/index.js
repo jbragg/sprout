@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import { Map } from 'immutable';
 import {
   ANSWER_ORACLE, QUEUE_ITEM_ORACLE, UNQUEUE_ITEM_ORACLE, SET_CLUSTER_ID,
   EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEMS, EDIT_ITEM,

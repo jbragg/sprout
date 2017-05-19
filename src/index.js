@@ -16,13 +16,14 @@ import Root from './components/Root';
  * TODO: Perform this logging only during experiments.
  */
 const productionLogger = store => next => (action) => {
-  const { participantIndex, participantId } = store.getState();
+  const prev_state = store.getState();
+  const { participantIndex, participantId } = prev_state;
   if (participantIndex == null && participantId == null) {
     return next(action);
   }
   const logEntry = {};
   logEntry.start_time = new Date();
-  logEntry.prev_state = store.getState();
+  logEntry.prev_state = prev_state;
   logEntry.action = action;
 
   let returnedValue;

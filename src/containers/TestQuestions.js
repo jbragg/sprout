@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 import { Panel, OverlayTrigger, Popover } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
@@ -19,7 +20,7 @@ const propTypes = {
       group: PropTypes.number,
     }).isRequired,
   ).isRequired,
-  itemLabels: PropTypes.objectOf(PropTypes.string).isRequired,
+  itemLabels: ImmutablePropTypes.mapOf(PropTypes.string).isRequired,
   labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
   finalLabels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
   uncertainLabel: PropTypes.string.isRequired,
