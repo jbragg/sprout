@@ -8,41 +8,38 @@ import { changeExperimentPhase } from '../actions';
 const propTypes = {
   onEndExperiment: PropTypes.func.isRequired,
   duration: PropTypes.number.isRequired,
-  startTime: PropTypes.number.isRequired,
+  startTime: PropTypes.number,
+  now: PropTypes.number.isRequired,
+};
+
+const defaultProps = {
+  startTime: null,
 };
 
 class Countdown extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      date: Date.now(),
       clicked: false,
     };
     this.confirmed = this.confirmed.bind(this);
     this.confirm = this.confirm.bind(this);
+    this.ready = this.ready.bind(this);
   }
 
-  componentDidMount() {
-    this.timerID = setInterval(
-      () => this.tick(),
-      1000,
-    );
+  ready() {
+    return this.props.startTime != null;
   }
 
-  componentWillUnmount() {
-    clearInterval(this.timerID);
-  }
-
-  tick() {
-    this.setState({ date: Date.now() });
-    if (this.remainingTime() < 0) {
+  componentWillReceiveProps(nextProps) {
+    if (this.ready() && nextProps.now !== this.props.now && this.remainingTime(nextProps.now) <= 0) {
       this.props.onEndExperiment();
     }
   }
 
-  remainingTime() {
+  remainingTime(now) {
     const { duration, startTime } = this.props;
-    return Math.round((duration - (this.state.date - startTime)) / 1000);
+    return Math.round((duration - (now - startTime)) / 1000);
   }
 
   confirm() {
@@ -54,7 +51,10 @@ class Countdown extends React.Component {
   }
 
   render() {
-    const remainingTime = this.remainingTime();
+    if (!this.ready()) {
+      return null;
+    }
+    const remainingTime = this.remainingTime(this.props.now);
     const remainingMinutes = Math.max(Math.floor(remainingTime / 60), 0);
     const remainingSeconds = Math.max(remainingTime % 60, 0);
     const formatNumber = number => (number < 10 ? `0${number}` : number);
@@ -78,6 +78,7 @@ class Countdown extends React.Component {
 }
 
 Countdown.propTypes = propTypes;
+Countdown.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
   duration: state.experimentDuration,

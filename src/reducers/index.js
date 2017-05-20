@@ -477,7 +477,6 @@ function InstructionsApp(state = initialState, action) {
       return {
         ...state,
         experimentState: 'loaded',
-        experimentStartTime: Date.now(),
         systemVersion: action.payload.systemVersion,
         participantId: action.payload.participantId,
         participantIndex: action.payload.participantIndex,
@@ -508,6 +507,7 @@ function InstructionsApp(state = initialState, action) {
     case CHANGE_EXPERIMENT_PHASE: {
       return {
         ...state,
+        experimentStartTime: action.phase === 'ready' ? Date.now() : state.experimentStartTime,
         experimentState: action.phase,
       };
     }

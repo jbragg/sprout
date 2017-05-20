@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { Row, Col, Panel } from 'react-bootstrap';
 import Slider from 'react-slick';
 import { ItemThumbContainer } from '../containers/ItemContainer';
+import Loading from '../components/Loading';
 import { defaults } from '../constants';
 
 const propTypes = {
@@ -53,7 +54,7 @@ const sliderSettings = {
 };
 
 const SimilarItemList = ({ primaryItemId, similarItemIds, similar }) => (
-  primaryItemId == null ? <p>Loading...</p> : (
+  primaryItemId == null ? <p><Loading /></p> : (
     <Panel>
       <Row className="no-gutter">
         <Col xs={6} sm={5} md={4} lg={3}>

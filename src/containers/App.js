@@ -9,11 +9,12 @@ import { ItemLargeContainer } from './ItemContainer';
 import LabelSection from './LabelSection';
 import Instructions from './Instructions';
 import UnlabeledSection from '../components/UnlabeledSection';
+import Loading from '../components/Loading';
 import Countdown from './Countdown';
 import Survey from './Survey';
 import CustomDragLayer from '../CustomDragLayer';
 import Master from './Master';
-import { fetchExperiment } from '../actions';
+import { fetchExperiment, changeExperimentPhase } from '../actions';
 import { itemDataSelector } from '../reducers/index';
 import conditions from '../experiment';
 
@@ -35,6 +36,7 @@ const propTypes = {
       }).isRequired,
     }),
   ),
+  onChangeExperimentPhase: PropTypes.func.isRequired,
   useAnswers: PropTypes.bool,
   useReasons: PropTypes.bool,
   masterView: PropTypes.bool,
@@ -53,6 +55,10 @@ const defaultProps = {
 class App extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      date: Date.now(),
+      ready: false,
+    }
     const { initialize } = this.props;
     const params = {
       ...this.props.match.params,
@@ -64,6 +70,45 @@ class App extends React.Component {
       }
     });
     initialize(params);
+
+    this.handleImageLoaded = this.handleImageLoaded.bind(this);
+  }
+
+  componentDidMount() {
+    this.timerID = setInterval(
+      () => this.tick(),
+      1000,
+    );
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.experimentState !== 'loaded' && nextProps.experimentState === 'loaded') {
+      this.setState({
+        itemsLoaded: new Map(nextProps.items.map(item => [item.id, false])),
+      });
+    }
+  }
+
+  tick() {
+    this.setState({ date: Date.now() });
+  }
+
+  handleImageLoaded(itemId) {
+    this.setState((state, props) => {
+      const itemsLoaded = new Map([
+        ...state.itemsLoaded,
+        [itemId, true],
+      ]);
+      const ready = [...itemsLoaded.values()].every(e => e);
+      if (ready) {
+        props.onChangeExperimentPhase('ready');
+      }
+      return { ready, itemsLoaded };
+    });
   }
 
   render() {
@@ -74,45 +119,50 @@ class App extends React.Component {
       return <Grid><h1>Thanks!!</h1></Grid>
     } else if (masterView) {
       return <Grid fluid><Master /></Grid>;
-    } else if (experimentState === 'loaded') {
+    } else if (experimentState === 'loaded' || experimentState === 'ready') {
       return (
         <div id="app">
           <div className="hidden">
             {items.map(item => (
-              <img src={item.data.path} key={item.id} />
+              <img
+                src={item.data.path}
+                key={item.id}
+                onLoad={() => { this.handleImageLoaded(item.id); }}
+              />
             ))}
           </div>
-          {currentItemId == null ? null : <CustomDragLayer />}
-          <Grid fluid>
-            <Col sm={4}>
-              <Instructions />
-              <Countdown />
-            </Col>
-            <Col sm={4}>
-              <PanelGroup>
-                <UnlabeledSection useReasons={useReasons} />
-                {currentItemId == null ? null : (
-                  <ItemLargeContainer
-                    draggable
-                    itemId={currentItemId}
-                  />
-                )}
-              </PanelGroup>
-            </Col>
-            <Col sm={4}>
-              <PanelGroup>
-                {labels.map(label => <LabelSection label={label} key={label} />)}
-              </PanelGroup>
-            </Col>
-          </Grid>
+          {experimentState !== 'ready'
+              ? <Grid><h1><Loading /></h1></Grid>
+              : (
+                <Grid fluid>
+                  {currentItemId == null ? null : <CustomDragLayer />}
+                  <Col sm={4}>
+                    <Instructions />
+                    <Countdown now={this.state.date} />
+                  </Col>
+                  <Col sm={4}>
+                    <PanelGroup>
+                      <UnlabeledSection useReasons={useReasons} />
+                      {currentItemId == null ? null : (
+                        <ItemLargeContainer
+                          draggable
+                          itemId={currentItemId}
+                        />
+                      )}
+                    </PanelGroup>
+                  </Col>
+                  <Col sm={4}>
+                    <PanelGroup>
+                      {labels.map(label => <LabelSection label={label} key={label} />)}
+                    </PanelGroup>
+                  </Col>
+                </Grid>
+              )
+          }
         </div>
       );
     } else {
-      return (
-        <Grid>
-          <h1>Loading <span className="glyphicon glyphicon-refresh spinning" /></h1>
-        </Grid>
-      );
+      return <Grid><h1><Loading /></h1></Grid>;
     }
   }
 }
@@ -122,7 +172,7 @@ App.defaultProps = defaultProps;
 
 const mapStateToProps = (state, { location } ) => {
   const { experimentState } = state;
-  if (experimentState !== 'loaded' && experimentState !== 'survey') {
+  if (['loaded', 'ready', 'survey'].indexOf(experimentState) < 0) {
     return { experimentState };
   }
   return {
@@ -139,6 +189,9 @@ const mapStateToProps = (state, { location } ) => {
 const mapDispatchToProps = dispatch => ({
   initialize: (params) => {
     dispatch(fetchExperiment(params));
+  },
+  onChangeExperimentPhase: (phase) => {
+    dispatch(changeExperimentPhase(phase));
   },
 });
 

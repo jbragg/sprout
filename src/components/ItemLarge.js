@@ -8,6 +8,7 @@ import AnswersTable from './AnswersTable';
 import ConfusionsTable from './ConfusionsTable';
 import AnswersSummary from './AnswersSummary';
 import ReasonFormControl from '../containers/ReasonFormControl';
+import Loading from './Loading';
 
 const propTypes = {
   answers: PropTypes.array.isRequired,
@@ -132,7 +133,7 @@ class ItemLarge extends React.Component {
           </div>
           {imageStatus === 'loaded'
               ? null
-              : <h1>Loading <span className="glyphicon glyphicon-refresh spinning" /></h1>
+              : <h1><Loading /></h1>
             }
         </div>
       </div>,
