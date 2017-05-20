@@ -196,7 +196,7 @@ const birdClusterMapHack = new Map([
 ]);
 
 const setUpExperiment = (experiment, answers, taskIndex) => {
-  const rootDirPrefix = experiment.data.root_dir;
+  const rootDirPrefix = process.env.NODE_ENV === 'production' ? experiment.data.root_dir : '/static/private';
   const items = experiment.data.data.map(item => ({
     ...item,
     data: {
