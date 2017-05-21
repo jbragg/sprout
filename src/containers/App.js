@@ -4,24 +4,23 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { parse } from 'query-string';
 import { connect } from 'react-redux';
-import { Grid, Row, Col, PanelGroup } from 'react-bootstrap';
-import { ItemLargeContainer } from './ItemContainer';
-import LabelSection from './LabelSection';
-import Instructions from './Instructions';
-import UnlabeledSection from '../components/UnlabeledSection';
+import { Grid, Col, Well, Button } from 'react-bootstrap';
+import Instructions from '../components/Instructions';
 import Loading from '../components/Loading';
-import Countdown from './Countdown';
+import UnlabeledColumn from './UnlabeledColumn';
+import LabeledColumn from '../components/LabeledColumn';
+import Countdown from '../components/Countdown';
 import Survey from './Survey';
+import Oracle from './Oracle';
 import CustomDragLayer from '../CustomDragLayer';
 import Master from './Master';
 import { fetchExperiment, changeExperimentPhase } from '../actions';
 import { itemDataSelector } from '../reducers/index';
-import conditions from '../experiment';
+import { States, defaults } from '../constants';
 
 const propTypes = {
   experimentState: PropTypes.string,
   labels: PropTypes.arrayOf(PropTypes.string.isRequired),
-  currentItemId: PropTypes.number,
   initialize: PropTypes.func.isRequired,
   match: PropTypes.shape({
     params: PropTypes.object.isRequired,
@@ -36,19 +35,16 @@ const propTypes = {
       }).isRequired,
     }),
   ),
+  initialInstructions: PropTypes.string,
   onChangeExperimentPhase: PropTypes.func.isRequired,
-  useAnswers: PropTypes.bool,
-  useReasons: PropTypes.bool,
   masterView: PropTypes.bool,
 };
 
 const defaultProps = {
   experimentState: null,
-  currentItemId: null,
   items: null,
+  initialInstructions: null,
   labels: null,
-  useAnswers: true,
-  useReasons: true,
   masterView: false,
 };
 
@@ -57,8 +53,8 @@ class App extends React.Component {
     super(props);
     this.state = {
       date: Date.now(),
-      ready: false,
-    }
+      startTime: null,
+    };
     const { initialize } = this.props;
     const params = {
       ...this.props.match.params,
@@ -81,16 +77,19 @@ class App extends React.Component {
     );
   }
 
-  componentWillUnmount() {
-    clearInterval(this.timerID);
-  }
-
   componentWillReceiveProps(nextProps) {
-    if (this.props.experimentState !== 'loaded' && nextProps.experimentState === 'loaded') {
+    if (
+      this.props.experimentState !== States.LOADED &&
+      nextProps.experimentState === States.LOADED
+    ) {
       this.setState({
         itemsLoaded: new Map(nextProps.items.map(item => [item.id, false])),
       });
     }
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timerID);
   }
 
   tick() {
@@ -98,6 +97,7 @@ class App extends React.Component {
   }
 
   handleImageLoaded(itemId) {
+    // Experiment begins when all items loaded.
     this.setState((state, props) => {
       const itemsLoaded = new Map([
         ...state.itemsLoaded,
@@ -105,84 +105,167 @@ class App extends React.Component {
       ]);
       const ready = [...itemsLoaded.values()].every(e => e);
       if (ready) {
-        props.onChangeExperimentPhase('ready');
+        if (props.singlePage) {
+          props.onChangeExperimentPhase(States.COMBINED);
+        } else {
+          props.onChangeExperimentPhase(States.LABELING);
+        }
       }
-      return { ready, itemsLoaded };
+      return {
+        itemsLoaded,
+        startTime: ready ? Date.now() : null,
+      };
     });
   }
 
   render() {
-    const { experimentState, items, labels, ready, currentItemId, useAnswers, useReasons, masterView } = this.props;
-    if (experimentState === 'survey') {
-      return <Grid><Survey /></Grid>;
-    } else if (experimentState === 'thanks') {
-      return <Grid><h1>Thanks!!</h1></Grid>
+    const {
+      experimentState, items, labels, masterView,
+      onChangeExperimentPhase, initialInstructions,
+    } = this.props;
+    if (experimentState == null || experimentState === States.LOADING) {
+      return <Grid><h1><Loading /></h1></Grid>;
     } else if (masterView) {
       return <Grid fluid><Master /></Grid>;
-    } else if (experimentState === 'loaded' || experimentState === 'ready') {
-      return (
-        <div id="app">
-          <div className="hidden">
-            {items.map(item => (
-              <img
-                src={item.data.path}
-                key={item.id}
-                onLoad={() => { this.handleImageLoaded(item.id); }}
-              />
-            ))}
-          </div>
-          {experimentState !== 'ready'
-              ? <Grid><h1><Loading /></h1></Grid>
-              : (
-                <Grid fluid>
-                  {currentItemId == null ? null : <CustomDragLayer />}
-                  <Col sm={4}>
-                    <Instructions />
-                    <Countdown now={this.state.date} />
-                  </Col>
-                  <Col sm={4}>
-                    <PanelGroup>
-                      <UnlabeledSection useReasons={useReasons} />
-                      {currentItemId == null ? null : (
-                        <ItemLargeContainer
-                          draggable
-                          itemId={currentItemId}
-                        />
-                      )}
-                    </PanelGroup>
-                  </Col>
-                  <Col sm={4}>
-                    <PanelGroup>
-                      {labels.map(label => <LabelSection label={label} key={label} />)}
-                    </PanelGroup>
-                  </Col>
-                </Grid>
-              )
-          }
-        </div>
-      );
-    } else {
-      return <Grid><h1><Loading /></h1></Grid>;
     }
+    let experimentComponent = null;
+    if (experimentState === States.COMBINED) {
+      experimentComponent = (
+        <Grid fluid>
+          <Col sm={4}>
+            <h3>Customer Instructions</h3>
+            <p>Your task is to improve these instructions:</p>
+            <Well bsSize="sm">{initialInstructions}</Well>
+            <Oracle />
+            <Instructions />
+            <Countdown
+              startTime={this.state.startTime}
+              now={this.state.date}
+              onFinished={() => {
+                this.setState({ startTime: Date.now() });
+                onChangeExperimentPhase(States.SURVEY);
+              }}
+              duration={defaults.durations[experimentState]}
+              confirmText="Are you sure you want to submit your instructions and end the experiment?"
+            />
+          </Col>
+          <Col sm={4}>
+            <UnlabeledColumn />
+          </Col>
+          <Col sm={4}>
+            <LabeledColumn labels={labels} />
+          </Col>
+        </Grid>
+      );
+    } else if (experimentState === States.LABELING) {
+      experimentComponent = (
+        <Grid fluid>
+          <Col sm={6}>
+            <Well bsSize="sm">{initialInstructions}</Well>
+            <UnlabeledColumn />
+          </Col>
+          <Col sm={6}>
+            <LabeledColumn labels={labels} />
+            <Countdown
+              startTime={this.state.startTime}
+              now={this.state.date}
+              onFinished={() => {
+                this.setState({ startTime: Date.now() });
+                onChangeExperimentPhase(States.ORACLE);
+              }}
+              duration={defaults.durations[experimentState]}
+              confirmText="Are you sure you want to move on to the next stage before time is up?"
+            />
+          </Col>
+        </Grid>
+      );
+    } else if (experimentState === States.ORACLE) {
+      experimentComponent = (
+        <Grid fluid>
+          <Col sm={6}>
+            <LabeledColumn labels={labels} />
+          </Col>
+          <Col sm={6}>
+            <h3>Customer Instructions</h3>
+            <p>You may ask for clarifications of these instructions:</p>
+            <Well bsSize="sm">{initialInstructions}</Well>
+            <Oracle />
+            <Button
+              bsStyle="primary"
+              onClick={() => {
+                this.setState({ startTime: Date.now() });
+                onChangeExperimentPhase(States.INSTRUCTIONS);
+              }}
+            >
+              Done
+            </Button>
+          </Col>
+        </Grid>
+      );
+    } else if (experimentState === States.INSTRUCTIONS) {
+      experimentComponent = (
+        <Grid fluid>
+          <Col sm={6}>
+            <LabeledColumn labels={labels} />
+          </Col>
+          <Col sm={6}>
+            <h3>Customer Instructions</h3>
+            <p>Your task is to improve these instructions:</p>
+            <Well bsSize="sm">{initialInstructions}</Well>
+            <Oracle />
+            <Instructions />
+            <Countdown
+              startTime={this.state.startTime}
+              now={this.state.date}
+              onFinished={() => {
+                this.setState({ startTime: Date.now() });
+                onChangeExperimentPhase(States.SURVEY);
+              }}
+              duration={defaults.durations[experimentState]}
+              confirmText="Are you sure you want to submit your instructions and end the experiment?"
+            />
+          </Col>
+        </Grid>
+      );
+    } else if (experimentState === States.SURVEY) {
+      experimentComponent = <Grid><Survey /></Grid>;
+    } else if (experimentState === States.THANKS) {
+      experimentComponent = <Grid><h1>Thanks!!</h1></Grid>;
+    } else {
+      experimentComponent = <Grid><h1><Loading /></h1></Grid>;
+    }
+    return (
+      <div id="app">
+        <div className="hidden">
+          {items.map(item => (
+            <img
+              src={item.data.path}
+              key={item.id}
+              onLoad={() => { this.handleImageLoaded(item.id); }}
+            />
+          ))}
+        </div>
+        <CustomDragLayer />
+        {experimentComponent}
+      </div>
+    );
   }
 }
 
 App.propTypes = propTypes;
 App.defaultProps = defaultProps;
 
-const mapStateToProps = (state, { location } ) => {
-  const { experimentState } = state;
-  if (['loaded', 'ready', 'survey'].indexOf(experimentState) < 0) {
-    return { experimentState };
-  }
+const mapStateToProps = (state, { location }) => {
+  const isLoaded = state.experimentState != null && state.experimentState !== States.LOADING;
   return {
-    experimentState,
+    experimentState: state.experimentState,
     labels: state.labels,
-    items: [...itemDataSelector(state).byId.values()],
-    currentItemId: state.currentItemId,
-    useAnswers: conditions[state.systemVersion].useAnswers,
-    useReasons: conditions[state.systemVersion].useReasons,
-    masterView: parse(location.search).master === undefined ? false : true,
+    masterView: parse(location.search).master !== undefined,
+    singlePage: parse(location.search).singlePage !== undefined,
+    items: isLoaded
+      ? [...itemDataSelector(state).byId.values()]
+      : null,
+    initialInstructions: state.initialInstructions,
   };
 };
 

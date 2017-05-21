@@ -1,19 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 import { Button } from 'react-bootstrap';
-import Confirm from '../components/Confirm';
-import { changeExperimentPhase } from '../actions';
+import Confirm from './Confirm';
 
 const propTypes = {
-  onEndExperiment: PropTypes.func.isRequired,
+  onFinished: PropTypes.func.isRequired,
   duration: PropTypes.number.isRequired,
-  startTime: PropTypes.number,
+  startTime: PropTypes.number.isRequired,
   now: PropTypes.number.isRequired,
-};
-
-const defaultProps = {
-  startTime: null,
+  confirmText: PropTypes.string.isRequired,
 };
 
 class Countdown extends React.Component {
@@ -24,16 +19,11 @@ class Countdown extends React.Component {
     };
     this.confirmed = this.confirmed.bind(this);
     this.confirm = this.confirm.bind(this);
-    this.ready = this.ready.bind(this);
-  }
-
-  ready() {
-    return this.props.startTime != null;
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.ready() && nextProps.now !== this.props.now && this.remainingTime(nextProps.now) <= 0) {
-      this.props.onEndExperiment();
+    if (nextProps.now !== this.props.now && this.remainingTime(nextProps.now) <= 0) {
+      this.props.onFinished();
     }
   }
 
@@ -51,9 +41,6 @@ class Countdown extends React.Component {
   }
 
   render() {
-    if (!this.ready()) {
-      return null;
-    }
     const remainingTime = this.remainingTime(this.props.now);
     const remainingMinutes = Math.max(Math.floor(remainingTime / 60), 0);
     const remainingSeconds = Math.max(remainingTime % 60, 0);
@@ -61,32 +48,22 @@ class Countdown extends React.Component {
     return (
       <div>
         <Confirm
-          onConfirm={() => { this.props.onEndExperiment(); this.confirmed(); }}
+          onConfirm={() => { this.props.onFinished(); this.confirmed(); }}
           onDismiss={this.confirmed}
           show={this.state.clicked}
-          text={'Are you sure you want to submit your instructions and end the experiment?'}
+          text={this.props.confirmText}
         />
         <Button
           bsStyle="primary"
           onClick={this.confirm}
         >
-        {`Submit Instructions (${formatNumber(remainingMinutes)}:${formatNumber(remainingSeconds)} remaining)`}
-      </Button>
+          {`Submit (${formatNumber(remainingMinutes)}:${formatNumber(remainingSeconds)} remaining)`}
+        </Button>
       </div>
     );
   }
 }
 
 Countdown.propTypes = propTypes;
-Countdown.defaultProps = defaultProps;
 
-const mapStateToProps = state => ({
-  duration: state.experimentDuration,
-  startTime: state.experimentStartTime,
-});
-
-const mapDispatchToProps = dispatch => ({
-  onEndExperiment: () => { dispatch(changeExperimentPhase('survey')); },
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(Countdown);
+export default Countdown;

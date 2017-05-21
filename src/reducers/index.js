@@ -6,7 +6,7 @@ import {
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
   RECEIVE_EXPERIMENT, CHANGE_EXPERIMENT_PHASE } from '../actions';
 import getScore, { defaults as defaultMetrics } from '../score';
-import { Labels, defaults } from '../constants';
+import { Labels, States, defaults } from '../constants';
 import conditions from '../experiment';
 
 const labels = [Labels.YES, Labels.MAYBE, Labels.NO];
@@ -28,8 +28,6 @@ const initialState = {
   },
   uncertainLabel,
   experimentState: null,
-  experimentDuration: 15 * 60 * 1000,  // minutes to milliseconds
-  experimentStartTime: null,
   currentItemId: null,
   primaryItemId: null,
   similarItemIds: [],
@@ -470,13 +468,13 @@ function InstructionsApp(state = initialState, action) {
     case REQUEST_EXPERIMENT: {
       return {
         ...state,
-        experimentState: 'loading',
+        experimentState: States.LOADING,
       };
     }
     case RECEIVE_EXPERIMENT: {
       return {
         ...state,
-        experimentState: 'loaded',
+        experimentState: States.LOADED,
         systemVersion: action.payload.systemVersion,
         participantId: action.payload.participantId,
         participantIndex: action.payload.participantIndex,
@@ -507,7 +505,6 @@ function InstructionsApp(state = initialState, action) {
     case CHANGE_EXPERIMENT_PHASE: {
       return {
         ...state,
-        experimentStartTime: action.phase === 'ready' ? Date.now() : state.experimentStartTime,
         experimentState: action.phase,
       };
     }
