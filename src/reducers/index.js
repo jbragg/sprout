@@ -109,7 +109,7 @@ export const testItemsSelector = createSelector(
 );
 export const clusterItemsSelector = createSelector(
   state => state.clusterId,
-  itemsSelector,
+  itemDataSelector,
   (clusterId, items) => clusterId == null ? [] : [...items.byId.values()].filter(item => item.cluster === clusterId).map(item => item.id),
 );
 export const unlabeledClusterItemsSelector = createSelector(
@@ -177,7 +177,11 @@ const getSimilarItemIds = (itemId, state, unlabeledOnly = true) => {
 };
 
 export const getItemsSummary = (itemIds, state) => (
-  [].concat(...itemIds.map(id => itemAnswersSelector(state).get(id))).map(answer => answer.data.unclear_type).filter(s => s.length > 0).join(', ')
+  []
+    .concat(...itemIds.map(id => itemAnswersSelector(state).get(id)))
+    .map(answer => answer.data.unclear_type)
+    .filter(s => s.length > 0)
+    .join(', ')
 );
 
 /*

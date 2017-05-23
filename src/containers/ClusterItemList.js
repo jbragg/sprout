@@ -6,7 +6,10 @@ import { connect } from 'react-redux';
 import Slider from 'react-slick';
 import { Clearfix, Glyphicon } from 'react-bootstrap';
 import { ItemThumbContainer } from '../containers/ItemContainer';
-import { clusterIdsSelector, unlabeledClusterItemsSelector, clusterItemsSelector, getItemsSummary } from '../reducers/index';
+import {
+  clusterIdsSelector, unlabeledClusterItemsSelector, clusterItemsSelector,
+  getItemsSummary
+} from '../reducers/index';
 import { setClusterId } from '../actions';
 import { defaults, DragItemTypes as ItemTypes } from '../constants';
 
