@@ -20,7 +20,7 @@ const propTypes = {
 };
 
 const AnswersSummary = ({ answers, answerKey }) => {
-  const answerCounts = new Map([...answerKey.keys()].map(key => [key, 0]));
+  let answerCounts = new Map([...answerKey.keys()].map(key => [key, 0]));
   // Compute totals.
   answers.forEach(answer => answerCounts.set(answer.data.answer, answerCounts.get(answer.data.answer) + 1));
 
@@ -31,18 +31,23 @@ const AnswersSummary = ({ answers, answerKey }) => {
   }));
   return (
     <div>
-      <OverlayTrigger
-        overlay={
-          <Popover id="popover">
-            <Histogram counts={answerCountsTransform} />
-          </Popover>
-        }
-        placement="bottom"
-      >
-        <div>
-          <HistogramSummary values={scoredAnswers} />
-        </div>
-      </OverlayTrigger>
+      {answers.length === 0
+          ? <div className="text-center">No answers available</div>
+          : (
+            <OverlayTrigger
+              overlay={
+                <Popover id="popover">
+                  <Histogram counts={answerCountsTransform} />
+                </Popover>
+              }
+              placement="bottom"
+            >
+              <div>
+                <HistogramSummary values={scoredAnswers} />
+              </div>
+            </OverlayTrigger>
+          )
+      }
     </div>
   );
 };

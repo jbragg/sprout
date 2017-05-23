@@ -62,11 +62,11 @@ const HistogramSummary = ({ values }) => (
         </div>
       </Col>
       <Col xs={4}>
-        <span className="glyphicon glyphicon-triangle-bottom" />
         <span className="pull-right">
           {values.length}
           {' '}
           <span className="glyphicon glyphicon-user" />
+          <span className="glyphicon glyphicon-triangle-bottom" />
         </span>
       </Col>
     </Row>

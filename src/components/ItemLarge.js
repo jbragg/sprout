@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import {
   Image, Glyphicon, FormGroup, ControlLabel, Row, Col,
+  ListGroup, ListGroupItem,
 } from 'react-bootstrap';
 import AnswersTable from './AnswersTable';
 import ConfusionsTable from './ConfusionsTable';
@@ -75,26 +76,40 @@ class ItemLarge extends React.Component {
     } = this.props;
     const { imageStatus } = this.state;
     const itemComponent = (
-      <div>
+      <ListGroup className={imageStatus === 'loaded' ? '' : 'hidden'}>
         {useAnswers
-            ? <AnswersSummary answers={answers} answerKey={answerKey} />
+            ? (
+              <ListGroupItem>
+                <AnswersSummary answers={answers} answerKey={answerKey} />
+              </ListGroupItem>
+            )
             : null
         }
         {useAnswers && useReasons && aggregateOnly
-            ? <ConfusionsTable answers={answers} />
+            ? (
+              <ListGroupItem>
+                <ConfusionsTable answers={answers} />
+              </ListGroupItem>
+            )
             : null
         }
         {useAnswers && !aggregateOnly
-            ? <AnswersTable useReasons={useReasons} answers={answers} />
+            ? (
+              <ListGroupItem>
+                <AnswersTable useReasons={useReasons} answers={answers} />
+              </ListGroupItem>
+            )
             : null
         }
-        <Image
-          responsive
-          thumbnail
-          src={item.data.path}
-          onLoad={this.handleImageLoaded}
-        />
-      </div>
+        <ListGroupItem>
+          <Image
+            responsive
+            thumbnail
+            src={item.data.path}
+            onLoad={this.handleImageLoaded}
+          />
+        </ListGroupItem>
+      </ListGroup>
     );
     return connectDragSource(
       <div
@@ -114,28 +129,21 @@ class ItemLarge extends React.Component {
             </Row>
           </div>
         )}
-        <div className="panel-body">
-          <div className={imageStatus === 'loaded' ? '' : 'hidden'}>
-            {editReason
-              ? (
-                <div>
-                  <FormGroup>
-                    {itemComponent}
-                  </FormGroup>
-                  <FormGroup>
-                    <ControlLabel>Reason</ControlLabel>
-                    <ReasonFormControl itemId={item.id} />
-                  </FormGroup>
-                </div>
-              )
-              : itemComponent
-            }
-          </div>
-          {imageStatus === 'loaded'
-              ? null
-              : <h1><Loading /></h1>
-            }
-        </div>
+        {editReason
+          ? (
+            <div className={imageStatus === 'loaded' ? '' : 'hidden'}>
+              <FormGroup>
+                {itemComponent}
+              </FormGroup>
+              <FormGroup>
+                <ControlLabel>Reason</ControlLabel>
+                <ReasonFormControl itemId={item.id} />
+              </FormGroup>
+            </div>
+          )
+          : itemComponent
+        }
+        {imageStatus !== 'loaded' && <h1><Loading /></h1>}
       </div>,
     );
   }
