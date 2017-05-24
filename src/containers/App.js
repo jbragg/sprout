@@ -133,6 +133,12 @@ class App extends React.Component {
       experimentComponent = (
         <Grid fluid>
           <Col sm={4}>
+            <UnlabeledColumn />
+          </Col>
+          <Col sm={4}>
+            <LabeledColumn labels={labels} />
+          </Col>
+          <Col sm={4} className="instructions">
             <h3>Customer Instructions</h3>
             <p>Your task is to improve these instructions:</p>
             <Well bsSize="sm">{initialInstructions}</Well>
@@ -148,12 +154,6 @@ class App extends React.Component {
               duration={defaults.durations[experimentState]}
               confirmText="Are you sure you want to submit your instructions and end the experiment?"
             />
-          </Col>
-          <Col sm={4}>
-            <UnlabeledColumn />
-          </Col>
-          <Col sm={4}>
-            <LabeledColumn labels={labels} />
           </Col>
         </Grid>
       );

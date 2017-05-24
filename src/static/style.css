@@ -145,3 +145,9 @@
 .item-large .table {
   margin-bottom: 0;
 }
+
+.instructions {
+  border-radius: 25px;
+  border: 3px solid lightpink;
+  padding-bottom: 20px;
+}
