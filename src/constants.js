@@ -35,4 +35,16 @@ export const defaults = {
     [States.LABELING]: 5 * 60 * 1000,
     [States.INSTRUCTIONS]: 5 * 60 * 1000,
   },
+  warnings: {
+    [States.COMBINED]: [
+      [
+        5 * 60 * 1000,
+        "It's been a few minutes. Remember your goal is to improve the instructions. You should **ask for clarifications**, **edit the instructions**, and **create test questions**."
+      ],
+      [
+        10 * 60 * 1000,
+        "You have only a few minutes remaining. You should be improving the instructions. Remember to **ask for clarifications**, **edit the instructions**, and **create test questions**."
+      ],
+    ],
+  },
 }

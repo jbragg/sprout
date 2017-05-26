@@ -5,9 +5,7 @@ import Confirm from './Confirm';
 
 const propTypes = {
   onFinished: PropTypes.func.isRequired,
-  duration: PropTypes.number.isRequired,
-  startTime: PropTypes.number.isRequired,
-  now: PropTypes.number.isRequired,
+  remainingTime: PropTypes.number.isRequired,
   confirmText: PropTypes.string.isRequired,
 };
 
@@ -22,14 +20,12 @@ class Countdown extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.now !== this.props.now && this.remainingTime(nextProps.now) <= 0) {
+    if (
+      nextProps.remainingTime !== this.props.remainingTime &&
+      nextProps.remainingTime <= 0
+    ) {
       this.props.onFinished();
     }
-  }
-
-  remainingTime(now) {
-    const { duration, startTime } = this.props;
-    return Math.round((duration - (now - startTime)) / 1000);
   }
 
   confirm() {
@@ -41,9 +37,9 @@ class Countdown extends React.Component {
   }
 
   render() {
-    const remainingTime = this.remainingTime(this.props.now);
+    const { remainingTime } = this.props;
     const remainingMinutes = Math.max(Math.floor(remainingTime / 60), 0);
-    const remainingSeconds = Math.max(remainingTime % 60, 0);
+    const remainingSeconds = Math.max(Math.floor(remainingTime % 60), 0);
     const formatNumber = number => (number < 10 ? `0${number}` : number);
     return (
       <div>

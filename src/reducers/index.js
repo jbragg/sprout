@@ -27,7 +27,10 @@ const initialState = {
     answeredItems: [],
   },
   uncertainLabel,
-  experimentState: null,
+  experimentPhase: {
+    name: null,
+    startTime: null,
+  },
   currentItemId: null,
   primaryItemId: null,
   similarItemIds: [],
@@ -472,13 +475,21 @@ function InstructionsApp(state = initialState, action) {
     case REQUEST_EXPERIMENT: {
       return {
         ...state,
-        experimentState: States.LOADING,
+        experimentPhase: {
+          ...state.experimentPhase,
+          name: States.LOADING,
+          startTime: Date.now(),
+        },
       };
     }
     case RECEIVE_EXPERIMENT: {
       return {
         ...state,
-        experimentState: States.LOADED,
+        experimentPhase: {
+          ...state.experimentPhase,
+          name: States.LOADED,
+          startTime: Date.now(),
+        },
         systemVersion: action.payload.systemVersion,
         participantId: action.payload.participantId,
         participantIndex: action.payload.participantIndex,
@@ -509,7 +520,11 @@ function InstructionsApp(state = initialState, action) {
     case CHANGE_EXPERIMENT_PHASE: {
       return {
         ...state,
-        experimentState: action.phase,
+        experimentPhase: {
+          ...state.experimentPhase,
+          name: action.phase,
+          startTime: Date.now(),
+        },
       };
     }
     default: {

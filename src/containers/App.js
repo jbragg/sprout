@@ -4,7 +4,8 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { parse } from 'query-string';
 import { connect } from 'react-redux';
-import { Grid, Col, Well, Button } from 'react-bootstrap';
+import ReactMarkdown from 'react-markdown';
+import { Grid, Col, Well, Button, Alert } from 'react-bootstrap';
 import Instructions from '../components/Instructions';
 import Loading from '../components/Loading';
 import UnlabeledColumn from './UnlabeledColumn';
@@ -19,7 +20,10 @@ import { itemDataSelector } from '../reducers/index';
 import { States, defaults } from '../constants';
 
 const propTypes = {
-  experimentState: PropTypes.string,
+  experimentPhase: PropTypes.shape({
+    name: PropTypes.string,
+    startTime: PropTypes.number,
+  }).isRequired,
   labels: PropTypes.arrayOf(PropTypes.string.isRequired),
   initialize: PropTypes.func.isRequired,
   match: PropTypes.shape({
@@ -41,7 +45,6 @@ const propTypes = {
 };
 
 const defaultProps = {
-  experimentState: null,
   items: null,
   initialInstructions: null,
   labels: null,
@@ -53,7 +56,7 @@ class App extends React.Component {
     super(props);
     this.state = {
       date: Date.now(),
-      startTime: null,
+      warnings: [],
     };
     const { initialize } = this.props;
     const params = {
@@ -68,6 +71,10 @@ class App extends React.Component {
     initialize(params);
 
     this.handleImageLoaded = this.handleImageLoaded.bind(this);
+    this.dismissExpiredAlerts = this.dismissExpiredAlerts.bind(this);
+    this.handlePhaseChange = this.handlePhaseChange.bind(this);
+    this.remainingTime = this.remainingTime.bind(this);
+    this.elapsedTime = this.elapsedTime.bind(this);
   }
 
   componentDidMount() {
@@ -78,13 +85,13 @@ class App extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (
-      this.props.experimentState !== States.LOADED &&
-      nextProps.experimentState === States.LOADED
-    ) {
-      this.setState({
-        itemsLoaded: new Map(nextProps.items.map(item => [item.id, false])),
-      });
+    if (this.props.experimentPhase.name !== nextProps.experimentPhase.name) {
+      this.setState({ warnings: defaults.warnings[nextProps.experimentPhase.name] || [] });
+      if (nextProps.experimentPhase.name === States.LOADED) {
+        this.setState({
+          itemsLoaded: new Map(nextProps.items.map(item => [item.id, false])),
+        });
+      }
     }
   }
 
@@ -93,7 +100,26 @@ class App extends React.Component {
   }
 
   tick() {
-    this.setState({ date: Date.now() });
+    this.setState((state) => {
+      // Keep at most one expired warning.
+      const pastWarnings = state.warnings.filter(([time]) => time <= this.elapsedTime());
+      const newWarnings = state.warnings.slice(Math.max(0, pastWarnings.length - 1));
+      return {
+        warnings: newWarnings,
+        date: Date.now(),
+      };
+    });
+  }
+
+  elapsedTime() {
+    const now = this.state.date;
+    const startTime = this.props.experimentPhase.startTime;
+    return now - startTime;
+  }
+
+  remainingTime() {
+    const duration = defaults.durations[this.props.experimentPhase.name];
+    return duration - this.elapsedTime();
   }
 
   handleImageLoaded(itemId) {
@@ -113,22 +139,30 @@ class App extends React.Component {
       }
       return {
         itemsLoaded,
-        startTime: ready ? Date.now() : null,
       };
     });
   }
 
+  dismissExpiredAlerts() {
+    this.setState(state => ({
+      warnings: state.warnings.filter(([time]) => time > this.elapsedTime()),
+    }));
+  }
+
+  handlePhaseChange(newPhase) {
+    this.props.onChangeExperimentPhase(newPhase);
+  }
+
   render() {
-    const {
-      experimentState, items, labels, masterView,
-      onChangeExperimentPhase, initialInstructions,
-    } = this.props;
+    const { items, labels, masterView, initialInstructions } = this.props;
+    const experimentState = this.props.experimentPhase.name;
     if (experimentState == null || experimentState === States.LOADING) {
       return <Grid><h1><Loading /></h1></Grid>;
     } else if (masterView) {
       return <Grid fluid><Master /></Grid>;
     }
     let experimentComponent = null;
+    const remainingSeconds = this.remainingTime() / 1000;
     if (experimentState === States.COMBINED) {
       experimentComponent = (
         <Grid fluid>
@@ -145,14 +179,9 @@ class App extends React.Component {
             <Oracle />
             <Instructions />
             <Countdown
-              startTime={this.state.startTime}
-              now={this.state.date}
-              onFinished={() => {
-                this.setState({ startTime: Date.now() });
-                onChangeExperimentPhase(States.SURVEY);
-              }}
-              duration={defaults.durations[experimentState]}
-              confirmText="Are you sure you want to submit your instructions and end the experiment?"
+              remainingTime={remainingSeconds}
+              onFinished={() => { this.handlePhaseChange(States.SURVEY); }}
+              confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
             />
           </Col>
         </Grid>
@@ -167,14 +196,9 @@ class App extends React.Component {
           <Col sm={6}>
             <LabeledColumn labels={labels} />
             <Countdown
-              startTime={this.state.startTime}
-              now={this.state.date}
-              onFinished={() => {
-                this.setState({ startTime: Date.now() });
-                onChangeExperimentPhase(States.ORACLE);
-              }}
-              duration={defaults.durations[experimentState]}
-              confirmText="Are you sure you want to move on to the next stage before time is up?"
+              remainingTime={this.remainingSeconds}
+              onFinished={() => { this.handlePhaseChange(States.ORACLE); }}
+              confirmText={'Are you sure you want to move on to the next stage before time is up?'}
             />
           </Col>
         </Grid>
@@ -192,10 +216,7 @@ class App extends React.Component {
             <Oracle />
             <Button
               bsStyle="primary"
-              onClick={() => {
-                this.setState({ startTime: Date.now() });
-                onChangeExperimentPhase(States.INSTRUCTIONS);
-              }}
+              onClick={() => { this.handlePhaseChange(States.INSTRUCTIONS); }}
             >
               Done
             </Button>
@@ -215,14 +236,9 @@ class App extends React.Component {
             <Oracle />
             <Instructions />
             <Countdown
-              startTime={this.state.startTime}
-              now={this.state.date}
-              onFinished={() => {
-                this.setState({ startTime: Date.now() });
-                onChangeExperimentPhase(States.SURVEY);
-              }}
-              duration={defaults.durations[experimentState]}
-              confirmText="Are you sure you want to submit your instructions and end the experiment?"
+              remainingTime={this.remainingSeconds}
+              onFinished={() => { this.handlePhaseChange(States.SURVEY); }}
+              confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
             />
           </Col>
         </Grid>
@@ -246,6 +262,15 @@ class App extends React.Component {
           ))}
         </div>
         <CustomDragLayer />
+        {this.state.warnings.length > 0 && this.state.warnings[0][0] <= this.elapsedTime() &&
+          <Alert
+            bsStyle="warning"
+            onDismiss={this.dismissExpiredAlerts}
+            className="text-center"
+          >
+            <ReactMarkdown source={this.state.warnings[0][1]} />
+          </Alert>
+        }
         {experimentComponent}
       </div>
     );
@@ -256,9 +281,12 @@ App.propTypes = propTypes;
 App.defaultProps = defaultProps;
 
 const mapStateToProps = (state, { location }) => {
-  const isLoaded = state.experimentState != null && state.experimentState !== States.LOADING;
+  const isLoaded = (
+    state.experimentPhase.name != null &&
+    state.experimentPhase.name !== States.LOADING
+  );
   return {
-    experimentState: state.experimentState,
+    experimentPhase: state.experimentPhase,
     labels: state.labels,
     masterView: parse(location.search).master !== undefined,
     singlePage: parse(location.search).singlePage !== undefined,
