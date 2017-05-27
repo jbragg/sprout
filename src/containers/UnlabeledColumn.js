@@ -18,8 +18,8 @@ const defaultProps = {
 
 const UnlabeledColumn = ({ useReasons, currentItemId }) => (
   <PanelGroup>
-    <UnlabeledSection useReasons={useReasons} />
-    {currentItemId == null ? null : (
+    <UnlabeledSection className="panel" useReasons={useReasons} />
+    {currentItemId != null && (
       <ItemLargeContainer
         draggable
         itemId={currentItemId}

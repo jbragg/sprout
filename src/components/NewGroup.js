@@ -13,7 +13,7 @@ const propTypes = {
 const NewGroup = ({ connectDropTarget, isOver, canDrop }) => (
   connectDropTarget(
     <div
-      className={`btn btn-nohover ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
+      className={`new-group btn btn-nohover ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}
     >
       <h5 className="glyphicon glyphicon-plus" />
       {' '}

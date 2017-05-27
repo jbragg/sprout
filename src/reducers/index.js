@@ -13,8 +13,6 @@ const labels = [Labels.YES, Labels.MAYBE, Labels.NO];
 const finalLabels = [Labels.YES, Labels.NO];
 const uncertainLabel = Labels.MAYBE;
 
-// TODO: Refactor item & answer data that doesn't change and don't send
-// with state.
 const initialState = {
   participantIndex: null,
   systemVersion: null,

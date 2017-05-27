@@ -73,9 +73,11 @@ class ClusterItemList extends React.Component {
     const noDecrement = clusterId === 0;
     const noIncrement = clusterId >= nClusters - 1;
     return (
-      <div className="clusters">
+      <div className="cluster-item-list">
         <Clearfix>
-          <div className="pull-right">
+          <span className="page pull-right">
+            <strong>{`${clusterId + 1} / ${nClusters}`}</strong>
+            {' '}
             <button
               className={`btn btn-default btn-xs glyphicon glyphicon-arrow-left ${noDecrement ? 'disabled' : ''}`}
               onClick={() => (noDecrement || onSetCluster(clusterId - 1))}
@@ -84,8 +86,7 @@ class ClusterItemList extends React.Component {
               className={`btn btn-default btn-xs glyphicon glyphicon-arrow-right ${noIncrement ? 'disabled' : ''}`}
               onClick={() => (noIncrement || onSetCluster(clusterId + 1))}
             />
-          </div>
-          <strong className="page pull-right">{`${clusterId + 1} / ${nClusters}`}</strong>
+          </span>
         </Clearfix>
         {connectDragSource(
           <div

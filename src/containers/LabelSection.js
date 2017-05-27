@@ -50,7 +50,7 @@ class LabelSection extends React.Component {
     const mergeMessage = 'Are you sure? All items being dragged will be moved to the target group. This action is not reversible.';
     const deleteMessage = 'Are you sure you want to delete the group? All items in the group will keep their label. This action is not reversible.';
     return connectDropTarget(
-      <div className={`panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
+      <div className={`label-section label-${label} panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
         <Confirm
           text={this.state.confirmText || 'Are you sure?'}
           show={this.state.confirmFunc != null}

@@ -30,7 +30,7 @@ const AnswersSummary = ({ answers, answerKey }) => {
     answer: getScore(defaultMetrics.color)(answer.data.answer).human
   }));
   return (
-    <div>
+    <div className="answers-summary">
       {answers.length === 0
           ? <div className="text-center">No answers available</div>
           : (

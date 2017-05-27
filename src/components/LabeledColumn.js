@@ -3,7 +3,7 @@ import { PanelGroup } from 'react-bootstrap';
 import LabelSection from '../containers/LabelSection';
 
 export default ({ labels }) => (
-  <PanelGroup>
+  <PanelGroup className="labeled-column">
     {labels.map(label => <LabelSection label={label} key={label} />)}
   </PanelGroup>
 );

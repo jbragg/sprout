@@ -103,8 +103,8 @@ class ItemLarge extends React.Component {
         }
         <ListGroupItem>
           <Image
+            className="item"
             responsive
-            thumbnail
             src={item.data.path}
             onLoad={this.handleImageLoaded}
           />

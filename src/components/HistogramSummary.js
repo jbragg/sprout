@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import VegaLite from 'react-vega-lite';
 import { Row, Col } from 'react-bootstrap';
+import WorkersIndicator from './WorkersIndicator';
 
 const propTypes = {
   values: PropTypes.arrayOf(
@@ -62,12 +63,7 @@ const HistogramSummary = ({ values }) => (
         </div>
       </Col>
       <Col xs={4}>
-        <span className="pull-right">
-          {values.length}
-          {' '}
-          <span className="glyphicon glyphicon-user" />
-          <span className="glyphicon glyphicon-triangle-bottom" />
-        </span>
+        <WorkersIndicator workers={values.length} />
       </Col>
     </Row>
   </div>

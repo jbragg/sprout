@@ -5,6 +5,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { parse } from 'query-string';
 import { connect } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
+import Joyride from 'react-joyride';
 import { Grid, Col, Well, Button, Alert } from 'react-bootstrap';
 import Instructions from '../components/Instructions';
 import Loading from '../components/Loading';
@@ -17,7 +18,7 @@ import CustomDragLayer from '../CustomDragLayer';
 import Master from './Master';
 import { fetchExperiment, changeExperimentPhase } from '../actions';
 import { itemDataSelector } from '../reducers/index';
-import { States, defaults } from '../constants';
+import { States, defaults, tutorialSteps } from '../constants';
 
 const propTypes = {
   experimentPhase: PropTypes.shape({
@@ -42,6 +43,7 @@ const propTypes = {
   initialInstructions: PropTypes.string,
   onChangeExperimentPhase: PropTypes.func.isRequired,
   masterView: PropTypes.bool,
+  tutorial: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -49,6 +51,7 @@ const defaultProps = {
   initialInstructions: null,
   labels: null,
   masterView: false,
+  tutorial: true,
 };
 
 class App extends React.Component {
@@ -57,6 +60,8 @@ class App extends React.Component {
     this.state = {
       date: Date.now(),
       warnings: [],
+      tutorialSteps: [],
+      tutorialRunning: false,
     };
     const { initialize } = this.props;
     const params = {
@@ -78,10 +83,19 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.timerID = setInterval(
-      () => this.tick(),
-      1000,
-    );
+    if (this.props.tutorial) {
+      setTimeout(() => {
+        this.setState({
+          tutorialRunning: true,
+          tutorialSteps,
+        });
+      }, 6000);  // TODO: Check subcomponents mounted for more robust solution.
+    } else {
+      this.timerID = setInterval(
+        () => this.tick(),
+        1000,
+      );
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -154,7 +168,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { items, labels, masterView, initialInstructions } = this.props;
+    const { items, labels, masterView, initialInstructions, tutorial } = this.props;
     const experimentState = this.props.experimentPhase.name;
     if (experimentState == null || experimentState === States.LOADING) {
       return <Grid><h1><Loading /></h1></Grid>;
@@ -172,17 +186,28 @@ class App extends React.Component {
           <Col sm={4}>
             <LabeledColumn labels={labels} />
           </Col>
-          <Col sm={4} className="instructions">
+          <Col className="instructions" sm={4}>
             <h3>Customer Instructions</h3>
             <p>Your task is to improve these instructions:</p>
             <Well bsSize="sm">{initialInstructions}</Well>
             <Oracle />
             <Instructions />
-            <Countdown
-              remainingTime={remainingSeconds}
-              onFinished={() => { this.handlePhaseChange(States.SURVEY); }}
-              confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
-            />
+            {!tutorial
+                ? (
+                  <Countdown
+                    remainingTime={remainingSeconds}
+                    onFinished={() => { this.handlePhaseChange(States.SURVEY); }}
+                    confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
+                  />
+                )
+                : (
+                  <Button
+                    bsStyle="primary"
+                  >
+                    Submit
+                  </Button>
+                )
+            }
           </Col>
         </Grid>
       );
@@ -262,7 +287,14 @@ class App extends React.Component {
           ))}
         </div>
         <CustomDragLayer />
-        {this.state.warnings.length > 0 && this.state.warnings[0][0] <= this.elapsedTime() &&
+        {this.props.tutorial && (
+          <Joyride
+            ref={(c) => { this.joyride = c; }}
+            steps={this.state.tutorialSteps}
+            run={this.state.tutorialRunning}
+          />
+        )}
+        {!this.props.tutorial && this.state.warnings.length > 0 && this.state.warnings[0][0] <= this.elapsedTime() &&
           <Alert
             bsStyle="warning"
             onDismiss={this.dismissExpiredAlerts}

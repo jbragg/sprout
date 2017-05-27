@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { Panel, Tabs, Tab } from 'react-bootstrap';
 import SimilarItemList from '../containers/SimilarItemList';
 import ClusterItemList from '../containers/ClusterItemList';
@@ -9,16 +10,16 @@ const propTypes = {
   useReasons: PropTypes.bool.isRequired,
 }
 
-const UnlabeledSection = ({ useReasons }) => (
-  <div className="panel">
+const UnlabeledSection = ({ useReasons, className }) => (
+  <div className={classNames(className, 'unlabeled-items')}>
     <Progress />
     {useReasons
       ? (
         <Tabs defaultActiveKey={0} id="unlabeled-items" mountOnEnter unmountOnExit >
-          <Tab eventKey={0} title="Items">
+          <Tab tabClassName="items-nav" eventKey={0} title="Items">
             <SimilarItemList similar={useReasons}/>
           </Tab>
-          <Tab eventKey={1} title="Clusters">
+          <Tab tabClassName="clusters-nav" eventKey={1} title="Clusters">
             <ClusterItemList />
           </Tab>
         </Tabs>

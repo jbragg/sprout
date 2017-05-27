@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Row, Col, Table, OverlayTrigger, Popover } from 'react-bootstrap';
+import WorkersIndicator from './WorkersIndicator';
 
 const propTypes = {
   answers: PropTypes.arrayOf(
@@ -63,18 +64,13 @@ const ConfusionsTable = ({ answers }) => {
             {confusionsToTable(confusions.slice(0, 1))}
           </Col>
           <Col xs={4}>
-            <span className="pull-right">
-              {confusions.length}
-              {' '}
-              <span className="glyphicon glyphicon-user" />
-            <span className="glyphicon glyphicon-triangle-bottom" />
-            </span>
+            <WorkersIndicator workers={confusions.length} />
           </Col>
         </Row>
       </OverlayTrigger>
     );
   }
-  return <div>{component}</div>;
+  return <div className="confusions-summary">{component}</div>;
 };
 
 ConfusionsTable.propTypes = propTypes;
