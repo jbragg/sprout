@@ -24,10 +24,10 @@ const Master = ({ clustersGT, clusters }) => (
 );
 
 const mapStateToProps = state => ({
-  clustersGT: List([...state.entities.items.byId.values()])
+  clustersGT: List([...state.entities.itemData.byId.values()])
     .groupBy(item => item.subgroup)
     .sortBy(([item]) => item.subgroup),
-  clusters: List([...state.entities.items.byId.values()])
+  clusters: List([...state.entities.itemData.byId.values()])
     .groupBy(item => item.cluster)
     .sortBy(([item]) => item.cluster),
 });
