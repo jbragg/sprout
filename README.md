@@ -74,7 +74,8 @@ Steps 1 through 3 are from [here](https://cloud.google.com/appengine/docs/python
 NOTE: File locations are temporary.
 
 Experiment data
-- location: `src/static/private/pilot_instructions_experiment.json`
+- location: `src/static/private/pilot_instructions_experiment.with_vec.json`
+- NOTE: To add `cluster` and `vector` fields to an experiment data file, use `util/cluster.py`.
 - format (in Orderly format, which can be compiled into JSONSchema):
 ```
 object {

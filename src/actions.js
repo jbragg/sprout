@@ -221,7 +221,7 @@ const setUpExperiment = (experiment, answers, taskIndex) => {
 export function fetchExperiment(params) {
   return (dispatch) => {
     dispatch(requestExperiment());
-    const experimentPromise = fetch('/static/private/pilot_instructions_experiment.json')
+    const experimentPromise = fetch('/static/private/pilot_instructions_experiment.with_vec.json')
       .then(response => response.json());
     const answersPromise = fetch('/static/private/pilot_instructions_data_anon.json')
       .then(response => response.json());

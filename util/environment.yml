@@ -1,0 +1,8 @@
+dependencies:
+  - python=2.7
+  - numpy=1.12.*
+  - scikit-learn=0.18.*
+  - pandas=0.20.*
+  - nltk=3.2.*
+  - pip:
+    - algorithmia==1.0.8
