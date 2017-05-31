@@ -40,6 +40,31 @@ dev_appserver.py .
 ```
 Visit the application at [http://localhost:8080/](http://localhost:8080/). See [the documentation](https://cloud.google.com/appengine/docs/standard/python/tools/local-devserver-command) for other options for `dev_appserver.py`.
 
+### Config
+Specify `src/config.js` to define your tasks. For example:
+```javascript
+export default {
+  tasks: [
+    {
+      experimentPath: {path/to/experiment/file},
+      answersPath: {path/to/answers/file},
+      itemRootPath: {path/to/root/path/for/images},
+      initialInstructions: 'instructions go here',
+      tutorial: false,
+    },
+  ],
+};
+```
+The position in the array corresponds to the `taskIndex` (see Website usage section).
+
+### Website usage
+url parameters: `/:taskIndex?/:participantIndex?`
+all parameters:
+- `systemVersion={0,1,2}`
+- `taskIndex={0,1}`
+- `participantId={:str}`: useful for tracking a participant outside a study
+
+
 ## Deploying the back-end
 To deploy the application:
 
@@ -48,7 +73,7 @@ To deploy the application:
 2. [Deploy the
    application](https://developers.google.com/appengine/docs/python/tools/uploadinganapp).
 
-## Fetching experiment data
+## Fetching experiment data for analysis
 
 1. Export the PYTHONPATH environment variable for your Python directory, for example:
 ```
@@ -79,20 +104,22 @@ Experiment data
 - format (in Orderly format, which can be compiled into JSONSchema):
 ```
 object {
-  object {
-    string initial_instructions;
-    array [
+  array [
+    object {
+      integer id?;  # defaults to position in array
+      integer cluster?;  # cluster item belongs to, based on vector embedding of worker answers
+      array [
+        integer*;
+      ] vector?;  # aggregate embedding for answers associated with the item
+      integer: subgroup?;  # ground truth cluster
+      string: cls?;  # ground truth label
       object {
-        integer id;
-        integer cluster?;  # cluster item belongs to, based on vector embedding of worker answers
-        array [
-          integer*;
-        ] vector?;  # aggregate embedding for answers associated with the item
-        integer: subgroup?;  # ground truth cluster
-        string: cls?;  # ground truth label
-      }*;
-    ] data;  # these are the items
-  } data;
+        string: path;
+        object {
+        } query?;
+      } data;
+    }*;
+  ] data;  # these are the items
 };
 ```
 

@@ -44,6 +44,8 @@ const propTypes = {
   onChangeExperimentPhase: PropTypes.func.isRequired,
   masterView: PropTypes.bool,
   tutorial: PropTypes.bool,
+  multiPhase: PropTypes.bool,
+  waitForImages: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -51,7 +53,9 @@ const defaultProps = {
   initialInstructions: null,
   labels: null,
   masterView: false,
-  tutorial: true,
+  tutorial: false,
+  multiPhase: false,
+  waitForImages: false,
 };
 
 class App extends React.Component {
@@ -76,21 +80,14 @@ class App extends React.Component {
     initialize(params);
 
     this.handleImageLoaded = this.handleImageLoaded.bind(this);
+    this.advanceExperimentPhase = this.advanceExperimentPhase.bind(this);
     this.dismissExpiredAlerts = this.dismissExpiredAlerts.bind(this);
-    this.handlePhaseChange = this.handlePhaseChange.bind(this);
     this.remainingTime = this.remainingTime.bind(this);
     this.elapsedTime = this.elapsedTime.bind(this);
   }
 
   componentDidMount() {
-    if (this.props.tutorial) {
-      setTimeout(() => {
-        this.setState({
-          tutorialRunning: true,
-          tutorialSteps,
-        });
-      }, 6000);  // TODO: Check subcomponents mounted for more robust solution.
-    } else {
+    if (!this.props.tutorial) {
       this.timerID = setInterval(
         () => this.tick(),
         1000,
@@ -105,6 +102,17 @@ class App extends React.Component {
         this.setState({
           itemsLoaded: new Map(nextProps.items.map(item => [item.id, false])),
         });
+        if (nextProps.tutorial) {
+          setTimeout(() => {
+            this.setState({
+              tutorialRunning: true,
+              tutorialSteps,
+            });
+          }, 6000);  // TODO: Check subcomponents mounted for more robust solution.
+        }
+        if (!this.props.waitForImages) {
+          this.advanceExperimentPhase();
+        }
       }
     }
   }
@@ -144,12 +152,8 @@ class App extends React.Component {
         [itemId, true],
       ]);
       const ready = [...itemsLoaded.values()].every(e => e);
-      if (ready) {
-        if (props.singlePage) {
-          props.onChangeExperimentPhase(States.COMBINED);
-        } else {
-          props.onChangeExperimentPhase(States.LABELING);
-        }
+      if (ready && props.waitForImages) {
+        this.advanceExperimentPhase();
       }
       return {
         itemsLoaded,
@@ -157,14 +161,25 @@ class App extends React.Component {
     });
   }
 
+  advanceExperimentPhase() {
+    const currentPhase = this.props.experimentPhase.name;
+    if (currentPhase === States.LOADING && !this.props.multiPhase) {
+      this.props.onChangeExperimentPhase(States.COMBINED);
+    } else if (currentPhase === States.LOADING) {
+      this.props.onChangeExperimentPhase(States.LABELING);
+    } else if (currentPhase === States.COMBINED || currentPhase === States.INSTRUCTIONS) {
+      this.props.onChangeExperimentPhase(States.SURVEY);
+    } else if (currentPhase === States.LABELING) {
+      this.props.onChangeExperimentPhase(States.ORACLE);
+    } else if (currentPhase === States.ORACLE) {
+      this.props.onChangeExperimentPhase(States.INSTRUCTIONS);
+    }
+  }
+
   dismissExpiredAlerts() {
     this.setState(state => ({
       warnings: state.warnings.filter(([time]) => time > this.elapsedTime()),
     }));
-  }
-
-  handlePhaseChange(newPhase) {
-    this.props.onChangeExperimentPhase(newPhase);
   }
 
   render() {
@@ -196,7 +211,7 @@ class App extends React.Component {
                 ? (
                   <Countdown
                     remainingTime={remainingSeconds}
-                    onFinished={() => { this.handlePhaseChange(States.SURVEY); }}
+                    onFinished={this.advanceExperimentPhase}
                     confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
                   />
                 )
@@ -222,7 +237,7 @@ class App extends React.Component {
             <LabeledColumn labels={labels} />
             <Countdown
               remainingTime={this.remainingSeconds}
-              onFinished={() => { this.handlePhaseChange(States.ORACLE); }}
+              onFinished={this.advanceExperimentPhase}
               confirmText={'Are you sure you want to move on to the next stage before time is up?'}
             />
           </Col>
@@ -241,7 +256,7 @@ class App extends React.Component {
             <Oracle />
             <Button
               bsStyle="primary"
-              onClick={() => { this.handlePhaseChange(States.INSTRUCTIONS); }}
+              onClick={this.advanceExperimentPhase}
             >
               Done
             </Button>
@@ -262,7 +277,7 @@ class App extends React.Component {
             <Instructions />
             <Countdown
               remainingTime={this.remainingSeconds}
-              onFinished={() => { this.handlePhaseChange(States.SURVEY); }}
+              onFinished={this.advanceExperimentPhase}
               confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
             />
           </Col>
@@ -321,7 +336,8 @@ const mapStateToProps = (state, { location }) => {
     experimentPhase: state.experimentPhase,
     labels: state.labels,
     masterView: parse(location.search).master !== undefined,
-    singlePage: parse(location.search).singlePage !== undefined,
+    multiPhase: parse(location.search).multiPhase !== undefined,
+    tutorial: state.tutorial || false,
     items: isLoaded
       ? [...itemDataSelector(state).byId.values()]
       : null,

@@ -19,6 +19,7 @@ const initialState = {
   answerKey: null,
   labels,
   finalLabels,
+  tutorial: false,
   oracle: {
     queuedItems: [],
     answerInterval: 30 * 1000,  // seconds to milliseconds
@@ -494,6 +495,7 @@ function InstructionsApp(state = initialState, action) {
         initialInstructions: action.payload.initialInstructions,
         generalInstructions: action.payload.initialInstructions,
         answerKey: action.payload.answerKey,
+        tutorial: action.payload.tutorial,
         entities: {
           ...state.entities,
           itemData: {

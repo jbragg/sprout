@@ -3,6 +3,7 @@
 *.swp
 src/static/js/
 src/static/private/
+src/config.js
 lib/
 node_modules/
 experiment_data/

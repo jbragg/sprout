@@ -14,19 +14,24 @@ const Clusters = ({ clusters, itemToVal }) => (
   </div>
 );
 
-const Master = ({ clustersGT, clusters }) => (
+const Master = ({ clustersSubgroup, clustersQuery, clusters }) => (
   <div>
-    <h1>Ground truth clusters</h1>
-    <Clusters clusters={clustersGT} itemToVal={item => item.labelGT} />
+    <h1>Subgroup clusters</h1>
+    <Clusters clusters={clustersSubgroup} itemToVal={item => item.labelGT} />
+    <h1>Query clusters</h1>
+    <Clusters clusters={clustersQuery} itemToVal={item => item.labelGT} />
     <h1>Computed clusters</h1>
     <Clusters clusters={clusters} />
   </div>
 );
 
 const mapStateToProps = state => ({
-  clustersGT: List([...state.entities.itemData.byId.values()])
+  clustersSubgroup: List([...state.entities.itemData.byId.values()])
     .groupBy(item => item.subgroup)
     .sortBy(([item]) => item.subgroup),
+  clustersQuery: List([...state.entities.itemData.byId.values()])
+    .groupBy(item => JSON.stringify(item.data.query))
+    .sortBy(([item]) => JSON.stringify(item.data.query)),
   clusters: List([...state.entities.itemData.byId.values()])
     .groupBy(item => item.cluster)
     .sortBy(([item]) => item.cluster),

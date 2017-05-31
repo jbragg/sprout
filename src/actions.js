@@ -3,6 +3,7 @@ import latin3x3 from './rand/latin/latin3x3';
 import binary from './rand/binary/binary';
 import { Labels } from './constants';
 import { groupsSelector } from './reducers/index';
+import config from './config';
 
 /*
  * action types
@@ -137,8 +138,8 @@ function requestExperiment() {
   return { type: REQUEST_EXPERIMENT };
 }
 
-function receiveExperiment(json) {
-  return { type: RECEIVE_EXPERIMENT, payload: json };
+function receiveExperiment(payload) {
+  return { type: RECEIVE_EXPERIMENT, payload };
 }
 
 const answerKey = new Map([
@@ -195,48 +196,58 @@ const birdClusterMapHack = new Map([
   [12, Labels.NO],
 ]);
 
-const setUpExperiment = (experiment, answers, taskIndex) => {
-  const rootDirPrefix = process.env.NODE_ENV === 'production' ? experiment.data.root_dir : '/static/private';
-  const items = experiment.data.data.map(item => ({
+const setUpExperiment = (experiment, answers, itemRootPath, subtask = null) => {
+  const experimentData = subtask == null ? experiment.data : experiment[subtask].data;
+  const items = experimentData.map((item, id) => ({
+    id,
     ...item,
     data: {
       ...item.data,
-      path: `${rootDirPrefix}/${item.data.path}`,
+      path: `${itemRootPath}/${item.data.path}`,
     },
     labelGT: birdClusterMapHack.get(item.subgroup),
   }));
-  const formattedAnswers = answers.map((answer, id) => ({
-    ...answer,
-    assignmentid: id,
-    data: formatAnswerData(answer.data),
-  }));
+  const formattedAnswers = answers == null ? [] :
+    answers.map((answer, id) => ({
+      ...answer,
+      assignmentid: id,
+      data: formatAnswerData(answer.data),
+    }));
   return {
     answerKey,
     items,
     answers: formattedAnswers,
-    initialInstructions: experiment.data.initial_instructions,
   };
 };
 
 export function fetchExperiment(params) {
   return (dispatch) => {
     dispatch(requestExperiment());
-    const experimentPromise = fetch('/static/private/pilot_instructions_experiment.with_vec.json')
+    const taskIndex = params.taskIndex || 0;
+    const task = config.tasks[taskIndex];
+    const experimentPromise = fetch(task.experimentPath)
       .then(response => response.json());
-    const answersPromise = fetch('/static/private/pilot_instructions_data_anon.json')
-      .then(response => response.json());
+    let promises = [experimentPromise];
 
-    return Promise.all([experimentPromise, answersPromise])
+    if (task.answersPath != null) {
+      const answersPromise = fetch(task.answersPath)
+        .then(response => response.json());
+      promises = promises.concat([answersPromise]);
+    }
+
+    return Promise.all(promises)
       .then((result) => {
         const [experiment, answers] = result;
-        const taskIndex = params.taskIndex || 0;
         const systemVersion = params.systemVersion == null ? 2 : params.systemVersion;
         dispatch(receiveExperiment({
           ...setUpExperiment(
             experiment,
             answers,
-            taskIndex,
+            task.itemRootPath,
+            task.subtask,
           ),
+          initialInstructions: task.initialInstructions,
+          tutorial: task.tutorial,
           taskIndex,
           participantId: params.participantId,
           participantIndex: params.participantIndex,

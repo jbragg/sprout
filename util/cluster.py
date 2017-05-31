@@ -10,7 +10,7 @@ import Algorithmia
 import nltk
 import numpy as np
 import pandas as pd
-import sklearn
+from sklearn import cluster
 
 CACHED_FILENAME = os.path.join(os.path.dirname(__file__),
                                'cached_vectors.pickle')
@@ -44,7 +44,7 @@ def cluster_questions(df, k=8, cache=True, overwrite=False):
         with open(CACHED_FILENAME, 'wb') as f:
             pickle.dump(cached_vectors, f)
 
-    kmeans = sklearn.cluster.KMeans(n_clusters=min(k, len(questionids)))
+    kmeans = cluster.KMeans(n_clusters=min(k, len(questionids)))
     Y = kmeans.fit_predict(np.array(doc_vectors))
     clusters = collections.defaultdict(list)
     for questionid, y in zip(questionids, Y):
@@ -104,7 +104,7 @@ def main(answers_path, experiment_path, out_path, n_clusters):
 
     with open(experiment_path, 'r') as f:
         experiment = json.load(f)
-    for item in experiment['data']['data']:
+    for item in experiment['data']:
         questionid = item['id']
         item['cluster'] = question_to_cluster[
             questionid] if questionid in question_to_cluster else -1
