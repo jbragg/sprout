@@ -146,6 +146,12 @@
   margin-bottom: 0;
 }
 
+.item-large .item {
+  cursor: -moz-zoom-in;
+  cursor: -webkit-zoom-in;
+  cursor: zoom-in;
+}
+
 .instructions {
   border-radius: 25px;
   border: 3px solid lightpink;

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "",
   "engines": {
-    "node": "7.10.0"
+    "node": "8.0.0"
   },
   "scripts": {
     "build": "./scripts/build.sh",
@@ -26,6 +26,7 @@
     "react-dnd": "2.3.0",
     "react-dnd-html5-backend": "2.3.0",
     "react-dom": "15.5.4",
+    "react-image-lightbox": "4.0.0",
     "react-immutable-proptypes": "2.1.0",
     "react-joyride": "1.10.1",
     "react-markdown": "2.5.0",

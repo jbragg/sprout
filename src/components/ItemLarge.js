@@ -5,6 +5,7 @@ import {
   Image, Glyphicon, FormGroup, ControlLabel, Row, Col,
   ListGroup, ListGroupItem,
 } from 'react-bootstrap';
+import Lightbox from 'react-image-lightbox';
 import AnswersTable from './AnswersTable';
 import ConfusionsTable from './ConfusionsTable';
 import AnswersSummary from './AnswersSummary';
@@ -45,7 +46,10 @@ const defaultProps = ({
 class ItemLarge extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { imageStatus: 'loading' };
+    this.state = {
+      imageStatus: 'loading',
+      lightboxOpen: false,
+    };
 
     this.handleImageLoaded = this.handleImageLoaded.bind(this);
   }
@@ -107,7 +111,14 @@ class ItemLarge extends React.Component {
             responsive
             src={item.data.path}
             onLoad={this.handleImageLoaded}
+            onClick={() => { this.setState({ lightboxOpen: true }); }}
           />
+          {this.state.lightboxOpen &&
+            <Lightbox
+              mainSrc={item.data.path}
+              onCloseRequest={() => { this.setState({ lightboxOpen: false }); }}
+            />
+          }
         </ListGroupItem>
       </ListGroup>
     );
