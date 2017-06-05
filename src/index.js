@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { createStore, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-import { logger } from 'redux-logger';
+import { createLogger } from 'redux-logger';
 import fetch from 'isomorphic-fetch';
 
 import reducer from './reducers/index';
@@ -24,14 +24,14 @@ const stateTransformer = state => ({
   },
 });
 const productionLogger = store => next => (action) => {
-  const prev_state = store.getState();
-  const { participantIndex, participantId } = prev_state;
+  const prevState = store.getState();
+  const { participantIndex, participantId } = prevState;
   if (participantIndex == null && participantId == null) {
     return next(action);
   }
   const logEntry = {};
   logEntry.start_time = new Date();
-  logEntry.prev_state = stateTransformer(prev_state);
+  logEntry.prev_state = stateTransformer(prevState);
   logEntry.action = action;
 
   let returnedValue;
@@ -57,6 +57,30 @@ const middlewares = [thunkMiddleware];
 if (process.env.NODE_ENV === 'production') {
   middlewares.push(productionLogger);
 } else {
+  const logger = createLogger({
+    stateTransformer: state => ({
+      ...state,
+      entities: {
+        ...state.entities,
+        itemData: {
+          ...state.entities.itemData,
+          byId: state.entities.itemData.byId.toJS(),
+        },
+        items: {
+          ...state.entities.items,
+          byId: state.entities.items.byId.toJS(),
+        },
+        groups: {
+          ...state.entities.groups,
+          byId: state.entities.groups.byId.toJS(),
+        },
+        answers: {
+          ...state.entities.answers,
+          byId: state.entities.answers.byId.toJS(),
+        },
+      },
+    }),
+  });
   middlewares.push(logger);
 }
 const store = createStore(
