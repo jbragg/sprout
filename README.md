@@ -99,7 +99,6 @@ Steps 1 through 3 are from [here](https://cloud.google.com/appengine/docs/python
 NOTE: File locations are temporary.
 
 Experiment data
-- location: `src/static/private/pilot_instructions_experiment.with_vec.json`
 - NOTE: To add `cluster` and `vector` fields to an experiment data file, use `util/cluster.py`.
 - format (in Orderly format, which can be compiled into JSONSchema):
 ```
@@ -111,8 +110,6 @@ object {
       array [
         integer*;
       ] vector?;  # aggregate embedding for answers associated with the item
-      integer: subgroup?;  # ground truth cluster
-      string: cls?;  # ground truth label
       object {
         string: path;
         object {
@@ -124,7 +121,6 @@ object {
 ```
 
 Worker answers
-- location: `src/static/private/pilot_instructions_data_anon.json`
 - format:
 ```
 array [
@@ -137,4 +133,34 @@ array [
     } data;
   }*;
 ];
+```
+
+Saved state
+- format:
+```
+object {
+  string: instructions?  # Instructions text
+  array [
+    object {
+      integer id;
+      array [
+        integer*;
+      ] itemIds?;  # Ordered list of items in group
+      string label;
+      string name;
+    }*;
+  ] groups?;
+  array [
+    object {
+      integer id;
+      integer label?;
+      integer group?;
+      object {
+        string label;
+        string text;
+      } reason?;
+      boolean test?;
+    }*;
+  ] items?;
+};
 ```

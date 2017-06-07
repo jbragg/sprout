@@ -6,8 +6,10 @@ import Slider from 'react-slick';
 import { ItemThumbContainer } from '../containers/ItemContainer';
 import Loading from '../components/Loading';
 import { defaults } from '../constants';
+import { unlabeledItemIdsSelector } from '../reducers/index';
 
 const propTypes = {
+  isFinished: PropTypes.bool.isRequired,
   primaryItemId: PropTypes.number,
   similarItemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
   similar: PropTypes.bool,
@@ -53,10 +55,14 @@ const sliderSettings = {
   ],
 };
 
-const SimilarItemList = ({ primaryItemId, similarItemIds, similar }) => {
-  const component = primaryItemId == null
-    ? <p><Loading /></p>
-    : (
+const SimilarItemList = ({ primaryItemId, similarItemIds, similar, isFinished }) => {
+  let component = null;
+  if (isFinished) {
+    component = null;
+  } else if (primaryItemId == null) {
+    component = <p>hi</p>;
+  } else {
+    component = (
       <Panel>
         <Row className="no-gutter">
           <Col className="next" xs={6} sm={5} md={4} lg={3}>
@@ -86,6 +92,7 @@ const SimilarItemList = ({ primaryItemId, similarItemIds, similar }) => {
         </Row>
       </Panel>
     );
+  }
   return <div className="similar-item-list">{component}</div>;
 };
 
@@ -93,6 +100,7 @@ SimilarItemList.propTypes = propTypes;
 SimilarItemList.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
+  isFinished: unlabeledItemIdsSelector(state).length === 0,
   primaryItemId: state.primaryItemId,
   similarItemIds: state.similarItemIds,
 });

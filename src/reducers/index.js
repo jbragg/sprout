@@ -20,6 +20,7 @@ const initialState = {
   labels,
   finalLabels,
   tutorial: false,
+  isExperiment: true,
   oracle: {
     queuedItems: [],
     answerInterval: 30 * 1000,  // seconds to milliseconds
@@ -263,13 +264,15 @@ function InstructionsApp(state = initialState, action) {
       if (action.itemId == null && currentItemId == null && state.primaryItemId == null) {
         const { useReasons, useAnswers } = conditions[state.systemVersion];
         // Choose next primaryItem.
-        if (!useReasons && !useAnswers) {
+        if (unlabeledItemIdsSelector(state).length === 0) {
+          primaryItemId = null;
+        } else if (!useReasons && !useAnswers) {
           primaryItemId = unlabeledItemIdsSelector(state)[0];
         } else {
           primaryItemId = unlabeledSortedItemIdsSelector(state)[0];
         }
         currentItemId = primaryItemId;
-        similarItemIds = getSimilarItemIds(primaryItemId, state);
+        similarItemIds = primaryItemId == null ? [] : getSimilarItemIds(primaryItemId, state);
       } else if (action.itemId == null && currentItemId == null && state.similarItemIds.length > 0) {
         // Move to next similarItem.
         currentItemId = state.similarItemIds[0];
@@ -495,11 +498,12 @@ function InstructionsApp(state = initialState, action) {
         initialInstructions: action.payload.initialInstructions,
         generalInstructions: action.payload.initialInstructions,
         answerKey: action.payload.answerKey,
-        tutorial: action.payload.tutorial,
+        tutorial: action.payload.tutorial != null ? action.payload.tutorial : state.tutorial,
+        isExperiment: action.payload.isExperiment != null ? action.payload.isExperiment : state.isExperiment,
         entities: {
           ...state.entities,
           itemData: {
-            byId: new Map(action.payload.items.map(value => [value.id, {
+            byId: new Map(action.payload.itemData.map(value => [value.id, {
               ...value,
               answers: action.payload.answers
                 .filter(answer => answer.data.questionid === value.id)
@@ -508,12 +512,26 @@ function InstructionsApp(state = initialState, action) {
           },
           items: {
             byId: new Map(action.payload.items.map(value => [value.id, {
-              id: value.id,
+              ...value,
             }])),
+          },
+          groups: {
+            byId: new Map(action.payload.groups.map(value => [value.id, value],
+            )),
           },
           answers: {
             byId: new Map(action.payload.answers.map(value => [value.assignmentid, value])),
           },
+          labels: new Map([...state.entities.labels].map(([label, value]) => ([
+            label,
+            {
+              ...value,
+              itemIds: new Set([
+                ...value.itemIds,
+                ...action.payload.items.filter(item => item.label === label).map(item => item.id),
+              ]),
+            },
+          ]))),
         },
       };
     }

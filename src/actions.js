@@ -1,7 +1,5 @@
 import fetch from 'isomorphic-fetch';
 import latin3x3 from './rand/latin/latin3x3';
-import binary from './rand/binary/binary';
-import { Labels } from './constants';
 import { groupsSelector } from './reducers/index';
 import config from './config';
 
@@ -174,38 +172,22 @@ const getTreatment = (participantIndex, taskIndex) => {
   return latin3x3[squareIndex][participant % 3][task];
 };
 
-const getCustomerClusterLabel = (cluster, taskIndex = 0) => (
-  binary[taskIndex][cluster] === 0 ? Labels.YES : Labels.NO
-);
-
-// TODO: Don't define clusters in code.
-const birdClusterMapHack = new Map([
-  [-1, Labels.YES],
-  [0, Labels.NO],
-  [1, Labels.YES],
-  [2, Labels.NO],
-  [3, Labels.YES],
-  [4, Labels.NO],
-  [5, Labels.YES],
-  [6, Labels.NO],
-  [7, Labels.NO],
-  [8, Labels.NO],
-  [9, Labels.NO],
-  [10, Labels.YES],
-  [11, Labels.NO],
-  [12, Labels.NO],
-]);
-
-const setUpExperiment = (experiment, answers, itemRootPath, subtask = null) => {
-  const experimentData = subtask == null ? experiment.data : experiment[subtask].data;
-  const items = experimentData.map((item, id) => ({
+// TODO: option for whether state should be loaded or used as oracle.
+const setUpExperiment = (
+  experiment, itemRootPath, answers = null, state = null,
+) => {
+  const experimentData = experiment.data;
+  const itemData = experimentData.map((item, id) => ({
     id,
     ...item,
     data: {
       ...item.data,
       path: `${itemRootPath}/${item.data.path}`,
     },
-    labelGT: birdClusterMapHack.get(item.subgroup),
+    labelGT: null,
+  }));
+  const items = state && state.items ? state.items : itemData.map(item => ({
+    id: item.id,
   }));
   const formattedAnswers = answers == null ? [] :
     answers.map((answer, id) => ({
@@ -213,9 +195,21 @@ const setUpExperiment = (experiment, answers, itemRootPath, subtask = null) => {
       assignmentid: id,
       data: formatAnswerData(answer.data),
     }));
+  const groups = state && state.groups
+    ? state.groups.map(
+      group => ({
+        name: '',
+        description: '',
+        itemIds: new Set(items.filter(item => item.group === group.id).map(item => item.id)),
+        ...group,
+      }),
+    )
+    : [];
   return {
     answerKey,
     items,
+    itemData,
+    groups,
     answers: formattedAnswers,
   };
 };
@@ -235,19 +229,37 @@ export function fetchExperiment(params) {
       promises = promises.concat([answersPromise]);
     }
 
+    if (task.statePath != null) {
+      const statePromise = fetch(task.statePath)
+        .then(response => response.json());
+      promises = promises.concat([statePromise]);
+    }
+
     return Promise.all(promises)
       .then((result) => {
-        const [experiment, answers] = result;
+        let answers = null;
+        let state = null;
+        const [experiment] = result;
+        if (task.answersPath != null) {
+          answers = result[1];
+          if (task.statePath != null) {
+            state = result[2];
+          }
+        } else if (task.statePath != null) {
+          state = result[1];
+        }
+
         const systemVersion = params.systemVersion == null ? 2 : params.systemVersion;
         dispatch(receiveExperiment({
           ...setUpExperiment(
             experiment,
-            answers,
             task.itemRootPath,
-            task.subtask,
+            answers,
+            state,
           ),
           initialInstructions: task.initialInstructions,
           tutorial: task.tutorial,
+          isExperiment: task.isExperiment,
           taskIndex,
           participantId: params.participantId,
           participantIndex: params.participantIndex,

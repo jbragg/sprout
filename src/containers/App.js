@@ -44,6 +44,7 @@ const propTypes = {
   onChangeExperimentPhase: PropTypes.func.isRequired,
   masterView: PropTypes.bool,
   tutorial: PropTypes.bool,
+  isExperiment: PropTypes.bool,
   multiPhase: PropTypes.bool,
   waitForImages: PropTypes.bool,
 };
@@ -54,6 +55,7 @@ const defaultProps = {
   labels: null,
   masterView: false,
   tutorial: false,
+  isExperiment: true,
   multiPhase: false,
   waitForImages: false,
 };
@@ -87,7 +89,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    if (!this.props.tutorial) {
+    if (this.props.isExperiment) {
       this.timerID = setInterval(
         () => this.tick(),
         1000,
@@ -183,7 +185,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { items, labels, masterView, initialInstructions, tutorial } = this.props;
+    const { items, labels, masterView, initialInstructions, tutorial, isExperiment } = this.props;
     const experimentState = this.props.experimentPhase.name;
     if (experimentState == null || experimentState === States.LOADING) {
       return <Grid><h1><Loading /></h1></Grid>;
@@ -205,9 +207,9 @@ class App extends React.Component {
             <h3>Customer Instructions</h3>
             <p>Your task is to improve these instructions:</p>
             <Well bsSize="sm">{initialInstructions}</Well>
-            <Oracle />
+            {isExperiment && <Oracle />}
             <Instructions />
-            {!tutorial
+            {isExperiment
                 ? (
                   <Countdown
                     remainingTime={remainingSeconds}
@@ -338,6 +340,7 @@ const mapStateToProps = (state, { location }) => {
     masterView: parse(location.search).master !== undefined,
     multiPhase: parse(location.search).multiPhase !== undefined,
     tutorial: state.tutorial || false,
+    isExperiment: state.isExperiment,
     items: isLoaded
       ? [...itemDataSelector(state).byId.values()]
       : null,

@@ -27,7 +27,7 @@ const Master = ({ clustersSubgroup, clustersQuery, clusters }) => (
 
 const mapStateToProps = state => ({
   clustersSubgroup: List([...state.entities.itemData.byId.values()])
-    .groupBy(item => item.subgroup)
+    .groupBy(item => `${item.subgroup}:${item.cls}`)
     .sortBy(([item]) => item.subgroup),
   clustersQuery: List([...state.entities.itemData.byId.values()])
     .groupBy(item => JSON.stringify(item.data.query))
