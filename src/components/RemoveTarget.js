@@ -21,11 +21,11 @@ const defaultProps = {
 };
 
 const RemoveTarget = ({
-  connectDropTarget, defaultComponent, DropComponent, isOver, canDrop,
-children }) => (connectDropTarget(
+  connectDropTarget, DropComponent, isOver, canDrop, children,
+}) => (connectDropTarget(
   <div className={`${isOver ? 'over' : ''} ${canDrop ? 'target text-danger' : ''}`}>
     {canDrop ? <DropComponent /> : children}
-  </div>
+  </div>,
 ));
 
 RemoveTarget.propTypes = propTypes;

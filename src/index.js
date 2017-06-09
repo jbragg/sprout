@@ -58,6 +58,7 @@ if (process.env.NODE_ENV === 'production') {
   middlewares.push(productionLogger);
 } else {
   const logger = createLogger({
+    duration: true,
     stateTransformer: state => ({
       ...state,
       entities: {

@@ -69,7 +69,7 @@
 }
 
 .target {
-  border: 2px dotted red !important;
+  outline: 2px dotted red !important;
 }
 
 .target.over > .panel-heading, .target.over > div > .panel-heading, .target > div.over > .panel-heading, .target.over.btn {

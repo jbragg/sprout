@@ -269,7 +269,9 @@ export function fetchExperiment(params) {
           ),
         }));
         dispatch(setCurrentItem());
-        dispatch(startOracle());
+        if (task.isExperiment) {
+          dispatch(startOracle());
+        }
       });
   };
 }

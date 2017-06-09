@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { ItemBtnContainer } from '../containers/ItemContainer';
 
 const propTypes = {
-  itemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
+  itemIds: PropTypes.objectOf(PropTypes.number.isRequired).isRequired,
   onClick: PropTypes.func,
 };
 
@@ -13,7 +13,7 @@ const defaultProps = {
 
 const ItemList = ({ itemIds, onClick }) => (
   <div className="form-group itemlist">
-    {itemIds.map(itemId => (
+    {[...itemIds].map(itemId => (
       <ItemBtnContainer
         draggable
         itemId={itemId}

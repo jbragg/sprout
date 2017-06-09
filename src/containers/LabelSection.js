@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
-import { Panel } from 'react-bootstrap';
 import {
   editGroup, createGroupAssignAndSetCurrentItem, assignAndSetCurrentItem,
   mergeGroup,
@@ -13,14 +12,16 @@ import ItemList from '../components/ItemList';
 import RemoveTarget from '../components/RemoveTarget';
 import Confirm from '../components/Confirm';
 import { DragItemTypes as ItemTypes } from '../constants';
+import { labelGroupsSelector } from '../reducers/index';
 
 const propTypes = {
-  groupIds: PropTypes.arrayOf(PropTypes.number).isRequired,
+  groupIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
   isOver: PropTypes.bool.isRequired,
   canDrop: PropTypes.bool.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
   onGroupCreate: PropTypes.func.isRequired,
   onGroupDelete: PropTypes.func.isRequired,
+  itemIds: PropTypes.objectOf(PropTypes.number.isRequired).isRequired,
 };
 
 class LabelSection extends React.Component {
@@ -70,7 +71,7 @@ class LabelSection extends React.Component {
         </RemoveTarget>
         <div className="panel-body">
           <div>
-            <ItemList itemIds={[...itemIds.values()]} />
+            <ItemList itemIds={itemIds} />
           </div>
           {groupIds.length === 0 ? null : (
             <div className="panel-group">
@@ -135,7 +136,7 @@ const collect = (dndConnect, monitor) => ({
  */
 
 const mapStateToProps = (state, { label }) => ({
-  groupIds: [...state.entities.groups.byId.values()].filter(group => group.label === label).map(group => group.id),
+  groupIds: labelGroupsSelector(state).get(label),
   itemIds: state.entities.labels.get(label).itemIds,
 });
 

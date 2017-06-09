@@ -112,7 +112,7 @@ class Group extends React.Component {
         </div>
         <div className="panel-body">
           {useReasons ? <p>{summary}</p> : null}
-          <ItemList itemIds={[...group.itemIds.values()]} />
+          <ItemList itemIds={group.itemIds} />
         </div>
       </div>,
     ));

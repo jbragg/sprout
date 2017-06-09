@@ -1,4 +1,5 @@
-import { createSelector } from 'reselect';
+import { createSelector, createSelectorCreator, defaultMemoize } from 'reselect';
+import isEqual from 'lodash/isEqual';
 import { Map } from 'immutable';
 import {
   ANSWER_ORACLE, QUEUE_ITEM_ORACLE, UNQUEUE_ITEM_ORACLE, SET_CLUSTER_ID,
@@ -62,6 +63,11 @@ const cosineSimilarity = (vec1, vec2) => (
   dotProduct(vec1, vec2) / Math.sqrt(dotProduct(vec1, vec1)) / Math.sqrt(dotProduct(vec2, vec2))
 );
 
+const createDeepEqualSelector = createSelectorCreator(
+  defaultMemoize,
+  isEqual,
+);
+
 /*
  * selectors
  */
@@ -74,6 +80,18 @@ export const answersSelector = state => state.entities.answers;
 export const clusterIdsSelector = createSelector(
   itemDataSelector,
   items => new Set([...items.byId.values()].map(item => item.cluster)),
+);
+export const groupLabelsSelector = createSelector(
+  groupsSelector,
+  groups => new Map([...groups.byId].map(([key, group]) => [key, group.label])),
+);
+export const labelGroupsSelector = createDeepEqualSelector(
+  groupLabelsSelector,
+  state => state.labels,
+  (groups, labs) => new Map(labs.map(label => [
+    label,
+    [...groups].filter(([, value]) => value === label).map(([id]) => id),
+  ])),
 );
 export const itemLabelsSelector = createSelector(
   itemsSelector,

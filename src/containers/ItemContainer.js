@@ -32,10 +32,7 @@ const collect = (dndConnect, monitor) => ({
 
 const mapStateToProps = (state, { itemId, useReasons, useAnswers }) => ({
   selected: state.currentItemId === itemId,
-  item: {
-    ...itemsSelector(state).byId.get(itemId),
-    ...itemDataSelector(state).byId.get(itemId),
-  },
+  item: itemDataSelector(state).byId.get(itemId),
   answers: itemAnswersSelector(state).get(itemId),
   useReasons: useReasons == null ? conditions[state.systemVersion].useReasons : useReasons,
   useAnswers: useAnswers == null ? conditions[state.systemVersion].useAnswers : useAnswers,

@@ -47,6 +47,7 @@ const propTypes = {
   isExperiment: PropTypes.bool,
   multiPhase: PropTypes.bool,
   waitForImages: PropTypes.bool,
+  prefetchAll: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -58,6 +59,7 @@ const defaultProps = {
   isExperiment: true,
   multiPhase: false,
   waitForImages: false,
+  prefetchAll: false,
 };
 
 class App extends React.Component {
@@ -185,7 +187,10 @@ class App extends React.Component {
   }
 
   render() {
-    const { items, labels, masterView, initialInstructions, tutorial, isExperiment } = this.props;
+    const {
+      items, labels, masterView, initialInstructions, isExperiment,
+      prefetchAll,
+    } = this.props;
     const experimentState = this.props.experimentPhase.name;
     if (experimentState == null || experimentState === States.LOADING) {
       return <Grid><h1><Loading /></h1></Grid>;
@@ -294,15 +299,17 @@ class App extends React.Component {
     }
     return (
       <div id="app">
-        <div className="hidden">
-          {items.map(item => (
-            <img
-              src={item.data.path}
-              key={item.id}
-              onLoad={() => { this.handleImageLoaded(item.id); }}
-            />
-          ))}
-        </div>
+        {prefetchAll &&
+          <div className="hidden">
+            {items.map(item => (
+              <img
+                src={item.data.path}
+                key={item.id}
+                onLoad={() => { this.handleImageLoaded(item.id); }}
+              />
+            ))}
+          </div>
+        }
         <CustomDragLayer />
         {this.props.tutorial && (
           <Joyride
@@ -341,6 +348,7 @@ const mapStateToProps = (state, { location }) => {
     multiPhase: parse(location.search).multiPhase !== undefined,
     tutorial: state.tutorial || false,
     isExperiment: state.isExperiment,
+    prefetchAll: state.isExperiment,
     items: isLoaded
       ? [...itemDataSelector(state).byId.values()]
       : null,
