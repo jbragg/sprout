@@ -102,8 +102,7 @@ export function createGroup(keyValues) {
 export function createGroupAssignAndSetCurrentItem(itemIds, keyValues) {
   return (dispatch, getState) => {
     dispatch(createGroup(keyValues));
-    const groups = [...groupsSelector(getState()).byId.keys()];
-    const groupId = groups[groups.length - 1];
+    const groupId = Math.max(...groupsSelector(getState()).byId.keys());
     dispatch(assignAndSetCurrentItem(itemIds, { group: groupId }));
   };
 }
