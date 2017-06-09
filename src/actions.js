@@ -172,10 +172,21 @@ const getTreatment = (participantIndex, taskIndex) => {
   return latin3x3[squareIndex][participant % 3][task];
 };
 
-// TODO: option for whether state should be loaded or used as oracle.
+const getItemLabels = (items, groups = null) => {
+  const groupsMap = new Map(groups.map(group => [group.id, group]));
+  return new Map(items.map(item => [
+    item.id,
+    (item.group != null
+      ? groupsMap.get(item.group).label
+      : item.label
+    ),
+  ]));
+};
+
 const setUpExperiment = (
-  experiment, itemRootPath, answers = null, state = null,
+  experiment, itemRootPath, answers = null, state = null, oracle = null,
 ) => {
+  const oracleLabels = oracle == null ? new Map() : getItemLabels(oracle.items, oracle.groups);
   const experimentData = experiment.data;
   const itemData = experimentData.map((item, id) => ({
     id,
@@ -184,7 +195,7 @@ const setUpExperiment = (
       ...item.data,
       path: `${itemRootPath}/${item.data.path}`,
     },
-    labelGT: null,
+    labelGT: oracleLabels.get(item.id != null ? item.id : id),
   }));
   const items = state && state.items ? state.items : itemData.map(item => ({
     id: item.id,
@@ -224,33 +235,25 @@ export function fetchExperiment(params) {
     const task = config.tasks[taskIndex];
     const experimentPromise = fetch(task.experimentPath)
       .then(response => response.json());
-    let promises = [experimentPromise];
-
-    if (task.answersPath != null) {
-      const answersPromise = fetch(task.answersPath)
-        .then(response => response.json());
-      promises = promises.concat([answersPromise]);
-    }
-
-    if (task.statePath != null) {
-      const statePromise = fetch(task.statePath)
-        .then(response => response.json());
-      promises = promises.concat([statePromise]);
-    }
+    const promises = [
+      experimentPromise,
+      (task.answersPath == null
+        ? Promise.resolve(null)
+        : fetch(task.answersPath).then(response => response.json())
+      ),
+      (task.statePath == null
+        ? Promise.resolve(null)
+        : fetch(task.statePath).then(response => response.json())
+      ),
+      (task.oraclePath == null
+        ? Promise.resolve(null)
+        : fetch(task.oraclePath).then(response => response.json())
+      ),
+    ];
 
     return Promise.all(promises)
       .then((result) => {
-        let answers = null;
-        let state = null;
-        const [experiment] = result;
-        if (task.answersPath != null) {
-          answers = result[1];
-          if (task.statePath != null) {
-            state = result[2];
-          }
-        } else if (task.statePath != null) {
-          state = result[1];
-        }
+        const [experiment, answers, state, oracle] = result;
 
         const systemVersion = params.systemVersion == null ? 2 : params.systemVersion;
         dispatch(receiveExperiment({
@@ -259,6 +262,7 @@ export function fetchExperiment(params) {
             task.itemRootPath,
             answers,
             state,
+            oracle,
           ),
           initialInstructions: task.initialInstructions,
           instructions: (state && state.instructions) || task.initialInstructions,

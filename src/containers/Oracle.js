@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 import { connect } from 'react-redux';
 import { Popover, OverlayTrigger, Panel } from 'react-bootstrap';
 import { DropTarget } from 'react-dnd';
@@ -7,12 +8,10 @@ import ItemList from '../components/ItemList';
 import RemoveTarget from '../components/RemoveTarget';
 import { queueItemOracle, unqueueItemOracle } from '../actions';
 import { DragItemTypes as ItemTypes } from '../constants';
+import { queuedItemsSelector } from '../reducers/index';
 
 const propTypes = {
-  queuedItems: PropTypes.objectOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-    }).isRequired,
+  queuedItems: ImmutablePropTypes.orderedSetOf(PropTypes.number.isRequired,
   ).isRequired,
   answeredItems: PropTypes.arrayOf(
     PropTypes.shape({
@@ -57,7 +56,7 @@ const Oracle = ({
       </RemoveTarget>
       <div className="panel-body">
         <div>
-          {queuedItems.size === 0 ? null : <ItemList itemIds={[...queuedItems.keys()]} />}
+          {queuedItems.size === 0 ? null : <ItemList itemIds={queuedItems} />}
         </div>
         {labels.map((label) => {
           const itemIds = answeredItems.filter(val => val.label === label).map(val => val.id);
@@ -101,7 +100,7 @@ const collect = (dndConnect, monitor) => ({
  */
 
 const mapStateToProps = state => ({
-  queuedItems: new Map(state.oracle.queuedItems.map(item => [item.id, item])),
+  queuedItems: queuedItemsSelector(state),
   answeredItems: state.oracle.answeredItems,
   labels: state.labels,
 });

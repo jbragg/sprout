@@ -128,6 +128,10 @@ export const testItemsSelector = createSelector(
   itemsSelector,
   items => [...items.byId.values()].filter(item => item.test),
 );
+export const queuedItemsSelector = createSelector(
+  state => state.oracle.queuedItems,
+  queuedItems => new Set(queuedItems.map(item => item.id)),
+);
 export const clusterItemsSelector = createSelector(
   state => state.clusterId,
   itemDataSelector,

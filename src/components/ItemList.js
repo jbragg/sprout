@@ -4,7 +4,10 @@ import ImmutablePropTypes from 'react-immutable-proptypes';
 import { ItemBtnContainer } from '../containers/ItemContainer';
 
 const propTypes = {
-  itemIds: ImmutablePropTypes.orderedSetOf(PropTypes.number.isRequired).isRequired,
+  itemIds: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.number.isRequired),
+    ImmutablePropTypes.orderedSetOf(PropTypes.number.isRequired),
+  ]).isRequired,
   onClick: PropTypes.func,
 };
 
