@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
 import {
@@ -21,7 +22,7 @@ const propTypes = {
   connectDropTarget: PropTypes.func.isRequired,
   onGroupCreate: PropTypes.func.isRequired,
   onGroupDelete: PropTypes.func.isRequired,
-  itemIds: PropTypes.objectOf(PropTypes.number.isRequired).isRequired,
+  itemIds: ImmutablePropTypes.orderedSetOf(PropTypes.number.isRequired).isRequired,
 };
 
 class LabelSection extends React.Component {

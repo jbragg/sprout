@@ -1,6 +1,6 @@
 import { createSelector, createSelectorCreator, defaultMemoize } from 'reselect';
 import isEqual from 'lodash/isEqual';
-import { Map } from 'immutable';
+import { Map, OrderedSet as Set } from 'immutable';
 import {
   ANSWER_ORACLE, QUEUE_ITEM_ORACLE, UNQUEUE_ITEM_ORACLE, SET_CLUSTER_ID,
   EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEMS, EDIT_ITEM,
@@ -514,7 +514,7 @@ function InstructionsApp(state = initialState, action) {
         participantId: action.payload.participantId,
         participantIndex: action.payload.participantIndex,
         initialInstructions: action.payload.initialInstructions,
-        generalInstructions: action.payload.initialInstructions,
+        generalInstructions: action.payload.instructions,
         answerKey: action.payload.answerKey,
         tutorial: action.payload.tutorial != null ? action.payload.tutorial : state.tutorial,
         isExperiment: action.payload.isExperiment != null ? action.payload.isExperiment : state.isExperiment,

@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 import { ItemBtnContainer } from '../containers/ItemContainer';
 
 const propTypes = {
-  itemIds: PropTypes.objectOf(PropTypes.number.isRequired).isRequired,
+  itemIds: ImmutablePropTypes.orderedSetOf(PropTypes.number.isRequired).isRequired,
   onClick: PropTypes.func,
 };
 

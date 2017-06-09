@@ -13,7 +13,6 @@ import Root from './components/Root';
  * Logs all actions to back-end server.
  *
  * NOTE: Catches errors and does not re-raise them.
- * TODO: Perform this logging only during experiments.
  */
 const stateTransformer = state => ({
   ...state,

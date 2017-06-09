@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import { OrderedSet as Set } from 'immutable';
 import latin3x3 from './rand/latin/latin3x3';
 import { groupsSelector } from './reducers/index';
 import config from './config';
@@ -199,8 +200,11 @@ const setUpExperiment = (
       group => ({
         name: '',
         description: '',
-        itemIds: new Set(items.filter(item => item.group === group.id).map(item => item.id)),
         ...group,
+        itemIds: new Set(
+          group.itemIds
+          || items.filter(item => item.group === group.id).map(item => item.id),
+        ),
       }),
     )
     : [];
@@ -257,6 +261,7 @@ export function fetchExperiment(params) {
             state,
           ),
           initialInstructions: task.initialInstructions,
+          instructions: (state && state.instructions) || task.initialInstructions,
           tutorial: task.tutorial,
           isExperiment: task.isExperiment,
           taskIndex,

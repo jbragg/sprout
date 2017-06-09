@@ -16,6 +16,7 @@ import Survey from './Survey';
 import Oracle from './Oracle';
 import CustomDragLayer from '../CustomDragLayer';
 import Master from './Master';
+import Export from './Export';
 import { fetchExperiment, changeExperimentPhase } from '../actions';
 import { itemDataSelector } from '../reducers/index';
 import { States, defaults, tutorialSteps } from '../constants';
@@ -223,11 +224,13 @@ class App extends React.Component {
                   />
                 )
                 : (
-                  <Button
-                    bsStyle="primary"
-                  >
-                    Submit
-                  </Button>
+                  <Export>
+                    <Button
+                      bsStyle="primary"
+                    >
+                      Export
+                    </Button>
+                  </Export>
                 )
             }
           </Col>
