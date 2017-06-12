@@ -15,7 +15,7 @@ import Countdown from '../components/Countdown';
 import Survey from './Survey';
 import Oracle from './Oracle';
 import CustomDragLayer from '../CustomDragLayer';
-import Master from './Master';
+import Clusters from './Clusters';
 import Export from './Export';
 import { fetchExperiment, changeExperimentPhase } from '../actions';
 import { itemDataSelector } from '../reducers/index';
@@ -44,6 +44,7 @@ const propTypes = {
   initialInstructions: PropTypes.string,
   onChangeExperimentPhase: PropTypes.func.isRequired,
   masterView: PropTypes.bool,
+  clusterView: PropTypes.bool,
   tutorial: PropTypes.bool,
   isExperiment: PropTypes.bool,
   multiPhase: PropTypes.bool,
@@ -56,6 +57,7 @@ const defaultProps = {
   initialInstructions: null,
   labels: null,
   masterView: false,
+  clusterView: false,
   tutorial: false,
   isExperiment: true,
   multiPhase: false,
@@ -189,14 +191,14 @@ class App extends React.Component {
 
   render() {
     const {
-      items, labels, masterView, initialInstructions, isExperiment,
+      items, labels, masterView, clusterView, initialInstructions, isExperiment,
       prefetchAll,
     } = this.props;
     const experimentState = this.props.experimentPhase.name;
     if (experimentState == null || experimentState === States.LOADING) {
       return <Grid><h1><Loading /></h1></Grid>;
-    } else if (masterView) {
-      return <Grid fluid><Master /></Grid>;
+    } else if (clusterView) {
+      return <Grid fluid><Clusters /></Grid>;
     }
     let experimentComponent = null;
     const remainingSeconds = this.remainingTime() / 1000;
@@ -204,7 +206,7 @@ class App extends React.Component {
       experimentComponent = (
         <Grid fluid>
           <Col sm={4}>
-            <UnlabeledColumn />
+            <UnlabeledColumn master={masterView} />
           </Col>
           <Col sm={4}>
             <LabeledColumn labels={labels} />
@@ -241,7 +243,7 @@ class App extends React.Component {
         <Grid fluid>
           <Col sm={6}>
             <Well bsSize="sm">{initialInstructions}</Well>
-            <UnlabeledColumn />
+            <UnlabeledColumn master={masterView} />
           </Col>
           <Col sm={6}>
             <LabeledColumn labels={labels} />
@@ -347,6 +349,7 @@ const mapStateToProps = (state, { location }) => {
   return {
     experimentPhase: state.experimentPhase,
     labels: state.labels,
+    clusterView: parse(location.search).clusters !== undefined,
     masterView: parse(location.search).master !== undefined,
     multiPhase: parse(location.search).multiPhase !== undefined,
     tutorial: state.tutorial || false,

@@ -9,20 +9,23 @@ import conditions from '../experiment';
 const propTypes = {
   currentItemId: PropTypes.number,
   useReasons: PropTypes.bool,
+  master: PropTypes.bool,
 };
 
 const defaultProps = {
   currentItemId: null,
   useReasons: true,
+  master: false,
 };
 
-const UnlabeledColumn = ({ useReasons, currentItemId }) => (
+const UnlabeledColumn = ({ useReasons, currentItemId, master }) => (
   <PanelGroup>
     <UnlabeledSection className="panel" useReasons={useReasons} />
     {currentItemId != null && (
       <ItemLargeContainer
         draggable
         itemId={currentItemId}
+        master={master}
       />
     )}
   </PanelGroup>

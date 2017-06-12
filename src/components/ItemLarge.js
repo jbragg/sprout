@@ -30,6 +30,7 @@ const propTypes = {
   editReason: PropTypes.bool,
   draggable: PropTypes.bool.isRequired,
   recommendedGroup: PropTypes.number,
+  master: PropTypes.bool,
 };
 
 const defaultProps = ({
@@ -41,6 +42,7 @@ const defaultProps = ({
   aggregateOnly: true,
   editReason: false,
   recommendedGroup: null,
+  master: false,
 });
 
 class ItemLarge extends React.Component {
@@ -76,35 +78,31 @@ class ItemLarge extends React.Component {
     const {
       item, answers, connectDragSource, isDragging, useReasons,
       useAnswers, answerKey, aggregateOnly, editReason, draggable,
-      recommendedGroup,
+      recommendedGroup, master,
     } = this.props;
     const { imageStatus } = this.state;
     const itemComponent = (
       <ListGroup className={imageStatus === 'loaded' ? '' : 'hidden'}>
-        {useAnswers
-            ? (
-              <ListGroupItem>
-                <AnswersSummary answers={answers} answerKey={answerKey} />
-              </ListGroupItem>
-            )
-            : null
-        }
-        {useAnswers && useReasons && aggregateOnly
-            ? (
-              <ListGroupItem>
-                <ConfusionsTable answers={answers} />
-              </ListGroupItem>
-            )
-            : null
-        }
-        {useAnswers && !aggregateOnly
-            ? (
-              <ListGroupItem>
-                <AnswersTable useReasons={useReasons} answers={answers} />
-              </ListGroupItem>
-            )
-            : null
-        }
+        {useAnswers && (
+          <ListGroupItem>
+            <AnswersSummary answers={answers} answerKey={answerKey} />
+          </ListGroupItem>
+        )}
+        {useAnswers && useReasons && aggregateOnly && (
+          <ListGroupItem>
+            <ConfusionsTable answers={answers} />
+          </ListGroupItem>
+        )}
+        {useAnswers && !aggregateOnly && (
+          <ListGroupItem>
+            <AnswersTable useReasons={useReasons} answers={answers} />
+          </ListGroupItem>
+        )}
+        {master && (
+          <ListGroupItem>
+            <pre>{JSON.stringify(item, null, 2)}</pre>
+          </ListGroupItem>
+        )}
         <ListGroupItem>
           <Image
             className="item"
