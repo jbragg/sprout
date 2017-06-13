@@ -5,6 +5,22 @@ import { DragItemTypes as ItemTypes } from './constants';
 import { ItemThumbContainer } from './containers/ItemContainer';
 import GroupDrag from './components/GroupDrag';
 
+const propTypes = {
+  item: PropTypes.object,
+  itemType: PropTypes.string,
+  isDragging: PropTypes.bool.isRequired,
+  clientOffset: PropTypes.shape({
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number.isRequired,
+  }),
+};
+
+const defaultProps = {
+  item: null,
+  itemType: null,
+  clientOffset: null,
+};
+
 const layerStyles = {
   position: 'fixed',
   pointerEvents: 'none',
@@ -15,15 +31,14 @@ const layerStyles = {
   height: '100%',
 };
 
-function getItemStyles(props) {
-  const { clientOffset } = props;
+function getItemStyles(clientOffset) {
   if (!clientOffset) {
     return {
       display: 'none',
     };
   }
 
-  let { x, y } = clientOffset;
+  const { x, y } = clientOffset;
 
   const transform = `translate(${x}px, ${y}px)`;
   return {
@@ -32,37 +47,35 @@ function getItemStyles(props) {
   };
 }
 
-class CustomDragLayer extends React.Component {
-
-  renderItem(type, item) {
-    switch (type) {
-      case ItemTypes.ITEM:
-        return (<ItemThumbContainer itemId={item.id} />);
-      case ItemTypes.CLUSTER:
-        return (<GroupDrag n={item.ids.length} />);
-      case ItemTypes.GROUP:
-        return (<GroupDrag n={item.itemIds.length} />);
-      default:
-        return null;
-    }
-  }
-
-  render() {
-    const { item, itemType, isDragging } = this.props;
-
-    if (!isDragging) {
+function renderItem(type, item) {
+  switch (type) {
+    case ItemTypes.ITEM:
+      return (<ItemThumbContainer itemId={item.id} />);
+    case ItemTypes.CLUSTER:
+      return (<GroupDrag n={item.ids.length} />);
+    case ItemTypes.GROUP:
+      return (<GroupDrag n={item.itemIds.size} />);
+    default:
       return null;
-    }
-
-    return (
-      <div style={layerStyles}>
-        <div style={getItemStyles(this.props)}>
-          {this.renderItem(itemType, item)}
-        </div>
-      </div>
-    );
   }
 }
+
+const CustomDragLayer = ({ item, itemType, isDragging, clientOffset }) => {
+  if (!isDragging) {
+    return null;
+  }
+
+  return (
+    <div style={layerStyles}>
+      <div style={getItemStyles(clientOffset)}>
+        {renderItem(itemType, item)}
+      </div>
+    </div>
+  );
+};
+
+CustomDragLayer.propTypes = propTypes;
+CustomDragLayer.defaultProps = defaultProps;
 
 const dragLayerCollect = monitor => ({
   item: monitor.getItem(),

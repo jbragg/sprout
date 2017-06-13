@@ -56,7 +56,7 @@ class Group extends React.Component {
      * Need to remove css class before reapplying to ensure animation works.
      */
     const { currentItemId, group } = this.props;
-    if (nextProps.currentItemId !== currentItemId || nextProps.group.itemIds.size !== group.itemIds.size) {
+    if (nextProps.currentItemId !== currentItemId || nextProps.group.itemIds !== group.itemIds) {
       this.setState({ recommended: false }, () => {
         setTimeout(() => this.setState({ recommended: nextProps.recommended }), 0);
       });
@@ -129,7 +129,7 @@ Group.defaultProps = defaultProps;
 const groupSource = {
   beginDrag: props => ({
     id: props.groupId,
-    itemIds: [...props.group.itemIds.keys()],
+    itemIds: props.group.itemIds,
   }),
 };
 
