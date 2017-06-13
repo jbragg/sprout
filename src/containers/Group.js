@@ -102,7 +102,7 @@ class Group extends React.Component {
                 type="text"
                 bsSize="sm"
                 value={group.name}
-                onChange={(e) => { onGroupEdit({ name: e.target.value }); }}
+                onChange={(e) => { onGroupEdit({ name: e.target.value }, group.id); }}
               />
             </Col>
             <Col className="text-right" xs={2}>
@@ -147,21 +147,21 @@ const groupTarget = {
          * (by ignoring but still catching)
          * drop events of its own items rather than the parent label.
          */
-        props.onAssign([monitor.getItem().id]);
+        props.onAssign([monitor.getItem().id], props.groupId);
       }
     } else if (monitor.getItemType() === ItemTypes.GROUP) {
       const id = monitor.getItem().id;
       if (props.confirmMerge == null) {
-        props.onGroupMergeIn(id);
+        props.onGroupMergeIn(id, props.groupId);
       } else {
-        props.confirmMerge(() => props.onGroupMergeIn(id));
+        props.confirmMerge(() => props.onGroupMergeIn(id, props.groupId));
       }
     } else {  // ItemTypes.CLUSTER
       const ids = monitor.getItem().ids;
       if (props.confirmMerge == null) {
-        props.onAssign(ids);
+        props.onAssign(ids, props.groupId);
       } else {
-        props.confirmMerge(() => props.onAssign(ids));
+        props.confirmMerge(() => props.onAssign(ids, props.groupId));
       }
     }
   },
@@ -196,20 +196,24 @@ const mapStateToProps = (state, { groupId }) => ({
   useReasons: conditions[state.systemVersion].useReasons,
 });
 
-const mapDispatchToProps = (dispatch, { groupId }) => ({
-  onGroupEdit: (keyValues) => {
+const mapDispatchToProps = dispatch => ({
+  onGroupEdit: (keyValues, groupId) => {
     dispatch(editGroup(groupId, keyValues));
   },
-  onAssign: (itemIds) => {
+  onAssign: (itemIds, groupId) => {
     dispatch(assignAndSetCurrentItem(itemIds, { group: groupId }));
   },
-  onGroupMergeIn: (sourceGroupId) => {
+  onGroupMergeIn: (sourceGroupId, groupId) => {
     dispatch(mergeGroup(sourceGroupId, { group: groupId }));
   },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(
-  DragSource(ItemTypes.GROUP, groupSource, collectSource)(
+  DragSource(
+    ItemTypes.GROUP,
+    groupSource,
+    collectSource,
+  )(
     DropTarget(
       [ItemTypes.ITEM, ItemTypes.GROUP, ItemTypes.CLUSTER],
       groupTarget,

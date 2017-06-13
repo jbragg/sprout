@@ -62,7 +62,7 @@ class LabelSection extends React.Component {
         <RemoveTarget
           onDrop={(_, monitor) => {
             const id = monitor.getItem().id;
-            this.confirm(() => { onGroupDelete(id); }, deleteMessage);
+            this.confirm(() => { onGroupDelete(id, label); }, deleteMessage);
           }}
           onCanDrop={(_, monitor) => monitor.getItemType() === ItemTypes.GROUP && groupIds.indexOf(monitor.getItem().id) >= 0}
         >
@@ -74,7 +74,7 @@ class LabelSection extends React.Component {
           <div>
             <ItemList itemIds={itemIds} />
           </div>
-          {groupIds.length === 0 ? null : (
+          {groupIds.length > 0 && (
             <div className="panel-group">
               {groupIds.map(key => (
                 <Group
@@ -85,7 +85,7 @@ class LabelSection extends React.Component {
               ))}
             </div>
           )}
-          <NewGroup onGroupCreate={onGroupCreate} />
+          <NewGroup onGroupCreate={(ids) => { onGroupCreate(ids, label); }} />
         </div>
       </div>,
     );
@@ -104,11 +104,11 @@ const target = {
       return;
     }
     if (monitor.getItemType() === ItemTypes.ITEM) {
-      props.onAssign(monitor.getItem().id);
+      props.onAssign(monitor.getItem().id, props.label);
     } else if (monitor.getItemType() === ItemTypes.GROUP) {
-      props.onGroupMove(monitor.getItem().id);
+      props.onGroupMove(monitor.getItem().id, props.label);
     } else {  // ItemTypes.CLUSTER
-      props.onGroupCreate(monitor.getItem().ids);
+      props.onGroupCreate(monitor.getItem().ids, props.label);
     }
   },
   canDrop: (props, monitor) => {
@@ -141,17 +141,17 @@ const mapStateToProps = (state, { label }) => ({
   itemIds: state.entities.labels.get(label).itemIds,
 });
 
-const mapDispatchToProps = (dispatch, { label }) => ({
-  onGroupDelete: (groupId) => {
+const mapDispatchToProps = dispatch => ({
+  onGroupDelete: (groupId, label) => {
     dispatch(mergeGroup(groupId, { label }));
   },
-  onGroupCreate: (itemIds) => {
+  onGroupCreate: (itemIds, label) => {
     dispatch(createGroupAssignAndSetCurrentItem(itemIds, { label }));
   },
-  onAssign: (itemId) => {
+  onAssign: (itemId, label) => {
     dispatch(assignAndSetCurrentItem([itemId], { label }));
   },
-  onGroupMove: (groupId) => {
+  onGroupMove: (groupId, label) => {
     dispatch(editGroup(groupId, { label }));
   },
 });

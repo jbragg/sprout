@@ -8,8 +8,7 @@ import { setCurrentItem } from '../actions';
 import { DragItemTypes as ItemTypes } from '../constants';
 import conditions from '../experiment';
 import {
-  itemDataSelector, itemsSelector, itemAnswersSelector,
-  recommendedGroupSelector,
+  itemDataSelector, itemAnswersSelector, recommendedGroupSelector,
 } from '../reducers/index';
 
 /*
@@ -40,16 +39,20 @@ const mapStateToProps = (state, { itemId, useReasons, useAnswers }) => ({
   recommendedGroup: recommendedGroupSelector(state),
 });
 
-const mapDispatchToProps = (dispatch, { itemId, onClick }) => ({
+const mapDispatchToProps = (dispatch, { onClick }) => ({
   onClick: (onClick != null
-    ? () => onClick(itemId)
-    : () => { dispatch(setCurrentItem(itemId)); }
+    ? onClick
+    : (id) => { dispatch(setCurrentItem(id)); }
   ),
 });
 
 const connectOptionallyDraggable = (x) => {
   const Component = connect(mapStateToProps, mapDispatchToProps)(x);
-  const DraggableComponent = DragSource(ItemTypes.ITEM, itemSource, collect)(Component);
+  const DraggableComponent = DragSource(
+    ItemTypes.ITEM,
+    itemSource,
+    collect,
+  )(Component);
   return ({ draggable, ...props }) => (draggable
     ? <DraggableComponent draggable {...props} />
     : <Component draggable={false} {...props} />

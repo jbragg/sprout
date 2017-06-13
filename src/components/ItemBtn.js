@@ -68,7 +68,7 @@ class ItemBtn extends React.Component {
         >
           <button
             className={`item-btn btn btn-default ${selected ? 'active' : ''}`}
-            onClick={(e) => { onClick(); e.preventDefault(); }}
+            onClick={(e) => { onClick(item.id); e.preventDefault(); }}
             style={{
               color: textColor,
               backgroundColor,
