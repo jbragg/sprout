@@ -32,8 +32,9 @@ const UnlabeledColumn = ({ useReasons, currentItemId, master }) => (
 );
 
 UnlabeledColumn.propTypes = propTypes;
+UnlabeledColumn.defaultProps = defaultProps;
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   currentItemId: state.currentItemId,
   useReasons: conditions[state.systemVersion].useReasons,
 });

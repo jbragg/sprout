@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
 import Joyride from 'react-joyride';
 import { Grid, Col, Well, Button, Alert } from 'react-bootstrap';
+import { AutoAffix } from 'react-overlays';
 import Instructions from '../components/Instructions';
 import Loading from '../components/Loading';
 import UnlabeledColumn from './UnlabeledColumn';
@@ -206,35 +207,43 @@ class App extends React.Component {
       experimentComponent = (
         <Grid fluid>
           <Col sm={4}>
-            <UnlabeledColumn master={masterView} />
+            <AutoAffix>
+              <div>
+                <UnlabeledColumn master={masterView} />
+              </div>
+            </AutoAffix>
           </Col>
           <Col sm={4}>
             <LabeledColumn labels={labels} />
           </Col>
           <Col className="instructions" sm={4}>
-            <h3>Customer Instructions</h3>
-            <p>Your task is to improve these instructions:</p>
-            <Well bsSize="sm">{initialInstructions}</Well>
-            {isExperiment && <Oracle />}
-            <Instructions />
-            {isExperiment
-                ? (
-                  <Countdown
-                    remainingTime={remainingSeconds}
-                    onFinished={this.advanceExperimentPhase}
-                    confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
-                  />
-                )
-                : (
-                  <Export>
-                    <Button
-                      bsStyle="primary"
-                    >
-                      Export
-                    </Button>
-                  </Export>
-                )
-            }
+            <AutoAffix>
+              <div>
+                <h3>Customer Instructions</h3>
+                <p>Your task is to improve these instructions:</p>
+                <Well bsSize="sm">{initialInstructions}</Well>
+                {isExperiment && <Oracle />}
+                <Instructions />
+                {isExperiment
+                    ? (
+                      <Countdown
+                        remainingTime={remainingSeconds}
+                        onFinished={this.advanceExperimentPhase}
+                        confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
+                      />
+                    )
+                    : (
+                      <Export>
+                        <Button
+                          bsStyle="primary"
+                        >
+                          Export
+                        </Button>
+                      </Export>
+                    )
+                }
+              </div>
+            </AutoAffix>
           </Col>
         </Grid>
       );
@@ -323,14 +332,18 @@ class App extends React.Component {
             run={this.state.tutorialRunning}
           />
         )}
-        {!this.props.tutorial && this.state.warnings.length > 0 && this.state.warnings[0][0] <= this.elapsedTime() &&
-          <Alert
-            bsStyle="warning"
-            onDismiss={this.dismissExpiredAlerts}
-            className="text-center"
-          >
-            <ReactMarkdown source={this.state.warnings[0][1]} />
-          </Alert>
+        {!this.props.tutorial
+            && this.state.warnings.length > 0
+            && this.state.warnings[0][0] <= this.elapsedTime()
+            && (
+              <Alert
+                bsStyle="warning"
+                onDismiss={this.dismissExpiredAlerts}
+                className="text-center"
+              >
+                <ReactMarkdown source={this.state.warnings[0][1]} />
+              </Alert>
+            )
         }
         {experimentComponent}
       </div>
