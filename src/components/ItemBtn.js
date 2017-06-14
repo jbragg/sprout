@@ -52,9 +52,15 @@ class ItemBtn extends React.Component {
       connectDragSource, isDragging, useAnswers,
     } = this.props;
     const answerValues = answers.map(answer => answer.data.answer);
-    const scores = getScore(metric)(...answerValues);
-    const backgroundColor = useAnswers ? getColor(metric)(scores.color) : '';
-    const textColor = useAnswers ? getContrastColor(backgroundColor) : '';
+    const scores = answerValues.length > 0
+      ? getScore(metric)(...answerValues)
+      : null;
+    const backgroundColor = useAnswers && scores != null
+      ? getColor(metric)(scores.color)
+      : '';
+    const textColor = useAnswers && scores != null
+      ? getContrastColor(backgroundColor)
+      : '';
     return connectDragSource(
       <span
         className="item-btn"
