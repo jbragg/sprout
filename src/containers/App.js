@@ -19,6 +19,7 @@ import CustomDragLayer from '../CustomDragLayer';
 import Clusters from './Clusters';
 import Export from './Export';
 import Thanks from '../components/Thanks';
+import ExperimentProgress from '../components/ExperimentProgress';
 import { fetchExperiment, changeExperimentPhase } from '../actions';
 import { itemDataSelector } from '../reducers/index';
 import { States, defaults, tutorialSteps } from '../constants';
@@ -362,6 +363,13 @@ class App extends React.Component {
               </Alert>
             )
         }
+        {(this.state.params.tutorial || this.state.params.taskIndex != null) && (
+          <ExperimentProgress
+            currentIndex={
+              this.state.params.tutorial ? 0 : this.state.params.taskIndex + 1
+            }
+          />
+        )}
         {experimentComponent}
       </div>
     );
