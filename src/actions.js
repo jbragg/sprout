@@ -169,7 +169,7 @@ const getTreatment = (participantIndex, taskIndex) => {
   const participant = Number(participantIndex);
   const task = Number(taskIndex);
   const squareIndex = Math.floor(participant / 3) % latin3x3.length;
-  return latin3x3[squareIndex][participant % 3][task];
+  return latin3x3[squareIndex][participant % 3][task] - 1;
 };
 
 const getItemLabels = (items, groups = null) => {
@@ -231,8 +231,16 @@ const setUpExperiment = (
 export function fetchExperiment(params) {
   return (dispatch) => {
     dispatch(requestExperiment());
-    const taskIndex = params.taskIndex || 0;
-    const task = config.tasks[taskIndex];
+    let task = null;
+    let experimentId = null;
+    let taskId = params.taskId;
+    if (params.tutorial || params.taskIndex != null) {
+      experimentId = params.experimentId || 'default';
+      taskId = params.tutorial
+        ? config.experiments[experimentId].tutorial
+        : config.experiments[experimentId].tasks[params.taskIndex];
+    }
+    task = config.tasks[taskId];
     const experimentPromise = fetch(task.experimentPath)
       .then(response => response.json());
     const promises = [
@@ -255,7 +263,14 @@ export function fetchExperiment(params) {
       .then((result) => {
         const [experiment, answers, state, oracle] = result;
 
-        const systemVersion = params.systemVersion == null ? 2 : params.systemVersion;
+        let systemVersion = null;
+        if (params.participantIndex != null) {
+          systemVersion = params.tutorial
+            ? 2
+            : getTreatment(params.participantIndex, params.taskIndex);
+        } else {
+          systemVersion = params.systemVersion == null ? 2 : params.systemVersion;
+        }
         dispatch(receiveExperiment({
           ...setUpExperiment(
             experiment,
@@ -268,13 +283,9 @@ export function fetchExperiment(params) {
           instructions: (state && state.instructions) || task.initialInstructions,
           tutorial: task.tutorial,
           isExperiment: task.isExperiment,
-          taskIndex,
           participantId: params.participantId,
           participantIndex: params.participantIndex,
-          systemVersion: (params.participantIndex == null
-            ? systemVersion
-            : getTreatment(params.participantIndex, taskIndex)
-          ),
+          systemVersion,
         }));
         dispatch(setCurrentItem());
         if (task.isExperiment) {

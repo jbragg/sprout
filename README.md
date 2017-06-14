@@ -45,7 +45,7 @@ Specify `src/config.js` to define your tasks. For example:
 ```javascript
 export default {
   tasks: [
-    {
+    [taskId]: {
       experimentPath: {path/to/experiment/file},
       answersPath: {path/to/answers/file},
       itemRootPath: {path/to/root/path/for/images},
@@ -53,15 +53,24 @@ export default {
       tutorial: false,
     },
   ],
+  experiments: {
+    [experimentId]: {
+      tutorial: {taskIdTutorial},
+      tasks: [{taskId1}, {taskId2}, {taskId3}],
+    }
+  },
 };
 ```
-The position in the array corresponds to the `taskIndex` (see Website usage section).
+If taskIndex or tutorial are specified but not experimentId, experimentId defaults to "default".
 
 ### Website usage
 url parameters: `/:taskIndex?/:participantIndex?`
 all parameters:
 - `systemVersion={0,1,2}`
-- `taskIndex={0,1}`
+- `taskIndex={0,1,2}`
+- `tutorial?`
+- `taskId={:str}`
+- `experimentId={:str}`
 - `participantId={:str}`: useful for tracking a participant outside a study
 
 

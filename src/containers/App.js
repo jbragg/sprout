@@ -49,7 +49,7 @@ const propTypes = {
   tutorial: PropTypes.bool,
   isExperiment: PropTypes.bool,
   multiPhase: PropTypes.bool,
-  waitForImages: PropTypes.bool,
+  waitForImagesFrac: PropTypes.number,
   prefetchAll: PropTypes.bool,
 };
 
@@ -62,7 +62,7 @@ const defaultProps = {
   tutorial: false,
   isExperiment: true,
   multiPhase: false,
-  waitForImages: false,
+  waitForImagesFrac: 0,
   prefetchAll: false,
 };
 
@@ -84,6 +84,9 @@ class App extends React.Component {
       if (params[key] != null) {
         params[key] = Number(params[key]);
       }
+    });
+    ['tutorial'].forEach((key) => {
+      params[key] = params[key] !== undefined;
     });
     initialize(params);
 
@@ -107,9 +110,13 @@ class App extends React.Component {
     if (this.props.experimentPhase.name !== nextProps.experimentPhase.name) {
       this.setState({ warnings: defaults.warnings[nextProps.experimentPhase.name] || [] });
       if (nextProps.experimentPhase.name === States.LOADED) {
-        this.setState({
-          itemsLoaded: new Map(nextProps.items.map(item => [item.id, false])),
-        });
+        if (nextProps.prefetchAll) {
+          this.setState({
+            itemsLoaded: new Map(nextProps.items.map(item => [item.id, false])),
+          });
+        } else {
+          this.advanceExperimentPhase(nextProps.experimentPhase.name);
+        }
         if (nextProps.tutorial) {
           setTimeout(() => {
             this.setState({
@@ -117,9 +124,6 @@ class App extends React.Component {
               tutorialSteps,
             });
           }, 6000);  // TODO: Check subcomponents mounted for more robust solution.
-        }
-        if (!this.props.waitForImages) {
-          this.advanceExperimentPhase();
         }
       }
     }
@@ -159,9 +163,15 @@ class App extends React.Component {
         ...state.itemsLoaded,
         [itemId, true],
       ]);
-      const ready = [...itemsLoaded.values()].every(e => e);
-      if (ready && props.waitForImages) {
-        this.advanceExperimentPhase();
+      const frac = [...itemsLoaded.values()].reduce(
+        (acc, val) => (val ? acc + 1 : acc),
+        0,
+      ) / itemsLoaded.size;
+      if (
+        frac >= props.waitForImagesFrac
+        && props.experimentPhase.name === States.LOADED
+      ) {
+        this.advanceExperimentPhase(props.experimentPhase.name);
       }
       return {
         itemsLoaded,
@@ -169,11 +179,10 @@ class App extends React.Component {
     });
   }
 
-  advanceExperimentPhase() {
-    const currentPhase = this.props.experimentPhase.name;
-    if (currentPhase === States.LOADING && !this.props.multiPhase) {
+  advanceExperimentPhase(currentPhase) {
+    if (currentPhase === States.LOADED && !this.props.multiPhase) {
       this.props.onChangeExperimentPhase(States.COMBINED);
-    } else if (currentPhase === States.LOADING) {
+    } else if (currentPhase === States.LOADED) {
       this.props.onChangeExperimentPhase(States.LABELING);
     } else if (currentPhase === States.COMBINED || currentPhase === States.INSTRUCTIONS) {
       this.props.onChangeExperimentPhase(States.SURVEY);
@@ -228,7 +237,7 @@ class App extends React.Component {
                     ? (
                       <Countdown
                         remainingTime={remainingSeconds}
-                        onFinished={this.advanceExperimentPhase}
+                        onFinished={() => { this.advanceExperimentPhase(experimentState); }}
                         confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
                       />
                     )
@@ -258,7 +267,7 @@ class App extends React.Component {
             <LabeledColumn labels={labels} />
             <Countdown
               remainingTime={this.remainingSeconds}
-              onFinished={this.advanceExperimentPhase}
+              onFinished={() => { this.advanceExperimentPhase(experimentState); }}
               confirmText={'Are you sure you want to move on to the next stage before time is up?'}
             />
           </Col>
@@ -277,7 +286,7 @@ class App extends React.Component {
             <Oracle />
             <Button
               bsStyle="primary"
-              onClick={this.advanceExperimentPhase}
+              onClick={() => { this.advanceExperimentPhase(experimentState); }}
             >
               Done
             </Button>
@@ -298,7 +307,7 @@ class App extends React.Component {
             <Instructions />
             <Countdown
               remainingTime={this.remainingSeconds}
-              onFinished={this.advanceExperimentPhase}
+              onFinished={() => { this.advanceExperimentPhase(experimentState); }}
               confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
             />
           </Col>
@@ -356,8 +365,8 @@ App.defaultProps = defaultProps;
 
 const mapStateToProps = (state, { location }) => {
   const isLoaded = (
-    state.experimentPhase.name != null &&
-    state.experimentPhase.name !== States.LOADING
+    state.experimentPhase.name != null
+      && state.experimentPhase.name !== States.LOADING
   );
   return {
     experimentPhase: state.experimentPhase,
@@ -365,9 +374,10 @@ const mapStateToProps = (state, { location }) => {
     clusterView: parse(location.search).clusters !== undefined,
     masterView: parse(location.search).master !== undefined,
     multiPhase: parse(location.search).multiPhase !== undefined,
-    tutorial: state.tutorial || false,
-    isExperiment: state.isExperiment,
-    prefetchAll: state.isExperiment,
+    tutorial: Boolean(state.tutorial),
+    isExperiment: Boolean(state.isExperiment),
+    prefetchAll: Boolean(state.isExperiment),
+    waitForImagesFrac: state.isExperiment ? 1 : 0,
     items: isLoaded
       ? [...itemDataSelector(state).byId.values()]
       : null,

@@ -46,7 +46,7 @@ class ItemThumb extends React.Component {
     return connectDragSource(
       <button
         className={`item-thumb btn btn-default ${selected ? 'active' : ''}`}
-        onClick={(e) => { onClick(); e.preventDefault(); }}
+        onClick={(e) => { onClick(item.id); e.preventDefault(); }}
         style={{
           opacity: isDragging ? 0.5 : 1,
         }}
