@@ -18,6 +18,7 @@ import Oracle from './Oracle';
 import CustomDragLayer from '../CustomDragLayer';
 import Clusters from './Clusters';
 import Export from './Export';
+import Thanks from '../components/Thanks';
 import { fetchExperiment, changeExperimentPhase } from '../actions';
 import { itemDataSelector } from '../reducers/index';
 import { States, defaults, tutorialSteps } from '../constants';
@@ -69,12 +70,6 @@ const defaultProps = {
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      date: Date.now(),
-      warnings: [],
-      tutorialSteps: [],
-      tutorialRunning: false,
-    };
     const { initialize } = this.props;
     const params = {
       ...this.props.match.params,
@@ -90,6 +85,13 @@ class App extends React.Component {
     });
     initialize(params);
 
+    this.state = {
+      date: Date.now(),
+      warnings: [],
+      tutorialSteps: [],
+      tutorialRunning: false,
+      params,
+    };
     this.handleImageLoaded = this.handleImageLoaded.bind(this);
     this.advanceExperimentPhase = this.advanceExperimentPhase.bind(this);
     this.dismissExpiredAlerts = this.dismissExpiredAlerts.bind(this);
@@ -202,7 +204,7 @@ class App extends React.Component {
   render() {
     const {
       items, labels, masterView, clusterView, initialInstructions, isExperiment,
-      prefetchAll,
+      prefetchAll, tutorial,
     } = this.props;
     const experimentState = this.props.experimentPhase.name;
     if (experimentState == null || experimentState === States.LOADING) {
@@ -233,24 +235,30 @@ class App extends React.Component {
                 <Well bsSize="sm">{initialInstructions}</Well>
                 {isExperiment && <Oracle />}
                 <Instructions />
-                {isExperiment
-                    ? (
-                      <Countdown
-                        remainingTime={remainingSeconds}
-                        onFinished={() => { this.advanceExperimentPhase(experimentState); }}
-                        confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
-                      />
-                    )
-                    : (
-                      <Export>
-                        <Button
-                          bsStyle="primary"
-                        >
-                          Export
-                        </Button>
-                      </Export>
-                    )
-                }
+                {isExperiment && (
+                  <Countdown
+                    remainingTime={remainingSeconds}
+                    onFinished={() => { this.advanceExperimentPhase(experimentState); }}
+                    confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
+                  />
+                )}
+                {!isExperiment && !tutorial && (
+                  <Export>
+                    <Button
+                      bsStyle="primary"
+                    >
+                      Export
+                    </Button>
+                  </Export>
+                )}
+                {tutorial && (
+                  <Button
+                    bsStyle="primary"
+                    onClick={() => { this.props.onChangeExperimentPhase(States.THANKS); }}
+                  >
+                    Ready for experiment
+                  </Button>
+                )}
               </div>
             </AutoAffix>
           </Col>
@@ -316,7 +324,7 @@ class App extends React.Component {
     } else if (experimentState === States.SURVEY) {
       experimentComponent = <Grid><Survey /></Grid>;
     } else if (experimentState === States.THANKS) {
-      experimentComponent = <Grid><h1>Thanks!!</h1></Grid>;
+      experimentComponent = <Grid><Thanks params={this.state.params} /></Grid>;
     } else {
       experimentComponent = <Grid><h1><Loading /></h1></Grid>;
     }
