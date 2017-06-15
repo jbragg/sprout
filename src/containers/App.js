@@ -133,7 +133,9 @@ class App extends React.Component {
   }
 
   componentWillUnmount() {
-    clearInterval(this.timerID);
+    if (this.props.isExperiment) {
+      clearInterval(this.timerID);
+    }
   }
 
   tick() {
@@ -350,7 +352,7 @@ class App extends React.Component {
             run={this.state.tutorialRunning}
           />
         )}
-        {!this.props.tutorial
+        {this.props.isExperiment
             && this.state.warnings.length > 0
             && this.state.warnings[0][0] <= this.elapsedTime()
             && (
