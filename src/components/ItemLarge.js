@@ -31,6 +31,8 @@ const propTypes = {
   draggable: PropTypes.bool.isRequired,
   recommendedGroup: PropTypes.number,
   master: PropTypes.bool,
+  lightboxOpen: PropTypes.bool.isRequired,
+  onSetLightbox: PropTypes.func.isRequired,
 };
 
 const defaultProps = ({
@@ -50,7 +52,6 @@ class ItemLarge extends React.Component {
     super(props);
     this.state = {
       imageStatus: 'loading',
-      lightboxOpen: false,
     };
 
     this.handleImageLoaded = this.handleImageLoaded.bind(this);
@@ -78,7 +79,7 @@ class ItemLarge extends React.Component {
     const {
       item, answers, connectDragSource, isDragging, useReasons,
       useAnswers, answerKey, aggregateOnly, editReason, draggable,
-      recommendedGroup, master,
+      recommendedGroup, master, lightboxOpen, onSetLightbox,
     } = this.props;
     const { imageStatus } = this.state;
     const itemComponent = (
@@ -109,12 +110,12 @@ class ItemLarge extends React.Component {
             responsive
             src={item.data.path}
             onLoad={this.handleImageLoaded}
-            onClick={() => { this.setState({ lightboxOpen: true }); }}
+            onClick={() => { onSetLightbox(true); }}
           />
-          {this.state.lightboxOpen &&
+          {lightboxOpen &&
             <Lightbox
               mainSrc={item.data.path}
-              onCloseRequest={() => { this.setState({ lightboxOpen: false }); }}
+              onCloseRequest={() => { onSetLightbox(false); }}
             />
           }
         </ListGroupItem>

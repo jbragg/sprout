@@ -4,7 +4,7 @@ import { DragSource } from 'react-dnd';
 import ItemLarge from '../components/ItemLarge';
 import ItemThumb from '../components/ItemThumb';
 import ItemBtn from '../components/ItemBtn';
-import { setCurrentItem } from '../actions';
+import { setCurrentItem, setLightbox } from '../actions';
 import { DragItemTypes as ItemTypes } from '../constants';
 import conditions from '../experiment';
 import {
@@ -37,6 +37,7 @@ const mapStateToProps = (state, { itemId, useReasons, useAnswers }) => ({
   useAnswers: useAnswers == null ? conditions[state.systemVersion].useAnswers : useAnswers,
   answerKey: state.answerKey,
   recommendedGroup: recommendedGroupSelector(state),
+  lightboxOpen: state.lightboxOpen,
 });
 
 const mapDispatchToProps = (dispatch, { onClick }) => ({
@@ -44,6 +45,7 @@ const mapDispatchToProps = (dispatch, { onClick }) => ({
     ? onClick
     : (id) => { dispatch(setCurrentItem(id)); }
   ),
+  onSetLightbox: (payload) => { dispatch(setLightbox(payload)); },
 });
 
 const connectOptionallyDraggable = (x) => {

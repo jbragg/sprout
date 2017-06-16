@@ -23,10 +23,18 @@ export const REQUEST_EXPERIMENT = 'REQUEST_EXPERIMENT';
 export const RECEIVE_EXPERIMENT = 'RECEIVE_EXPERIMENT';
 export const FETCH_EXPERIMENT = 'FETCH_EXPERIMENT';
 export const CHANGE_EXPERIMENT_PHASE = 'CHANGE_EXPERIMENT_PHASE';
+export const SET_LIGHTBOX = 'SET_LIGHTBOX';
 
 /*
  * action creators
  */
+
+export function setLightbox(payload) {
+  return {
+    type: SET_LIGHTBOX,
+    payload,
+  };
+}
 
 export function setClusterId(id) {
   return {

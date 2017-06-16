@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { HotKeys } from 'react-hotkeys';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { parse } from 'query-string';
@@ -20,7 +21,7 @@ import Clusters from './Clusters';
 import Export from './Export';
 import Thanks from '../components/Thanks';
 import ExperimentProgress from '../components/ExperimentProgress';
-import { fetchExperiment, changeExperimentPhase } from '../actions';
+import { fetchExperiment, changeExperimentPhase, setLightbox } from '../actions';
 import { itemDataSelector } from '../reducers/index';
 import { States, defaults, tutorialSteps } from '../constants';
 
@@ -53,6 +54,7 @@ const propTypes = {
   multiPhase: PropTypes.bool,
   waitForImagesFrac: PropTypes.number,
   prefetchAll: PropTypes.bool,
+  onSetLightbox: PropTypes.func.isRequired,
 };
 
 const defaultProps = {
@@ -207,7 +209,7 @@ class App extends React.Component {
   render() {
     const {
       items, labels, masterView, clusterView, initialInstructions, isExperiment,
-      prefetchAll, tutorial,
+      prefetchAll, tutorial, onSetLightbox,
     } = this.props;
     const experimentState = this.props.experimentPhase.name;
     if (experimentState == null || experimentState === States.LOADING) {
@@ -332,48 +334,50 @@ class App extends React.Component {
       experimentComponent = <Grid><h1><Loading /></h1></Grid>;
     }
     return (
-      <div id="app">
-        {prefetchAll &&
-          <div className="hidden">
-            {items.map(item => (
-              <img
-                src={item.data.path}
-                key={item.id}
-                onLoad={() => { this.handleImageLoaded(item.id); }}
-              />
-            ))}
-          </div>
-        }
-        <CustomDragLayer />
-        {this.props.tutorial && (
-          <Joyride
-            ref={(c) => { this.joyride = c; }}
-            steps={this.state.tutorialSteps}
-            run={this.state.tutorialRunning}
-          />
-        )}
-        {this.props.isExperiment
-            && this.state.warnings.length > 0
-            && this.state.warnings[0][0] <= this.elapsedTime()
-            && (
-              <Alert
-                bsStyle="warning"
-                onDismiss={this.dismissExpiredAlerts}
-                className="text-center"
-              >
-                <ReactMarkdown source={this.state.warnings[0][1]} />
-              </Alert>
-            )
-        }
-        {(this.state.params.tutorial || this.state.params.taskIndex != null) && (
-          <ExperimentProgress
-            currentIndex={
-              this.state.params.tutorial ? 0 : this.state.params.taskIndex + 1
-            }
-          />
-        )}
-        {experimentComponent}
-      </div>
+      <HotKeys handlers={{ preview: () => { onSetLightbox(true); }}}>
+        <div id="app">
+          {prefetchAll &&
+            <div className="hidden">
+              {items.map(item => (
+                <img
+                  src={item.data.path}
+                  key={item.id}
+                  onLoad={() => { this.handleImageLoaded(item.id); }}
+                />
+              ))}
+            </div>
+          }
+          <CustomDragLayer />
+          {this.props.tutorial && (
+            <Joyride
+              ref={(c) => { this.joyride = c; }}
+              steps={this.state.tutorialSteps}
+              run={this.state.tutorialRunning}
+            />
+          )}
+          {this.props.isExperiment
+              && this.state.warnings.length > 0
+              && this.state.warnings[0][0] <= this.elapsedTime()
+              && (
+                <Alert
+                  bsStyle="warning"
+                  onDismiss={this.dismissExpiredAlerts}
+                  className="text-center"
+                >
+                  <ReactMarkdown source={this.state.warnings[0][1]} />
+                </Alert>
+              )
+          }
+          {(this.state.params.tutorial || this.state.params.taskIndex != null) && (
+            <ExperimentProgress
+              currentIndex={
+                this.state.params.tutorial ? 0 : this.state.params.taskIndex + 1
+              }
+            />
+          )}
+          {experimentComponent}
+        </div>
+      </HotKeys>
     );
   }
 }
@@ -409,6 +413,9 @@ const mapDispatchToProps = dispatch => ({
   },
   onChangeExperimentPhase: (phase) => {
     dispatch(changeExperimentPhase(phase));
+  },
+  onSetLightbox: (payload) => {
+    dispatch(setLightbox(payload));
   },
 });
 

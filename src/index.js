@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Mousetrap from 'mousetrap';
 import { createStore, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import { createLogger } from 'redux-logger';
@@ -8,6 +9,14 @@ import fetch from 'isomorphic-fetch';
 import reducer from './reducers/index';
 
 import Root from './components/Root';
+
+// Disable react-hotkeys for in-focus input, select, and textarea
+Mousetrap.prototype.stopCallback = (e, element) => (
+  element.tagName === 'INPUT'
+    || element.tagName === 'SELECT'
+    || element.tagName === 'TEXTAREA'
+    || (element.contentEditable && element.contentEditable === 'true')
+);
 
 /**
  * Logs all actions to back-end server.
@@ -89,7 +98,7 @@ const store = createStore(
 );
 
 if (process.env.NODE_ENV === 'production') {
-  window.addEventListener("beforeunload", function(event) {
+  window.addEventListener('beforeunload', (event) => {
     const message = 'Please check with the experimenter before changing the page or closing the window';
     event.returnValue = message;
     return message;

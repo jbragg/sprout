@@ -5,7 +5,8 @@ import {
   ANSWER_ORACLE, QUEUE_ITEM_ORACLE, UNQUEUE_ITEM_ORACLE, SET_CLUSTER_ID,
   EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEMS, EDIT_ITEM,
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
-  RECEIVE_EXPERIMENT, CHANGE_EXPERIMENT_PHASE } from '../actions';
+  RECEIVE_EXPERIMENT, CHANGE_EXPERIMENT_PHASE, SET_LIGHTBOX,
+} from '../actions';
 import getScore, { defaults as defaultMetrics } from '../score';
 import { Labels, States, defaults } from '../constants';
 import conditions from '../experiment';
@@ -22,6 +23,7 @@ const initialState = {
   finalLabels,
   tutorial: false,
   isExperiment: true,
+  lightboxOpen: false,
   oracle: {
     queuedItems: [],
     answerInterval: 30 * 1000,  // seconds to milliseconds
@@ -565,6 +567,12 @@ function InstructionsApp(state = initialState, action) {
           name: action.phase,
           startTime: Date.now(),
         },
+      };
+    }
+    case SET_LIGHTBOX: {
+      return {
+        ...state,
+        lightboxOpen: action.payload,
       };
     }
     default: {
