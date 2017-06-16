@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
@@ -23,6 +24,12 @@ const propTypes = {
   onGroupCreate: PropTypes.func.isRequired,
   onGroupDelete: PropTypes.func.isRequired,
   itemIds: ImmutablePropTypes.orderedSetOf(PropTypes.number.isRequired).isRequired,
+  label: PropTypes.string.isRequired,
+  fixedTarget: PropTypes.bool,
+};
+
+const defaultProps = {
+  fixedTarget: true,
 };
 
 class LabelSection extends React.Component {
@@ -41,18 +48,36 @@ class LabelSection extends React.Component {
   }
 
   confirmed() {
-    this.setState({ confirmFunc: null, confirmText: null, });
+    this.setState({ confirmFunc: null, confirmText: null });
   }
 
   render() {
     const {
       groupIds, label, onGroupCreate, connectDropTarget,
-      isOver, canDrop, itemIds, onGroupDelete,
+      isOver, canDrop, itemIds, onGroupDelete, fixedTarget,
     } = this.props;
     const mergeMessage = 'Are you sure? All items being dragged will be moved to the target group. This action is not reversible.';
     const deleteMessage = 'Are you sure you want to delete the group? All items in the group will keep their label. This action is not reversible.';
     return connectDropTarget(
-      <div className={`label-section label-${label} panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
+      <div
+        className={classNames(
+          'label-section',
+          `label-${label}`,
+          'panel',
+          'panel-default',
+          { over: isOver, target: canDrop },
+        )}
+      >
+        {fixedTarget && (
+          <div
+            className={classNames(
+              'fixed-target',
+              { over: isOver, target: canDrop, hidden: !canDrop })
+            }
+          >
+            {label}
+          </div>
+        )}
         <Confirm
           text={this.state.confirmText || 'Are you sure?'}
           show={this.state.confirmFunc != null}
@@ -93,6 +118,7 @@ class LabelSection extends React.Component {
 }
 
 LabelSection.propTypes = propTypes;
+LabelSection.defaultProps = defaultProps;
 
 /*
  * react-dnd
