@@ -2,27 +2,31 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import ItemList from '../components/ItemList';
-import { unlabeledSortedItemIdsSelector } from '../reducers/index';
+import {
+  unlabeledSortedItemIdsSelector, sortedItemIdsSelector,
+} from '../reducers/index';
 
 const propTypes = {
-  unreviewedItemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
+  itemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
+  thumbnails: PropTypes.bool,
 };
 
-const UnreviewedItemList = ({ unreviewedItemIds }) => (
-  <div className="panel panel-default">
-    <div className="panel-body">
-      <div>
-        <strong>All</strong>
-      </div>
-      <ItemList itemIds={unreviewedItemIds} />
-    </div>
-  </div>
+const defaultProps = {
+  thumbnails: true,
+};
+
+const UnreviewedItemList = ({ itemIds, thumbnails }) => (
+  <ItemList itemIds={itemIds} thumbnails={thumbnails} />
 );
 
 UnreviewedItemList.propTypes = propTypes;
+UnreviewedItemList.defaultProps = defaultProps;
 
-const mapStateToProps = state => ({
-  unreviewedItemIds: unlabeledSortedItemIdsSelector(state),
+const mapStateToProps = (state, { unlabeledOnly }) => ({
+  itemIds: (unlabeledOnly
+    ? unlabeledSortedItemIdsSelector(state)
+    : sortedItemIdsSelector(state)
+  ),
 });
 
 export default connect(mapStateToProps)(UnreviewedItemList);

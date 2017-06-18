@@ -8,7 +8,8 @@ import { setCurrentItem, setLightbox } from '../actions';
 import { DragItemTypes as ItemTypes } from '../constants';
 import conditions from '../experiment';
 import {
-  itemDataSelector, itemAnswersSelector, recommendedGroupSelector,
+  itemDataSelector, itemsSelector, itemAnswersSelector,
+  recommendedGroupSelector, itemSimilaritiesSelector,
 } from '../reducers/index';
 
 /*
@@ -32,12 +33,17 @@ const collect = (dndConnect, monitor) => ({
 const mapStateToProps = (state, { itemId, useReasons, useAnswers }) => ({
   selected: state.currentItemId === itemId,
   item: itemDataSelector(state).byId.get(itemId),
+  isLabeled: (
+    itemsSelector(state).byId.get(itemId).group != null
+    || itemsSelector(state).byId.get(itemId).label != null
+  ),
   answers: itemAnswersSelector(state).get(itemId),
   useReasons: useReasons == null ? conditions[state.systemVersion].useReasons : useReasons,
   useAnswers: useAnswers == null ? conditions[state.systemVersion].useAnswers : useAnswers,
   answerKey: state.answerKey,
   recommendedGroup: recommendedGroupSelector(state),
   lightboxOpen: state.lightboxOpen,
+  itemSimilarities: itemSimilaritiesSelector(state).get(itemId),
 });
 
 const mapDispatchToProps = (dispatch, { onClick }) => ({

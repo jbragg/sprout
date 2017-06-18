@@ -65,7 +65,7 @@ class ItemBtn extends React.Component {
       <span
         className="item-btn"
         style={{
-          opacity: isDragging ? 0.5 : 1,
+          opacity: isDragging ? 0.5 : null,
         }}
       >
         <OverlayTrigger

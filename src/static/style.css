@@ -45,7 +45,12 @@
 
 .item-thumb {
   max-width: 6em;
+  max-height: 10em;
   padding: 0px;
+}
+
+.item-thumb.labeled {
+  opacity: 0.1;
 }
 
 .item-thumb img {
@@ -61,7 +66,7 @@
 }
 
 .labeling-progress .progress {
-  margin-bottom: 0;
+  margin-bottom: 5px;
 }
 
 .histogram .progress {
@@ -125,7 +130,7 @@
 }
 
 .slick-slider {
-  margin: 0px 30px 30px;
+  margin: 0px 30px 10px;
 }
 
 .clusters .page {

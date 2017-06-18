@@ -21,6 +21,7 @@ import Clusters from './Clusters';
 import Export from './Export';
 import Thanks from '../components/Thanks';
 import ExperimentProgress from '../components/ExperimentProgress';
+import Progress from './Progress';
 import { fetchExperiment, changeExperimentPhase, setLightbox } from '../actions';
 import { itemDataSelector } from '../reducers/index';
 import { States, defaults, tutorialSteps } from '../constants';
@@ -230,6 +231,7 @@ class App extends React.Component {
             </AutoAffix>
           </Col>
           <Col sm={4}>
+            <Progress />
             <LabeledColumn labels={labels} />
           </Col>
           <Col className="instructions" sm={4}>

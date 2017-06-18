@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import {
   Image, Glyphicon, FormGroup, ControlLabel, Row, Col,
@@ -10,6 +11,7 @@ import AnswersTable from './AnswersTable';
 import ConfusionsTable from './ConfusionsTable';
 import AnswersSummary from './AnswersSummary';
 import ReasonFormControl from '../containers/ReasonFormControl';
+import ItemList from './ItemList';
 import Loading from './Loading';
 
 const propTypes = {
@@ -25,6 +27,10 @@ const propTypes = {
   isDragging: PropTypes.bool,
   useReasons: PropTypes.bool,
   useAnswers: PropTypes.bool,
+  similarItems: PropTypes.bool,
+  itemSimilarities: ImmutablePropTypes.orderedMapOf(
+    PropTypes.number.isRequired,
+  ),
   aggregateOnly: PropTypes.bool,
   answerKey: PropTypes.objectOf(PropTypes.string.isRequired).isRequired,
   editReason: PropTypes.bool,
@@ -41,6 +47,8 @@ const defaultProps = ({
   isDragging: false,
   useReasons: true,
   useAnswers: true,
+  similarItems: true,
+  itemSimilarities: null,
   aggregateOnly: true,
   editReason: false,
   recommendedGroup: null,
@@ -80,6 +88,7 @@ class ItemLarge extends React.Component {
       item, answers, connectDragSource, isDragging, useReasons,
       useAnswers, answerKey, aggregateOnly, editReason, draggable,
       recommendedGroup, master, lightboxOpen, onSetLightbox,
+      similarItems, itemSimilarities,
     } = this.props;
     const { imageStatus } = this.state;
     const itemComponent = (
@@ -119,12 +128,25 @@ class ItemLarge extends React.Component {
             />
           }
         </ListGroupItem>
+        {useReasons && similarItems && (
+          <ListGroupItem>
+            {itemSimilarities && itemSimilarities.size > 0
+                ? (
+                  <div>
+                    <strong>Similar items</strong>
+                    <ItemList itemIds={itemSimilarities} thumbnails />
+                  </div>
+                )
+                : <div className="text-center">No similar items to show</div>
+            }
+          </ListGroupItem>
+        )}
       </ListGroup>
     );
     return connectDragSource(
       <div
         className={`panel panel-default item-large ${imageStatus === 'loaded' && recommendedGroup >= 0 ? 'recommended' : ''}`}
-        style={{ opacity: isDragging ? 0.5 : 1 }}
+        style={{ opacity: isDragging ? 0.5 : null }}
       >
         {!draggable ? null : (
           <div className="panel-heading panel-heading-less-padding">

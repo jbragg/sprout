@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 
 const propTypes = {
@@ -24,12 +25,14 @@ const propTypes = {
   connectDragSource: PropTypes.func.isRequired,
   connectDragPreview: PropTypes.func,
   isDragging: PropTypes.bool,
+  isLabeled: PropTypes.bool,
 };
 
 const defaultProps = ({
   connectDragPreview: x => x,
   connectDragSource: x => x,
   isDragging: false,
+  isLabeled: false,
 });
 
 class ItemThumb extends React.Component {
@@ -42,13 +45,18 @@ class ItemThumb extends React.Component {
   }
 
   render() {
-    const { item, selected, onClick, connectDragSource, isDragging } = this.props;
+    const {
+      item, selected, onClick, connectDragSource, isDragging, isLabeled,
+    } = this.props;
     return connectDragSource(
       <button
-        className={`item-thumb btn btn-default ${selected ? 'active' : ''}`}
+        className={classNames(
+          'item-thumb btn btn-default',
+          { active: selected, labeled: isLabeled },
+        )}
         onClick={(e) => { onClick(item.id); e.preventDefault(); }}
         style={{
-          opacity: isDragging ? 0.5 : 1,
+          opacity: isDragging ? 0.5 : null,
         }}
       >
         <div className="text-center small"><small>{item.id}</small></div>

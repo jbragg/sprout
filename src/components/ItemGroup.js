@@ -39,7 +39,7 @@ const ItemGroup = ({
   <div
     className={`class-container panel panel-primary ${recommended ? 'recommended' : ''} ${isOver ? 'over' : ''} ${isTarget ? 'target' : ''}`}
     style={{
-      opacity: isDragging ? 0.5 : 1,
+      opacity: isDragging ? 0.5 : null,
     }}
   >
     <div

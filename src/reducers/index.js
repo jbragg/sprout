@@ -1,6 +1,6 @@
 import { createSelector, createSelectorCreator, defaultMemoize } from 'reselect';
 import isEqual from 'lodash/isEqual';
-import { Map, OrderedSet as Set } from 'immutable';
+import { OrderedMap as Map, OrderedSet as Set } from 'immutable';
 import {
   ANSWER_ORACLE, QUEUE_ITEM_ORACLE, UNQUEUE_ITEM_ORACLE, SET_CLUSTER_ID,
   EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEMS, EDIT_ITEM,
@@ -98,7 +98,10 @@ export const labelGroupsSelector = createDeepEqualSelector(
 export const itemLabelsSelector = createSelector(
   itemsSelector,
   groupsSelector,
-  (items, groups) => new Map([...items.byId.values()].map(item => [item.id, item.group == null ? item.label : groups.byId.get(item.group).label])),
+  (items, groups) => new Map([...items.byId.values()].map(item => [
+    item.id,
+    item.group == null ? item.label : groups.byId.get(item.group).label,
+  ])),
 );
 export const itemVectorsSelector = createSelector(
   itemDataSelector,
@@ -148,12 +151,35 @@ export const unlabeledClusterItemsSelector = createSelector(
 export const itemAnswersSelector = createSelector(
   itemDataSelector,
   answersSelector,
-  (items, answers) => new Map([...items.byId].map(([id, item]) => [id, item.answers.map(answerId => answers.byId.get(answerId))])),
+  (items, answers) => new Map([...items.byId].map(([id, item]) => [
+    id,
+    item.answers.map(answerId => answers.byId.get(answerId)),
+  ])),
+);
+export const itemScoresSelector = createSelector(
+  itemAnswersSelector,
+  itemAnswers => new Map([...itemAnswers].map(([id, answers]) => [
+    id,
+    getScore(defaultMetrics.sort)(
+      ...answers.map(answer => answer.data.answer),
+    ).color,
+  ])),
+);
+export const sortedItemIdsSelector = createSelector(
+  itemScoresSelector,
+  scores => [...scores.keys()].sort(
+    (id1, id2) => scores.get(id1) - scores.get(id2),
+  ),
 );
 export const unlabeledItemScoresSelector = createSelector(
   unlabeledItemIdsSelector,
   itemAnswersSelector,
-  (itemIds, answers) => new Map(itemIds.map(id => [id, getScore(defaultMetrics.sort)(...answers.get(id).map(answer => answer.data.answer)).color])),
+  (itemIds, answers) => new Map(itemIds.map(id => [
+    id,
+    getScore(defaultMetrics.sort)(
+      ...answers.get(id).map(answer => answer.data.answer),
+    ).color,
+  ])),
 );
 export const unlabeledSortedItemIdsSelector = createSelector(
   unlabeledItemIdsSelector,
