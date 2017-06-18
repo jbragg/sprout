@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 import { connect } from 'react-redux';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import { Row, Col, FormControl, Glyphicon } from 'react-bootstrap';
 import { DragSource, DropTarget } from 'react-dnd';
-import ItemList from '../components/ItemList';
+import ItemGroup from '../components/ItemGroup';
 import { editGroup, mergeGroup, assignAndSetCurrentItem } from '../actions';
 import { recommendedGroupSelector, getItemsSummary } from '../reducers/index';
 import { DragItemTypes as ItemTypes } from '../constants';
@@ -16,6 +16,10 @@ const propTypes = {
     name: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,
+    itemIds: PropTypes.oneOfType([
+      PropTypes.arrayOf(PropTypes.number.isRequired),
+      ImmutablePropTypes.orderedSetOf(PropTypes.number.isRequired),
+    ]).isRequired,
   }).isRequired,
   onGroupEdit: PropTypes.func.isRequired,
   summary: PropTypes.string.isRequired,
@@ -73,47 +77,20 @@ class Group extends React.Component {
     // ignore its own items to prevent the parent label from handling.
     const isTarget = canDrop && !group.itemIds.has(monitorItemId);
     return connectDragSource(connectDropTarget(
-      <div
-        className={`class-container panel panel-primary ${recommended ? 'recommended' : ''} ${isOver ? 'over' : ''} ${isTarget ? 'target' : ''}`}
-        style={{
-          opacity: isDragging ? 0.5 : 1,
-        }}
-      >
-        <div
-          className="panel-heading panel-heading-less-padding"
-        >
-          <Row className="no-gutter">
-            <Col xs={2}>
-              {recommended
-                ? (
-                  <Glyphicon
-                    className={`large ${(isOver && canDrop) ? 'text-primary' : ''}`}
-                    glyph="star"
-                    style={{
-                      color: (isOver && canDrop) ? '' : 'yellow',
-                    }}
-                  />
-                )
-                : null
-              }
-            </Col>
-            <Col xs={8}>
-              <FormControl
-                type="text"
-                bsSize="sm"
-                value={group.name}
-                onChange={(e) => { onGroupEdit({ name: e.target.value }, group.id); }}
-              />
-            </Col>
-            <Col className="text-right" xs={2}>
-              <Glyphicon className="large" glyph="move" />
-            </Col>
-          </Row>
-        </div>
-        <div className="panel-body">
-          {useReasons ? <p>{summary}</p> : null}
-          <ItemList itemIds={group.itemIds} />
-        </div>
+      <div className="panel">
+        <ItemGroup
+          itemIds={group.itemIds}
+          isOver={isOver}
+          isTarget={isTarget}
+          isDragging={isDragging}
+          recommended={recommended}
+          isNameable
+          name={group.name}
+          nameEditFunc={(e) => {
+            onGroupEdit({ name: e.target.value }, group.id);
+          }}
+          summary={useReasons ? summary : null}
+        />
       </div>,
     ));
   }

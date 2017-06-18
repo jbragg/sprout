@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { PanelGroup } from 'react-bootstrap';
 import { ItemLargeContainer } from '../containers/ItemContainer';
 import UnlabeledSection from '../components/UnlabeledSection';
+import UnreviewedItemList from '../containers/UnreviewedItemList';
 import conditions from '../experiment';
 
 const propTypes = {
@@ -20,6 +21,7 @@ const defaultProps = {
 
 const UnlabeledColumn = ({ useReasons, currentItemId, master }) => (
   <PanelGroup>
+    <UnreviewedItemList />
     <UnlabeledSection className="panel" useReasons={useReasons} />
     {currentItemId != null && (
       <ItemLargeContainer

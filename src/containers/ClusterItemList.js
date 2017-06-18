@@ -1,17 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DragSource } from 'react-dnd';
 import { connect } from 'react-redux';
-import Slider from 'react-slick';
-import { Clearfix, Glyphicon } from 'react-bootstrap';
-import { ItemThumbContainer } from '../containers/ItemContainer';
+import { Clearfix } from 'react-bootstrap';
+import ItemGroup from '../components/ItemGroup';
 import {
   clusterIdsSelector, unlabeledClusterItemsSelector, clusterItemsSelector,
-  getItemsSummary
+  getItemsSummary,
 } from '../reducers/index';
 import { setClusterId } from '../actions';
-import { defaults, DragItemTypes as ItemTypes } from '../constants';
+import { DragItemTypes as ItemTypes } from '../constants';
 
 const propTypes = {
   itemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
@@ -21,40 +21,7 @@ const propTypes = {
   onSetCluster: PropTypes.func.isRequired,
   connectDragSource: PropTypes.func.isRequired,
   connectDragPreview: PropTypes.func.isRequired,
-};
-
-const sliderSettings = {
-  ...defaults.sliderSettings,
-  responsive: [
-    {
-      breakpoint: 992,
-      settings: {
-        slidesToShow: 2,
-        slidesToScroll: 2,
-      },
-    },
-    {
-      breakpoint: 1200,
-      settings: {
-        slidesToShow: 3,
-        slidesToScroll: 3,
-      },
-    },
-    {
-      breakpoint: 1600,
-      settings: {
-        slidesToShow: 4,
-        slidesToScroll: 4,
-      },
-    },
-    {
-      breakpoint: 10000,
-      settings: {
-        slidesToShow: 5,
-        slidesToScroll: 5,
-      },
-    },
-  ],
+  isDragging: PropTypes.bool.isRequired,
 };
 
 class ClusterItemList extends React.Component {
@@ -69,6 +36,7 @@ class ClusterItemList extends React.Component {
   render() {
     const {
       clusterId, nClusters, itemIds, summary, onSetCluster, connectDragSource,
+      isDragging,
     } = this.props;
     const noDecrement = clusterId === 0;
     const noIncrement = clusterId >= nClusters - 1;
@@ -79,37 +47,32 @@ class ClusterItemList extends React.Component {
             <strong>{`${clusterId + 1} / ${nClusters}`}</strong>
             {' '}
             <button
-              className={`btn btn-default btn-xs glyphicon glyphicon-arrow-left ${noDecrement ? 'disabled' : ''}`}
+              className={classNames(
+                'btn btn-default btn-xs glyphicon glyphicon-arrow-left',
+                { disabled: noDecrement },
+              )}
               onClick={() => (noDecrement || onSetCluster(clusterId - 1))}
             />
             <button
-              className={`btn btn-default btn-xs glyphicon glyphicon-arrow-right ${noIncrement ? 'disabled' : ''}`}
+              className={classNames(
+                'btn btn-default btn-xs glyphicon glyphicon-arrow-right',
+                { disabled: noIncrement },
+              )}
               onClick={() => (noIncrement || onSetCluster(clusterId + 1))}
             />
           </span>
         </Clearfix>
         {connectDragSource(
           <div
-            className={`panel panel-primary ${itemIds.length === 0 ? 'disabled' : ''}`}
-            style={{
-              opacity: itemIds.length === 0 ? 0.5 : 1,
-            }}
+            className={classNames({ disabled: itemIds.length === 0 })}
+            style={{ opacity: itemIds.length === 0 ? 0.5 : null }}
           >
-            <div className="panel-heading panel-heading-less-padding text-right">
-              <Glyphicon className="large" glyph="move" />
-            </div>
-            <div className="panel-body">
-              <p>{summary}</p>
-              {itemIds.length === 0 ? null : (
-                <Slider {...sliderSettings}>
-                  {itemIds.map(id => (
-                    <div key={id}>
-                      <ItemThumbContainer draggable itemId={id} />
-                    </div>
-                ))}
-                </Slider>
-              )}
-            </div>
+            <ItemGroup
+              itemIds={itemIds}
+              summary={summary}
+              thumbnails
+              isDragging={isDragging}
+            />
           </div>,
         )}
       </div>
