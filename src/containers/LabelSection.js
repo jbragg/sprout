@@ -5,8 +5,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes';
 import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
 import {
-  editGroup, createGroupAssignAndSetCurrentItem, assignAndSetCurrentItem,
-  mergeGroup,
+  editGroup, createGroup, assignItems, mergeGroup,
 } from '../actions';
 import Group from './Group';
 import NewGroup from '../components/NewGroup';
@@ -172,10 +171,10 @@ const mapDispatchToProps = dispatch => ({
     dispatch(mergeGroup(groupId, { label }));
   },
   onGroupCreate: (itemIds, label) => {
-    dispatch(createGroupAssignAndSetCurrentItem(itemIds, { label }));
+    dispatch(createGroup({ label }, itemIds, false));
   },
   onAssign: (itemId, label) => {
-    dispatch(assignAndSetCurrentItem([itemId], { label }));
+    dispatch(assignItems([itemId], { label }, false));
   },
   onGroupMove: (groupId, label) => {
     dispatch(editGroup(groupId, { label }));

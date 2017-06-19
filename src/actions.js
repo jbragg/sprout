@@ -70,12 +70,19 @@ export function setCurrentItem(itemId = null) {
   };
 }
 
-export function assignItems(itemIds, assignment) {
-  return {
+export function assignItems(itemIds, assignment, setCurrent = false) {
+  const action = {
     type: ASSIGN_ITEMS,
     itemIds,
     assignment,  // { label: labelName } or { group: groupId }
   };
+  return (setCurrent
+    ? (dispatch) => {
+      dispatch(action);
+      dispatch(setCurrentItem());
+    }
+    : action
+  );
 }
 
 export function editItem(itemId, keyValues) {
@@ -83,13 +90,6 @@ export function editItem(itemId, keyValues) {
     type: EDIT_ITEM,
     itemId,
     keyValues,  // { test: true } or { reason: { label: true, text: 'something' } }
-  };
-}
-
-export function assignAndSetCurrentItem(itemIds, assignment) {
-  return (dispatch) => {
-    dispatch(assignItems(itemIds, assignment));
-    dispatch(setCurrentItem());
   };
 }
 
@@ -101,19 +101,24 @@ export function editGroup(groupId, keyValues) {
   };
 }
 
-export function createGroup(keyValues) {
-  return {
+export function createGroup(keyValues, itemIds = null, setCurrent = false) {
+  const action = {
     type: CREATE_GROUP,
     keyValues,
   };
-}
-
-export function createGroupAssignAndSetCurrentItem(itemIds, keyValues) {
-  return (dispatch, getState) => {
-    dispatch(createGroup(keyValues));
-    const groupId = Math.max(...groupsSelector(getState()).byId.keys());
-    dispatch(assignAndSetCurrentItem(itemIds, { group: groupId }));
-  };
+  return (setCurrent || itemIds != null
+    ? (dispatch, getState) => {
+      dispatch(createGroup(keyValues));
+      if (itemIds != null) {
+        const groupId = Math.max(...groupsSelector(getState()).byId.keys());
+        dispatch(assignItems(itemIds, { group: groupId }));
+      }
+      if (setCurrent) {
+        dispatch(setCurrentItem());
+      }
+    }
+    : action
+  );
 }
 
 export function mergeGroup(groupId, target) {

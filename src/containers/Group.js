@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DragSource, DropTarget } from 'react-dnd';
 import ItemGroup from '../components/ItemGroup';
-import { editGroup, mergeGroup, assignAndSetCurrentItem } from '../actions';
+import { editGroup, mergeGroup, assignItems } from '../actions';
 import { recommendedGroupSelector, getItemsSummary } from '../reducers/index';
 import { DragItemTypes as ItemTypes } from '../constants';
 import conditions from '../experiment';
@@ -178,7 +178,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(editGroup(groupId, keyValues));
   },
   onAssign: (itemIds, groupId) => {
-    dispatch(assignAndSetCurrentItem(itemIds, { group: groupId }));
+    dispatch(assignItems(itemIds, { group: groupId }, false));
   },
   onGroupMergeIn: (sourceGroupId, groupId) => {
     dispatch(mergeGroup(sourceGroupId, { group: groupId }));
