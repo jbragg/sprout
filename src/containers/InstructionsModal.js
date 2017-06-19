@@ -70,7 +70,12 @@ class InstructionsModal extends React.Component {
                   </Panel>
                   <Row>
                     <Col sm={6}>
-                      <ItemLargeContainer itemId={item.id} useAnswers={false} />
+                      <ItemLargeContainer
+                        itemId={item.id}
+                        useAnswers={false}
+                        useReasons={false}
+                        zoomable={false}
+                      />
                     </Col>
                     <Col sm={6}>
                       <FormGroup>

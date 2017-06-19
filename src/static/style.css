@@ -176,7 +176,7 @@
   margin-bottom: 0;
 }
 
-.item-large .item {
+.zoomable {
   cursor: -moz-zoom-in;
   cursor: -webkit-zoom-in;
   cursor: zoom-in;

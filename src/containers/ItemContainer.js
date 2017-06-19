@@ -7,6 +7,8 @@ import ItemBtn from '../components/ItemBtn';
 import { setCurrentItem, setLightbox } from '../actions';
 import { DragItemTypes as ItemTypes } from '../constants';
 import conditions from '../experiment';
+import getScore, { defaults as defaultMetrics } from '../score';
+import { getColor, getContrastColor } from '../color';
 import {
   itemDataSelector, itemsSelector, itemAnswersSelector,
   recommendedGroupSelector, itemSimilaritiesSelector,
@@ -30,21 +32,39 @@ const collect = (dndConnect, monitor) => ({
  * redux
  */
 
-const mapStateToProps = (state, { itemId, useReasons, useAnswers }) => ({
-  selected: state.currentItemId === itemId,
-  item: itemDataSelector(state).byId.get(itemId),
-  isLabeled: (
-    itemsSelector(state).byId.get(itemId).group != null
-    || itemsSelector(state).byId.get(itemId).label != null
-  ),
-  answers: itemAnswersSelector(state).get(itemId),
-  useReasons: useReasons == null ? conditions[state.systemVersion].useReasons : useReasons,
-  useAnswers: useAnswers == null ? conditions[state.systemVersion].useAnswers : useAnswers,
-  answerKey: state.answerKey,
-  recommendedGroup: recommendedGroupSelector(state),
-  lightboxOpen: state.lightboxOpen,
-  itemSimilarities: itemSimilaritiesSelector(state).get(itemId),
-});
+const mapStateToProps = (state, { itemId, useReasons, useAnswers, metric }) => {
+  const useAnswersVal = useAnswers == null
+    ? conditions[state.systemVersion].useAnswers
+    : useAnswers;
+  const metricVal = metric != null ? defaultMetrics.color : metric;
+  const answers = itemAnswersSelector(state).get(itemId);
+  const scores = answers.length > 0
+    ? getScore(metricVal)(...answers.map(answer => answer.data.answer))
+    : null;
+  const backgroundColor = scores != null && useAnswersVal
+    ? getColor(metricVal)(scores.color)
+    : null;
+  const textColor = scores != null && useAnswersVal
+    ? getContrastColor(backgroundColor)
+    : null;
+  return {
+    selected: state.currentItemId === itemId,
+    item: itemDataSelector(state).byId.get(itemId),
+    isLabeled: (
+      itemsSelector(state).byId.get(itemId).group != null
+      || itemsSelector(state).byId.get(itemId).label != null
+    ),
+    answers,
+    backgroundColor,
+    textColor,
+    useReasons: useReasons == null ? conditions[state.systemVersion].useReasons : useReasons,
+    useAnswers: useAnswersVal,
+    answerKey: state.answerKey,
+    recommendedGroup: recommendedGroupSelector(state),
+    lightboxOpen: state.lightboxOpen,
+    itemSimilarities: itemSimilaritiesSelector(state).get(itemId),
+  };
+};
 
 const mapDispatchToProps = (dispatch, { onClick }) => ({
   onClick: (onClick != null

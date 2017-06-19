@@ -2,39 +2,26 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
-import { getColor, getContrastColor } from '../color';
-import getScore, { defaults as defaultMetrics } from '../score';
 import { ItemThumbContainer } from '../containers/ItemContainer';
 
 const propTypes = {
   selected: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
-  answers: PropTypes.arrayOf(
-    PropTypes.shape({
-      data: PropTypes.shape({
-        answer: PropTypes.string.isRequired.isRequired,
-        uncertainty: PropTypes.string.isRequired,
-        uncertainty_input: PropTypes.string.isRequired,
-        unclear_type: PropTypes.string.isRequired,
-        unclear_reason: PropTypes.string.isRequired,
-      }).isRequired,
-    }),
-  ).isRequired,
   item: PropTypes.shape({
     id: PropTypes.number }).isRequired,
-  metric: PropTypes.string,
   connectDragSource: PropTypes.func,
   connectDragPreview: PropTypes.func,
   isDragging: PropTypes.bool,
-  useAnswers: PropTypes.bool,
+  textColor: PropTypes.string,
+  backgroundColor: PropTypes.string,
 };
 
 const defaultProps = ({
   connectDragSource: x => x,
   connectDragPreview: x => x,
   isDragging: false,
-  metric: defaultMetrics.color,
-  useAnswers: true,
+  textColor: null,
+  backgroundColor: null,
 });
 
 class ItemBtn extends React.Component {
@@ -48,19 +35,9 @@ class ItemBtn extends React.Component {
 
   render() {
     const {
-      selected, item, answers, onClick, metric,
-      connectDragSource, isDragging, useAnswers,
+      selected, item, onClick,
+      connectDragSource, isDragging, textColor, backgroundColor,
     } = this.props;
-    const answerValues = answers.map(answer => answer.data.answer);
-    const scores = answerValues.length > 0
-      ? getScore(metric)(...answerValues)
-      : null;
-    const backgroundColor = useAnswers && scores != null
-      ? getColor(metric)(scores.color)
-      : '';
-    const textColor = useAnswers && scores != null
-      ? getContrastColor(backgroundColor)
-      : '';
     return connectDragSource(
       <span
         className="item-btn"
@@ -78,7 +55,7 @@ class ItemBtn extends React.Component {
             style={{
               color: textColor,
               backgroundColor,
-              border: selected ? `2px ${textColor} solid` : '',
+              border: selected ? '2px black solid' : null,
             }}
           >
             {item.id}

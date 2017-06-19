@@ -6,17 +6,6 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 const propTypes = {
   selected: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
-  answers: PropTypes.arrayOf(
-    PropTypes.shape({
-      data: PropTypes.shape({
-        answer: PropTypes.string.isRequired.isRequired,
-        uncertainty: PropTypes.string.isRequired,
-        uncertainty_input: PropTypes.string.isRequired,
-        unclear_type: PropTypes.string.isRequired,
-        unclear_reason: PropTypes.string.isRequired,
-      }).isRequired,
-    }),
-  ).isRequired,
   item: PropTypes.shape({
     data: PropTypes.shape({
       path: PropTypes.string.isRequired,
@@ -26,6 +15,8 @@ const propTypes = {
   connectDragPreview: PropTypes.func,
   isDragging: PropTypes.bool,
   isLabeled: PropTypes.bool,
+  textColor: PropTypes.string,
+  backgroundColor: PropTypes.string,
 };
 
 const defaultProps = ({
@@ -33,6 +24,8 @@ const defaultProps = ({
   connectDragSource: x => x,
   isDragging: false,
   isLabeled: false,
+  textColor: null,
+  backgroundColor: null,
 });
 
 class ItemThumb extends React.Component {
@@ -47,19 +40,29 @@ class ItemThumb extends React.Component {
   render() {
     const {
       item, selected, onClick, connectDragSource, isDragging, isLabeled,
+      textColor, backgroundColor,
     } = this.props;
     return connectDragSource(
       <button
         className={classNames(
           'item-thumb btn btn-default',
-          { active: selected, labeled: isLabeled },
+          { labeled: isLabeled },
         )}
         onClick={(e) => { onClick(item.id); e.preventDefault(); }}
         style={{
           opacity: isDragging ? 0.5 : null,
+          border: selected ? '2px solid black' : null,
         }}
       >
-        <div className="text-center small"><small>{item.id}</small></div>
+        <div
+          className="text-center small"
+          style={{
+            color: textColor,
+            backgroundColor,
+          }}
+        >
+          <small>{item.id}</small>
+        </div>
         <img
           className="img-responsive"
           src={item.data.path}

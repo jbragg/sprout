@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ImmutablePropTypes from 'react-immutable-proptypes';
+import classNames from 'classnames';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import {
   Image, Glyphicon, FormGroup, ControlLabel, Row, Col,
@@ -37,8 +38,11 @@ const propTypes = {
   draggable: PropTypes.bool.isRequired,
   recommendedGroup: PropTypes.number,
   master: PropTypes.bool,
+  zoomable: PropTypes.bool,
   lightboxOpen: PropTypes.bool.isRequired,
   onSetLightbox: PropTypes.func.isRequired,
+  textColor: PropTypes.string,
+  backgroundColor: PropTypes.string,
 };
 
 const defaultProps = ({
@@ -53,6 +57,9 @@ const defaultProps = ({
   editReason: false,
   recommendedGroup: null,
   master: false,
+  zoomable: true,
+  textColor: null,
+  backgroundColor: null,
 });
 
 class ItemLarge extends React.Component {
@@ -88,7 +95,7 @@ class ItemLarge extends React.Component {
       item, answers, connectDragSource, isDragging, useReasons,
       useAnswers, answerKey, aggregateOnly, editReason, draggable,
       recommendedGroup, master, lightboxOpen, onSetLightbox,
-      similarItems, itemSimilarities,
+      similarItems, itemSimilarities, textColor, backgroundColor, zoomable,
     } = this.props;
     const { imageStatus } = this.state;
     const itemComponent = (
@@ -115,11 +122,16 @@ class ItemLarge extends React.Component {
         )}
         <ListGroupItem>
           <Image
-            className="item"
+            className={classNames(
+              'item',
+              { zoomable },
+            )}
             responsive
             src={item.data.path}
             onLoad={this.handleImageLoaded}
-            onClick={() => { onSetLightbox(true); }}
+            onClick={zoomable && (
+              () => { onSetLightbox(true); }
+            )}
           />
           {lightboxOpen &&
             <Lightbox
@@ -149,7 +161,13 @@ class ItemLarge extends React.Component {
         style={{ opacity: isDragging ? 0.5 : null }}
       >
         {!draggable ? null : (
-          <div className="panel-heading panel-heading-less-padding">
+          <div
+            className="panel-heading panel-heading-less-padding"
+            style={{
+              color: textColor,
+              backgroundColor,
+            }}
+          >
             <Row className="no-gutter">
               <Col xs={2} />
               <Col className="text-center panel-title" xs={8}>
