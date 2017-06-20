@@ -52,7 +52,7 @@ function renderItem(type, item) {
     case ItemTypes.ITEM:
       return (<ItemThumbContainer itemId={item.id} />);
     case ItemTypes.CLUSTER:
-      return (<GroupDrag n={item.ids.length} />);
+      return (<GroupDrag n={item.ids.size} />);
     case ItemTypes.GROUP:
       return (<GroupDrag n={item.itemIds.size} />);
     default:

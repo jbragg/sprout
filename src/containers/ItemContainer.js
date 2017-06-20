@@ -63,6 +63,7 @@ const mapStateToProps = (state, { itemId, useReasons, useAnswers, metric }) => {
     recommendedGroup: recommendedGroupSelector(state),
     lightboxOpen: state.lightboxOpen,
     itemSimilarities: itemSimilaritiesSelector(state).get(itemId),
+    similarItems: !state.similarNav,
   };
 };
 

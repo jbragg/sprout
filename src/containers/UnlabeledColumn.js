@@ -10,6 +10,7 @@ const propTypes = {
   currentItemId: PropTypes.number,
   useReasons: PropTypes.bool,
   master: PropTypes.bool,
+  similarNav: PropTypes.bool.isRequired,
 };
 
 const defaultProps = {
@@ -18,9 +19,13 @@ const defaultProps = {
   master: false,
 };
 
-const UnlabeledColumn = ({ useReasons, currentItemId, master }) => (
+const UnlabeledColumn = ({ useReasons, currentItemId, master, similarNav }) => (
   <PanelGroup>
-    <UnlabeledSection className="panel" useReasons={useReasons} />
+    <UnlabeledSection
+      className="panel"
+      useReasons={useReasons}
+      similarNav={similarNav}
+    />
     {currentItemId != null
         ? (
           <ItemLargeContainer
@@ -42,6 +47,7 @@ UnlabeledColumn.defaultProps = defaultProps;
 const mapStateToProps = state => ({
   currentItemId: state.currentItemId,
   useReasons: conditions[state.systemVersion].useReasons,
+  similarNav: state.similarNav,
 });
 
 export default connect(mapStateToProps)(UnlabeledColumn);

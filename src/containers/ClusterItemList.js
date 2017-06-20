@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 import classNames from 'classnames';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DragSource } from 'react-dnd';
@@ -14,7 +15,9 @@ import { setClusterId } from '../actions';
 import { DragItemTypes as ItemTypes } from '../constants';
 
 const propTypes = {
-  itemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
+  itemIds: ImmutablePropTypes.orderedSetOf(
+    PropTypes.number.isRequired,
+  ).isRequired,
   summary: PropTypes.string.isRequired,
   clusterId: PropTypes.number.isRequired,
   nClusters: PropTypes.number.isRequired,
@@ -64,8 +67,8 @@ class ClusterItemList extends React.Component {
         </Clearfix>
         {connectDragSource(
           <div
-            className={classNames({ disabled: itemIds.length === 0 })}
-            style={{ opacity: itemIds.length === 0 ? 0.5 : null }}
+            className={classNames({ disabled: itemIds.size === 0 })}
+            style={{ opacity: itemIds.size === 0 ? 0.5 : null }}
           >
             <ItemGroup
               itemIds={itemIds}
@@ -88,7 +91,7 @@ ClusterItemList.propTypes = propTypes;
 
 const source = {
   beginDrag: props => ({ ids: props.itemIds }),
-  canDrag: props => props.itemIds.length > 0,
+  canDrag: props => props.itemIds.size > 0,
 };
 
 const collect = (dndConnect, monitor) => ({
@@ -112,11 +115,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = dispatch => ({
-  onSetCluster: (id) => {
-    dispatch(setClusterId(id));
-  },
-});
+const mapDispatchToProps = {
+  onSetCluster: setClusterId,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(
   DragSource(ItemTypes.CLUSTER, source, collect)(ClusterItemList),

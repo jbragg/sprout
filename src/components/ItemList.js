@@ -17,12 +17,14 @@ const propTypes = {
   onClick: PropTypes.func,
   thumbnails: PropTypes.bool,
   dots: PropTypes.bool,
+  itemInFocus: PropTypes.number,
 };
 
 const defaultProps = {
   onClick: null,
   thumbnails: false,
   dots: false,
+  itemInFocus: null,
 };
 
 const sliderSettings = {
@@ -59,31 +61,65 @@ const sliderSettings = {
   ],
 };
 
+const getArray = sequence => (Array.isArray(sequence)
+  ? sequence
+  : [...sequence.keys()]
+);
+
 class ItemList extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { slide: 0, slidesToShow: 1 };
-    this.handleSlideChange = this.handleSlideChange.bind(this);
+    this.state = {
+      slide: 0,
+      slidesToShow: 1,
+    };
+    this.goToItem = this.goToItem.bind(this);
   }
 
-  handleSlideChange(cur, next) {
-    this.setState({ slide: next, slidesToShow: Math.abs(next - cur) });
+  componentWillReceiveProps(nextProps) {
+    if (
+      nextProps.itemInFocus !== this.props.itemInFocus
+      && nextProps.itemInFocus != null
+    ) {
+      this.goToItem(nextProps.itemInFocus);
+    }
+  }
+
+  goToItem(id) {
+    const itemIds = getArray(this.props.itemIds);
+    const nextId = itemIds.indexOf(id);
+    if (nextId >= 0) {
+      this.slider.slickGoTo(nextId);
+    }
   }
 
   render() {
     const { onClick, thumbnails, dots } = this.props;
-    const itemIds = (Array.isArray(this.props.itemIds)
-      ? this.props.itemIds
-      : [...this.props.itemIds.keys()]
-    );
+    const itemIds = getArray(this.props.itemIds);
     return (
       <div className="form-group itemlist">
         {thumbnails
             ? (itemIds.length > 0 && (
               <Slider
+                ref={(c) => { this.slider = c; }}
                 {...sliderSettings}
                 dots={dots}
-                beforeChange={this.handleSlideChange}
+                beforeChange={(cur, next) => {
+                  setTimeout(
+                    () => {
+                      this.setState({ slidesToShow: Math.abs(cur - next) });
+                    },
+                    5000,
+                  );
+                }}
+                afterChange={(next) => {
+                  /**
+                   * TODO: Move to beforeChange and remove setTimeout if
+                   * transition bug is fixed:
+                   * https://github.com/akiran/react-slick/issues/136
+                   */
+                  this.setState({ slide: next });
+                }}
               >
                 {itemIds.map(id => (
                   <div key={id}>

@@ -23,7 +23,7 @@ const Progress = ({ labeledItems, totalItems }) => (
 Progress.propTypes = propTypes;
 
 const mapStateToProps = state => ({
-  labeledItems: state.entities.items.byId.size - unlabeledItemIdsSelector(state).length,
+  labeledItems: state.entities.items.byId.size - unlabeledItemIdsSelector(state).size,
   totalItems: state.entities.items.byId.size,
 });
 

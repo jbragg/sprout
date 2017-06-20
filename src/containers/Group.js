@@ -124,7 +124,11 @@ const groupTarget = {
          * (by ignoring but still catching)
          * drop events of its own items rather than the parent label.
          */
-        props.onAssign([monitor.getItem().id], props.groupId);
+        props.onAssign(
+          [monitor.getItem().id],
+          props.groupId,
+          props.autoAdvance,
+        );
       }
     } else if (monitor.getItemType() === ItemTypes.GROUP) {
       const id = monitor.getItem().id;
@@ -134,11 +138,13 @@ const groupTarget = {
         props.confirmMerge(() => props.onGroupMergeIn(id, props.groupId));
       }
     } else {  // ItemTypes.CLUSTER
-      const ids = monitor.getItem().ids;
+      const ids = [...monitor.getItem().ids];
       if (props.confirmMerge == null) {
-        props.onAssign(ids, props.groupId);
+        props.onAssign(ids, props.groupId, props.autoAdvance);
       } else {
-        props.confirmMerge(() => props.onAssign(ids, props.groupId));
+        props.confirmMerge(
+          () => props.onAssign(ids, props.groupId, props.autoAdvance),
+        );
       }
     }
   },
@@ -171,14 +177,15 @@ const mapStateToProps = (state, { groupId }) => ({
   recommended: recommendedGroupSelector(state) === groupId,
   currentItemId: state.currentItemId,
   useReasons: conditions[state.systemVersion].useReasons,
+  autoAdvance: state.autoAdvance,
 });
 
 const mapDispatchToProps = dispatch => ({
   onGroupEdit: (keyValues, groupId) => {
     dispatch(editGroup(groupId, keyValues));
   },
-  onAssign: (itemIds, groupId) => {
-    dispatch(assignItems(itemIds, { group: groupId }, false));
+  onAssign: (itemIds, groupId, autoAdvance) => {
+    dispatch(assignItems(itemIds, { group: groupId }, autoAdvance));
   },
   onGroupMergeIn: (sourceGroupId, groupId) => {
     dispatch(mergeGroup(sourceGroupId, { group: groupId }));

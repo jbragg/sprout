@@ -25,6 +25,7 @@ const propTypes = {
   itemIds: ImmutablePropTypes.orderedSetOf(PropTypes.number.isRequired).isRequired,
   label: PropTypes.string.isRequired,
   fixedTarget: PropTypes.bool,
+  autoAdvance: PropTypes.bool.isRequired,
 };
 
 const defaultProps = {
@@ -109,7 +110,11 @@ class LabelSection extends React.Component {
               ))}
             </div>
           )}
-          <NewGroup onGroupCreate={(ids) => { onGroupCreate(ids, label); }} />
+          <NewGroup
+            onGroupCreate={(ids) => {
+              onGroupCreate(ids, label, this.props.autoAdvance);
+            }}
+          />
         </div>
       </div>,
     );
@@ -129,11 +134,11 @@ const target = {
       return;
     }
     if (monitor.getItemType() === ItemTypes.ITEM) {
-      props.onAssign(monitor.getItem().id, props.label);
+      props.onAssign(monitor.getItem().id, props.label, props.autoAdvance);
     } else if (monitor.getItemType() === ItemTypes.GROUP) {
       props.onGroupMove(monitor.getItem().id, props.label);
     } else {  // ItemTypes.CLUSTER
-      props.onGroupCreate(monitor.getItem().ids, props.label);
+      props.onGroupCreate([...monitor.getItem().ids], props.label);
     }
   },
   canDrop: (props, monitor) => {
@@ -164,17 +169,18 @@ const collect = (dndConnect, monitor) => ({
 const mapStateToProps = (state, { label }) => ({
   groupIds: labelGroupsSelector(state).get(label),
   itemIds: state.entities.labels.get(label).itemIds,
+  autoAdvance: state.autoAdvance,
 });
 
 const mapDispatchToProps = dispatch => ({
   onGroupDelete: (groupId, label) => {
     dispatch(mergeGroup(groupId, { label }));
   },
-  onGroupCreate: (itemIds, label) => {
-    dispatch(createGroup({ label }, itemIds, false));
+  onGroupCreate: (itemIds, label, autoAdvance) => {
+    dispatch(createGroup({ label }, itemIds, autoAdvance));
   },
-  onAssign: (itemId, label) => {
-    dispatch(assignItems([itemId], { label }, false));
+  onAssign: (itemId, label, autoAdvance) => {
+    dispatch(assignItems([itemId], { label }, autoAdvance));
   },
   onGroupMove: (groupId, label) => {
     dispatch(editGroup(groupId, { label }));

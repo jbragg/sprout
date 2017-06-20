@@ -24,10 +24,18 @@ export const RECEIVE_EXPERIMENT = 'RECEIVE_EXPERIMENT';
 export const FETCH_EXPERIMENT = 'FETCH_EXPERIMENT';
 export const CHANGE_EXPERIMENT_PHASE = 'CHANGE_EXPERIMENT_PHASE';
 export const SET_LIGHTBOX = 'SET_LIGHTBOX';
+export const SET_AUTOADVANCE = 'SET_AUTOADVANCE';
 
 /*
  * action creators
  */
+
+export function setAutoAdvance(payload) {
+  return {
+    type: SET_AUTOADVANCE,
+    payload,
+  };
+}
 
 export function setLightbox(payload) {
   return {

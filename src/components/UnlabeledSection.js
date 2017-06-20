@@ -7,22 +7,22 @@ import ClusterItemList from '../containers/ClusterItemList';
 
 const propTypes = {
   useReasons: PropTypes.bool.isRequired,
-  similarItemList: PropTypes.bool,
-  unreviewedItemList: PropTypes.bool,
+  similarNav: PropTypes.bool,
   className: PropTypes.string,
 };
 
 const defaultProps = {
-  similarItemList: false,
-  unreviewedItemList: true,
+  similarNav: false,
   className: null,
 };
 
-const UnlabeledSection = ({ useReasons, className, similarItemList, unreviewedItemList }) => (
+const UnlabeledSection = ({ useReasons, className, similarNav }) => (
   <div className={classNames(className, 'unlabeled-items')}>
     <div className="items-nav">
-      {similarItemList && <SimilarItemList similar={useReasons} />}
-      {unreviewedItemList && <UnreviewedItemList thumbnails />}
+      {similarNav
+          ? <SimilarItemList similar={useReasons} />
+          : <UnreviewedItemList thumbnails />
+      }
     </div>
     {useReasons && (
       <div className="clusters-nav">

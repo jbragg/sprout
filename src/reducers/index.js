@@ -5,7 +5,7 @@ import {
   ANSWER_ORACLE, QUEUE_ITEM_ORACLE, UNQUEUE_ITEM_ORACLE, SET_CLUSTER_ID,
   EDIT_GENERAL_INSTRUCTIONS, SET_CURRENT_ITEM, ASSIGN_ITEMS, EDIT_ITEM,
   EDIT_GROUP, CREATE_GROUP, MERGE_GROUP, REQUEST_EXPERIMENT,
-  RECEIVE_EXPERIMENT, CHANGE_EXPERIMENT_PHASE, SET_LIGHTBOX,
+  RECEIVE_EXPERIMENT, CHANGE_EXPERIMENT_PHASE, SET_LIGHTBOX, SET_AUTOADVANCE,
 } from '../actions';
 import getScore, { defaults as defaultMetrics } from '../score';
 import { Labels, States, defaults } from '../constants';
@@ -24,6 +24,7 @@ const initialState = {
   tutorial: false,
   isExperiment: true,
   lightboxOpen: false,
+  autoAdvance: true,
   oracle: {
     queuedItems: [],
     answerInterval: 30 * 1000,  // seconds to milliseconds
@@ -36,6 +37,7 @@ const initialState = {
   },
   currentItemId: null,
   primaryItemId: null,
+  similarNav: false,
   similarItemIds: [],
   clusterId: 0,
   initialInstructions: null,
@@ -125,9 +127,9 @@ export const itemSimilaritiesSelector = createSelector(
 const isUnlabeled = item => (item.group == null && item.label == null);
 export const unlabeledItemIdsSelector = createSelector(
   itemsSelector,
-  items => [...items.byId.values()]
+  items => new Set([...items.byId.values()]
     .filter(item => isUnlabeled(item))
-    .map(item => item.id),
+    .map(item => item.id)),
 );
 export const testItemsSelector = createSelector(
   itemsSelector,
@@ -171,20 +173,10 @@ export const sortedItemIdsSelector = createSelector(
     (id1, id2) => scores.get(id1) - scores.get(id2),
   ),
 );
-export const unlabeledItemScoresSelector = createSelector(
-  unlabeledItemIdsSelector,
-  itemAnswersSelector,
-  (itemIds, answers) => new Map(itemIds.map(id => [
-    id,
-    getScore(defaultMetrics.sort)(
-      ...answers.get(id).map(answer => answer.data.answer),
-    ).color,
-  ])),
-);
 export const unlabeledSortedItemIdsSelector = createSelector(
   unlabeledItemIdsSelector,
-  unlabeledItemScoresSelector,
-  (itemIds, scores) => [...itemIds].sort((id1, id2) => scores.get(id1) - scores.get(id2)),
+  sortedItemIdsSelector,
+  (unlabeledItemIds, sortedItemIds) => sortedItemIds.filter(id => unlabeledItemIds.has(id)),
 );
 export const groupItemsSelector = createSelector(
   groupsSelector,
@@ -226,7 +218,7 @@ const nextClusterSelector = createSelector(
 
 const getSimilarItemIds = (itemId, state, unlabeledOnly = true) => {
   const unlabeledItemIds = unlabeledItemIdsSelector(state);
-  return [...itemSimilaritiesSelector(state).get(itemId).keys()].filter(id => !unlabeledOnly || unlabeledItemIds.indexOf(id) >= 0);
+  return [...itemSimilaritiesSelector(state).get(itemId).keys()].filter(id => !unlabeledOnly || unlabeledItemIds.has(id));
 };
 
 export const getItemsSummary = (itemIds, state) => (
@@ -314,16 +306,16 @@ function InstructionsApp(state = initialState, action) {
       if (action.itemId == null && currentItemId == null && state.primaryItemId == null) {
         const { useReasons, useAnswers } = conditions[state.systemVersion];
         // Choose next primaryItem.
-        if (unlabeledItemIdsSelector(state).length === 0) {
+        if (unlabeledItemIdsSelector(state).size === 0) {
           primaryItemId = null;
         } else if (!useReasons && !useAnswers) {
-          primaryItemId = unlabeledItemIdsSelector(state)[0];
+          primaryItemId = [...unlabeledItemIdsSelector(state)][0];
         } else {
           primaryItemId = unlabeledSortedItemIdsSelector(state)[0];
         }
         currentItemId = primaryItemId;
         similarItemIds = primaryItemId == null ? [] : getSimilarItemIds(primaryItemId, state);
-      } else if (action.itemId == null && currentItemId == null && state.similarItemIds.length > 0) {
+      } else if (state.similarNav && action.itemId == null && currentItemId == null && state.similarItemIds.length > 0) {
         // Move to next similarItem.
         currentItemId = state.similarItemIds[0];
       } else if (action.itemId == null && currentItemId == null) {
@@ -331,7 +323,7 @@ function InstructionsApp(state = initialState, action) {
         currentItemId = primaryItemId;
       } else if (action.itemId == null) {
         // Nothing to do.
-      } else if (action.itemId !== primaryItemId && state.similarItemIds.indexOf(action.itemId) < 0 && isUnlabeled(state.entities.items.byId.get(action.itemId))) {
+      } else if (state.similarNav && action.itemId !== primaryItemId && state.similarItemIds.indexOf(action.itemId) < 0 && isUnlabeled(state.entities.items.byId.get(action.itemId))) {
         // New unlabeled item.
         primaryItemId = action.itemId;
         currentItemId = primaryItemId;
@@ -599,6 +591,12 @@ function InstructionsApp(state = initialState, action) {
       return {
         ...state,
         lightboxOpen: action.payload,
+      };
+    }
+    case SET_AUTOADVANCE: {
+      return {
+        ...state,
+        autoAdvance: action.payload,
       };
     }
     default: {
