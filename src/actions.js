@@ -307,6 +307,7 @@ export function fetchExperiment(params) {
           participantId: params.participantId,
           participantIndex: params.participantIndex,
           systemVersion,
+          similarNav: task.similarNav,
         }));
         dispatch(setCurrentItem());
         if (task.isExperiment) {

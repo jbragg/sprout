@@ -540,8 +540,18 @@ function InstructionsApp(state = initialState, action) {
         initialInstructions: action.payload.initialInstructions,
         generalInstructions: action.payload.instructions,
         answerKey: action.payload.answerKey,
-        tutorial: action.payload.tutorial != null ? action.payload.tutorial : state.tutorial,
-        isExperiment: action.payload.isExperiment != null ? action.payload.isExperiment : state.isExperiment,
+        tutorial: (action.payload.tutorial != null
+          ? action.payload.tutorial
+          : state.tutorial
+        ),
+        isExperiment: (action.payload.isExperiment != null
+          ? action.payload.isExperiment
+          : state.isExperiment
+        ),
+        similarNav: (action.payload.similarNav != null
+          ? action.payload.similarNav
+          : state.similarNav
+        ),
         entities: {
           ...state.entities,
           itemData: {
