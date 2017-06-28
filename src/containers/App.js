@@ -18,6 +18,7 @@ import Survey from './Survey';
 import Oracle from './Oracle';
 import CustomDragLayer from '../CustomDragLayer';
 import Clusters from './Clusters';
+import Raw from './Raw';
 import Export from './Export';
 import Thanks from '../components/Thanks';
 import ExperimentProgress from '../components/ExperimentProgress';
@@ -50,6 +51,7 @@ const propTypes = {
   onChangeExperimentPhase: PropTypes.func.isRequired,
   masterView: PropTypes.bool,
   clusterView: PropTypes.bool,
+  rawView: PropTypes.bool,
   tutorial: PropTypes.bool,
   isExperiment: PropTypes.bool,
   multiPhase: PropTypes.bool,
@@ -64,6 +66,7 @@ const defaultProps = {
   labels: null,
   masterView: false,
   clusterView: false,
+  rawView: false,
   tutorial: false,
   isExperiment: true,
   multiPhase: false,
@@ -210,13 +213,15 @@ class App extends React.Component {
   render() {
     const {
       items, labels, masterView, clusterView, initialInstructions, isExperiment,
-      prefetchAll, tutorial, onSetLightbox,
+      prefetchAll, tutorial, onSetLightbox, rawView,
     } = this.props;
     const experimentState = this.props.experimentPhase.name;
     if (experimentState == null || experimentState === States.LOADING) {
       return <Grid><h1><Loading /></h1></Grid>;
     } else if (clusterView) {
       return <Grid fluid><Clusters /></Grid>;
+    } else if (rawView) {
+      return <Grid fluid><Raw /></Grid>;
     }
     let experimentComponent = null;
     const remainingSeconds = this.remainingTime() / 1000;
@@ -237,10 +242,12 @@ class App extends React.Component {
           <Col className="instructions" sm={4}>
             <AutoAffix>
               <div>
-                <h3>Customer Instructions</h3>
-                <p>Your task is to improve these instructions:</p>
-                <Well bsSize="sm">{initialInstructions}</Well>
-                {isExperiment && <Oracle />}
+                <div className="instructions-customer">
+                  <h3>Customer Instructions</h3>
+                  <p>Your task is to improve these instructions:</p>
+                  <Well bsSize="sm">{initialInstructions}</Well>
+                  {isExperiment && <Oracle />}
+                </div>
                 <Instructions />
                 {isExperiment && (
                   <Countdown
@@ -336,7 +343,7 @@ class App extends React.Component {
       experimentComponent = <Grid><h1><Loading /></h1></Grid>;
     }
     return (
-      <HotKeys handlers={{ preview: () => { onSetLightbox(true); }}}>
+      <HotKeys handlers={{ preview: () => { onSetLightbox(true); } }}>
         <div id="app">
           {prefetchAll &&
             <div className="hidden">
@@ -355,6 +362,7 @@ class App extends React.Component {
               ref={(c) => { this.joyride = c; }}
               steps={this.state.tutorialSteps}
               run={this.state.tutorialRunning}
+              type="continuous"
             />
           )}
           {this.props.isExperiment
@@ -396,6 +404,7 @@ const mapStateToProps = (state, { location }) => {
     experimentPhase: state.experimentPhase,
     labels: state.labels,
     clusterView: parse(location.search).clusters !== undefined,
+    rawView: parse(location.search).raw !== undefined,
     masterView: parse(location.search).master !== undefined,
     multiPhase: parse(location.search).multiPhase !== undefined,
     tutorial: Boolean(state.tutorial),

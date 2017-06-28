@@ -23,7 +23,7 @@ const initialState = {
   finalLabels,
   tutorial: false,
   isExperiment: true,
-  lightboxOpen: false,
+  lightboxId: null,
   autoAdvance: true,
   oracle: {
     queuedItems: [],
@@ -602,7 +602,10 @@ function InstructionsApp(state = initialState, action) {
     case SET_LIGHTBOX: {
       return {
         ...state,
-        lightboxOpen: action.payload,
+        lightboxId: (action.payload && action.payload.id != null
+          ? action.payload.id
+          : action.payload && state.currentItemId
+        ),
       };
     }
     case SET_AUTOADVANCE: {

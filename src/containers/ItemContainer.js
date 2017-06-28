@@ -61,7 +61,7 @@ const mapStateToProps = (state, { itemId, useReasons, useAnswers, metric }) => {
     useAnswers: useAnswersVal,
     answerKey: state.answerKey,
     recommendedGroup: recommendedGroupSelector(state),
-    lightboxOpen: state.lightboxOpen,
+    lightboxOpen: state.lightboxId === itemId,
     itemSimilarities: itemSimilaritiesSelector(state).get(itemId),
     similarItems: !state.similarNav,
   };

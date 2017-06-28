@@ -130,13 +130,13 @@ class ItemLarge extends React.Component {
             src={item.data.path}
             onLoad={this.handleImageLoaded}
             onClick={zoomable && (
-              () => { onSetLightbox(true); }
+              () => { onSetLightbox({ id: item.id }); }
             )}
           />
           {lightboxOpen &&
             <Lightbox
               mainSrc={item.data.path}
-              onCloseRequest={() => { onSetLightbox(false); }}
+              onCloseRequest={() => { onSetLightbox(null); }}
             />
           }
         </ListGroupItem>
