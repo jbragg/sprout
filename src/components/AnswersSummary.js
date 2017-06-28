@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import getScore, { defaults as defaultMetrics } from '../score';
 import { OverlayTrigger, Popover } from 'react-bootstrap';
+import getScore, { defaults as defaultMetrics } from '../score';
 import Histogram from './Histogram';
 import HistogramSummary from './HistogramSummary';
 
@@ -12,22 +12,30 @@ const propTypes = {
         answer: PropTypes.string.isRequired.isRequired,
         uncertainty: PropTypes.string.isRequired,
         uncertainty_input: PropTypes.string.isRequired,
-        unclear_type: PropTypes.string.isRequired,
-        unclear_reason: PropTypes.string.isRequired,
+        unclear_type: PropTypes.string,
+        unclear_reason: PropTypes.string,
       }).isRequired,
     }),
   ).isRequired,
+  answerKey: PropTypes.objectOf(PropTypes.string.isRequired).isRequired,
 };
 
 const AnswersSummary = ({ answers, answerKey }) => {
-  let answerCounts = new Map([...answerKey.keys()].map(key => [key, 0]));
+  const answerCounts = new Map([...answerKey.keys()].map(key => [key, 0]));
   // Compute totals.
-  answers.forEach(answer => answerCounts.set(answer.data.answer, answerCounts.get(answer.data.answer) + 1));
+  answers.forEach(answer => answerCounts.set(
+    answer.data.answer,
+    answerCounts.get(answer.data.answer) + 1,
+  ));
 
   // Transform values
-  const answerCountsTransform = new Map([...answerCounts].map(([key, count]) => [[getScore(defaultMetrics.color)(key).human, answerKey.get(key)], count]));
+  const answerCountsTransform = new Map([...answerCounts].map(
+    ([key, count]) => [
+      [getScore(defaultMetrics.color)(key).human, answerKey.get(key)],
+      count,
+    ]));
   const scoredAnswers = answers.map(answer => ({
-    answer: getScore(defaultMetrics.color)(answer.data.answer).human
+    answer: getScore(defaultMetrics.color)(answer.data.answer).human,
   }));
   return (
     <div className="answers-summary">

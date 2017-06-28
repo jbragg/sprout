@@ -224,8 +224,8 @@ const getSimilarItemIds = (itemId, state, unlabeledOnly = true) => {
 export const getItemsSummary = (itemIds, state) => (
   []
     .concat(...itemIds.map(id => itemAnswersSelector(state).get(id)))
-    .map(answer => answer.data.unclear_type)
-    .filter(s => s.length > 0)
+    .map(answer => answer.data.unclear_type || answer.data.unclear_reason)
+    .filter(s => s)
     .join(', ')
 );
 
@@ -537,6 +537,8 @@ function InstructionsApp(state = initialState, action) {
         systemVersion: action.payload.systemVersion,
         participantId: action.payload.participantId,
         participantIndex: action.payload.participantIndex,
+        experimentId: action.payload.experimentId,
+        taskId: action.payload.taskId,
         initialInstructions: action.payload.initialInstructions,
         generalInstructions: action.payload.instructions,
         answerKey: action.payload.answerKey,

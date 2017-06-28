@@ -170,11 +170,9 @@ const answerKey = new Map([
 ]);
 
 function formatAnswerData(answerData) {
-  // TODO: Do this server-side.
+  // answerData.answer is either a key or value in answerKey.
   const answerKeyIndex = [...answerKey.values()].indexOf(answerData.answer);
-  let answerValue = (answerKeyIndex >= 0) ? answerKeyIndex + 1 : Number(answerData.answer);
-  // Answers on the server go from Definitely Yes to Definitely No, but we reverse that.
-  answerValue = ((answerValue - 3) * -1) + 3;
+  const answerValue = (answerKeyIndex >= 0) ? answerKeyIndex + 1 : Number(answerData.answer);
   return {
     ...answerData,
     answer: answerValue,
@@ -308,6 +306,8 @@ export function fetchExperiment(params) {
           participantIndex: params.participantIndex,
           systemVersion,
           similarNav: task.similarNav,
+          experimentId,
+          taskId,
         }));
         dispatch(setCurrentItem());
         if (task.isExperiment) {
