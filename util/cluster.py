@@ -12,24 +12,25 @@ import numpy as np
 import pandas as pd
 from sklearn import cluster
 
-CACHED_FILENAME = os.path.join(os.path.dirname(__file__),
-                               'cached_vectors.pickle')
 
-
-def cluster_questions(df, k=8, cache=True, overwrite=False):
+def cluster_questions(df, k=8, cache=True, overwrite=False, cached_filename=None):
     """Cluster questions."""
     doc_vectors = []
     questionids = []
     questionids_other = []
-    cached = cache and os.path.exists(CACHED_FILENAME) and not overwrite
+    cached = cache and os.path.exists(cached_filename) and not overwrite
     if cached:
-        with open(CACHED_FILENAME, 'rb') as f:
+        with open(cached_filename, 'rb') as f:
             cached_vectors = pickle.load(f)
     else:
         cached_vectors = dict()
     for questionid, df2 in df.groupby('questionid'):
-        print df2
-        question_reason = ' '.join(df2[df2.reason != False]['reason'])
+        words = df2.unclear_type.fillna('').str.cat(sep=' ') or ''
+        more_words = df2.unclear_reason.fillna('').str.cat(sep=' ') or ''
+        if more_words:
+            words += ' {}'.format(more_words)
+        question_reason = words
+        print words
         if cached:
             doc_vector = cached_vectors[questionid]
         else:
@@ -41,7 +42,7 @@ def cluster_questions(df, k=8, cache=True, overwrite=False):
         else:
             questionids_other.append(questionid)
     if not cached:
-        with open(CACHED_FILENAME, 'wb') as f:
+        with open(cached_filename, 'wb') as f:
             pickle.dump(cached_vectors, f)
 
     kmeans = cluster.KMeans(n_clusters=min(k, len(questionids)))
@@ -79,27 +80,32 @@ def get_doc_vector(text):
         return None
 
 
-def main(answers_path, experiment_path, out_path, n_clusters):
+def main(answers_path, experiment_path, out_path, n_clusters=5, cached_filename=None):
     """Create new experiment file with item cluster information.
 
     Args:
         answers_path (str): Path to answers data file.
         experiment_path (str): Path to experiment file.
         out_path (str): Path to augmented experiment file.
-        n_clusters (str): Number of clusters to use.
+        n_clusters (Optional[int]): Number of clusters to use. Defaults to 5.
+        cached_filename (Optional[str])
 
     """
+    # TODO: Don't default to 5 clusters.
+    if cached_filename is None:
+        cached_filename = os.path.basename(answers_path) + '.pickle.CACHED'
     df = pd.read_json(answers_path, orient='records')
 
     def filter1(row):
         """Select answers less than 100% confident for clustering."""
-        return bool(row['likert_from_mean'] < 2 or row['reason'])
+        return bool(row['likert_from_mean'] < 2 or row['unclear_reason'] or row['unclear_type'])
     df_filtered = df[df.apply(filter1, axis=1)]
     clusters, questionids_other, embeddings = cluster_questions(
-        df_filtered, k=n_clusters)
+        df_filtered, k=n_clusters,
+        cached_filename=cached_filename)
     question_to_cluster = dict()
-    for i, cluster in enumerate(clusters):
-        for questionid in cluster:
+    for i, clust in enumerate(clusters):
+        for questionid in clust:
             question_to_cluster[questionid] = i
 
     with open(experiment_path, 'r') as f:
@@ -131,8 +137,7 @@ if __name__ == '__main__':
         default='../src/static/private/pilot_instructions_experiment.with_vec.json')
     parser.add_argument(
         '--n_clusters',
-        type=int,
-        default=5)  # TODO(jbragg): Choose number of clusters?
+        type=int)
     args = parser.parse_args()
     main(n_clusters=args.n_clusters,
          answers_path=args.answers,
