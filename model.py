@@ -9,3 +9,7 @@ class Actions(ndb.Model):
     prev_state = ndb.JsonProperty(compressed=True)
     next_state = ndb.JsonProperty(compressed=True)
     error = ndb.StringProperty()
+    experiment_id = ndb.StringProperty()
+    participant_id = ndb.StringProperty()
+    participant_index = ndb.IntegerProperty()
+    task_id = ndb.StringProperty()

@@ -1,0 +1,9 @@
+indexes:
+
+- kind: Actions
+  properties:
+  - name: experiment_id
+  - name: participant_id
+  - name: participant_index
+  - name: task_id
+  - name: start_time

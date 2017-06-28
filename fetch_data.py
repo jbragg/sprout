@@ -9,7 +9,6 @@ DATA_DIR = os.path.join(os.path.dirname(
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default JSON code."""
-
     if isinstance(obj, datetime.datetime):
         serial = obj.isoformat()
         return serial
@@ -40,16 +39,12 @@ def fetch_all(query, limit=100):
     return results
 
 
-def main(project_id, data_dir=DATA_DIR):
+def main(project_id, data_dir=DATA_DIR, separate=True):
     """Fetch experiment data.
 
     Creates data_dir with the following files (JSON-serialized lists of
     entities):
-    - demographics.json: model.Demographics entities.
-    - treatments.json: model.Treatment entities.
-    - trials.json: model.TrialResponse entities.
-    - comments.json: model.Comments entities.
-    - postsurvey.json: model.PostSurvey entities.
+    - actions.json: model.Actions entities.
 
     """
     if not os.path.exists(data_dir):
@@ -60,11 +55,45 @@ def main(project_id, data_dir=DATA_DIR):
         '/_ah/remote_api')
 
     for entity_type, fname in [(model.Actions, 'actions.json')]:
-        with open(os.path.join(data_dir, fname), 'w') as f:
-            print 'fetching {}...'.format(fname)
-            records = [
-                rec.to_dict() for rec in fetch_all(entity_type.query().order(entity_type.date))]
-            json.dump(records, f, default=json_serial)
+        filters = []
+        if fname == 'actions.json':
+            filters = entity_type.query(
+                projection=[
+                    entity_type.experiment_id,
+                    entity_type.task_id,
+                    entity_type.participant_id,
+                    entity_type.participant_index,
+                ],
+                distinct=True
+            ).fetch()
+        if not separate:
+            with open(os.path.join(data_dir, fname), 'w') as f:
+                print 'fetching {}...'.format(fname)
+                records = [
+                    rec.to_dict() for rec in fetch_all(
+                        entity_type.query().order(entity_type.date))
+                ]
+                json.dump(records, f, default=json_serial)
+        else:
+            for filter in filters:
+                name = '{}.{}.{}.{}.json'.format(
+                    filter.experiment_id or '',
+                    filter.task_id or '',
+                    filter.participant_id or '',
+                    filter.participant_index or '',
+                )
+                with open(os.path.join(data_dir, name), 'w') as f:
+                    records = [
+                        rec.to_dict() for rec in fetch_all(
+                            entity_type.query(
+                                entity_type.experiment_id == filter.experiment_id,
+                                entity_type.task_id == filter.task_id,
+                                entity_type.participant_id == filter.participant_id,
+                                entity_type.participant_index == filter.participant_index,
+                            ).order(entity_type.start_time)
+                        )
+                    ]
+                    json.dump(records, f, default=json_serial)
 
 
 if __name__ == '__main__':

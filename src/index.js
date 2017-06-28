@@ -52,6 +52,11 @@ const productionLogger = store => next => (action) => {
   logEntry.duration = new Date() - logEntry.start_time;
   logEntry.next_state = stateTransformer(store.getState());
 
+  logEntry.participant_id = logEntry.next_state.participantId;
+  logEntry.participant_index = logEntry.next_state.participantIndex;
+  logEntry.task_id = logEntry.next_state.taskId;
+  logEntry.experiment_id = logEntry.next_state.experimentId;
+
   fetch('/record', {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
