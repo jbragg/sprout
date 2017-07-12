@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Glyphicon } from 'react-bootstrap';
 import classNames from 'classnames';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 
@@ -67,6 +68,11 @@ class ItemThumb extends React.Component {
           className="img-responsive"
           src={item.data.path}
         />
+        {isLabeled && (
+          <h2 className="check-label">
+            <Glyphicon glyph="ok-circle" />
+          </h2>
+        )}
       </button>,
     );
   }

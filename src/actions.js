@@ -177,7 +177,7 @@ function formatAnswerData(answerData) {
     ...answerData,
     answer: answerValue,
     answerString: answerKey.get(answerValue),
-    unclearReasonString: (answerData.unclear_type || answerData.unclear_reason) ? `Questions about ${answerData.unclear_type || '[MISSING]'} may be unclear because ${answerData.unclear_reason || '[MISSING]'}` : null,
+    //unclearReasonString: (answerData.unclear_type || answerData.unclear_reason) ? `Questions about ${answerData.unclear_type || '[MISSING]'} may be unclear because ${answerData.unclear_reason || '[MISSING]'}` : null,
   };
 }
 

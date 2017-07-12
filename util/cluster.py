@@ -1,5 +1,6 @@
 """Utility to add vector and cluster information to items based on worker
 answers"""
+from __future__ import print_function
 import argparse
 import collections
 import cPickle as pickle
@@ -7,102 +8,128 @@ import json
 import os
 
 import Algorithmia
-import nltk
 import numpy as np
 import pandas as pd
 from sklearn import cluster
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-def cluster_questions(df, k=8, cache=True, overwrite=False, cached_filename=None):
-    """Cluster questions."""
-    doc_vectors = []
-    questionids = []
-    questionids_other = []
-    cached = cache and os.path.exists(cached_filename) and not overwrite
-    if cached:
-        with open(cached_filename, 'rb') as f:
-            cached_vectors = pickle.load(f)
-    else:
-        cached_vectors = dict()
-    for questionid, df2 in df.groupby('questionid'):
-        words = df2.unclear_type.fillna('').str.cat(sep=' ') or ''
-        more_words = df2.unclear_reason.fillna('').str.cat(sep=' ') or ''
-        if more_words:
-            words += ' {}'.format(more_words)
-        question_reason = words
-        print words
-        if cached:
-            doc_vector = cached_vectors[questionid]
-        else:
-            doc_vector = get_doc_vector(question_reason)
-            cached_vectors[questionid] = doc_vector
-        if doc_vector is not None:
-            doc_vectors.append(doc_vector)
-            questionids.append(questionid)
-        else:
-            questionids_other.append(questionid)
-    if not cached:
-        with open(cached_filename, 'wb') as f:
-            pickle.dump(cached_vectors, f)
+def get_word_vectors(words):
+    """Get word vectors.
 
-    kmeans = cluster.KMeans(n_clusters=min(k, len(questionids)))
-    Y = kmeans.fit_predict(np.array(doc_vectors))
-    clusters = collections.defaultdict(list)
-    for questionid, y in zip(questionids, Y):
-        clusters[y].append(questionid)
+    Args:
+        words ([str]): Words.
 
-    question_embeddings = dict()
-    for questionid, vector in zip(questionids, doc_vectors):
-        question_embeddings[questionid] = vector
+    Returns:
+        dict: Mapping from word to vector (or None).
 
-    return clusters.values(), questionids_other, question_embeddings
-
-
-def get_word_vectors(text):
-    """Get word vectors."""
-    words = nltk.tokenize.casual_tokenize(text)
+    """
     client = Algorithmia.client(os.environ['ALGORITHMIA_KEY'])
     algo = client.algo('jbragg/word2vec/0.1.1')
-    resp = algo.pipe(dict(getVecFromWord=words)).result
-    vectors = [v['vector'] for v in resp['vecFromWord'] if
-               v['vector'] is not None]
-
-    return vectors
+    resp = algo.pipe(dict(getVecFromWord=list(set(words)))).result
+    return dict((v['word'], v['vector']) for v in resp['vecFromWord'])
 
 
-def get_doc_vector(text):
-    """Get document vector."""
-    vectors = get_word_vectors(text)
-    if len(vectors) > 0:
-        arr = np.array(vectors)
-        return np.mean(arr, axis=0)
+def _concatenate_df_reasons(df):
+    """Return text from unclear reasons."""
+    words = df.unclear_type.fillna('').str.cat(sep=' ') or ''
+    more_words = df.unclear_reason.fillna('').str.cat(sep=' ') or ''
+    if more_words:
+        words += ' {}'.format(more_words)
+    return words.strip()
+
+
+def cluster_questions(df, cache=True, cached_filename=None):
+    """Cluster questions.
+
+    Args:
+        df (pd.DataFrame):
+        cached_filename (Optional[str]): Path to file for caching word vectors.
+
+    Returns:
+        clusters ([[int]]): Clusters of questionids.
+        exemplars ([int]): Representative questionids (one per cluster).
+        other ([int]): Unclustered questionids.
+        embeddings (dict): Mapping from questionid (int) to vector ([float]).
+
+    """
+    questions = df.groupby(
+        'questionid').apply(_concatenate_df_reasons).sort_index()
+    questions = questions.where(questions.map(lambda x: len(x) > 0)).dropna()
+    vectorizor = TfidfVectorizer(
+        input='content',
+        stop_words='english',
+    )
+    doc_word_matrix = vectorizor.fit_transform(questions)
+    words = vectorizor.get_feature_names()
+
+    cached = cached_filename and os.path.exists(cached_filename)
+    if cached:
+        with open(cached_filename, 'rb') as f:
+            word_vectors = pickle.load(f)
     else:
-        return None
+        word_vectors = get_word_vectors(words)
+        if cached_filename:
+            with open(cached_filename, 'wb') as f:
+                pickle.dump(word_vectors, f)
+
+    embedding_dim = len(next(
+        x for x in word_vectors.itervalues() if x is not None
+    ))
+    transform = np.matrix(
+        [word_vectors[w] if w in word_vectors and word_vectors[w]
+         else np.zeros(embedding_dim)
+         for w in words]
+    )
+    doc_feature_matrix = doc_word_matrix * transform
+    if any(np.allclose(v, np.zeros(embedding_dim))
+           for v in doc_feature_matrix.tolist()):
+        raise Exception('No embedding for a question. What to do?')
+
+    questionids = questions.index
+    questionids_other = set(df.questionid.unique()).difference(questionids)
+    clusters = collections.defaultdict(list)
+    k = 5
+    model = cluster.KMeans(n_clusters=min(k, doc_feature_matrix.shape[0]))
+    model = cluster.AffinityPropagation()
+    Y = model.fit_predict(doc_feature_matrix)
+    for questionid, y in zip(questionids, Y):
+        clusters[y].append(questionid)
+    print(clusters)
+    exemplars = [questionids[x] for x in model.cluster_centers_indices_]
+
+    question_embeddings = dict()
+    for questionid, vector in zip(questionids, doc_feature_matrix.tolist()):
+        question_embeddings[questionid] = vector
+
+    return (
+        [clusters[x] for x in sorted(clusters)],
+        exemplars,
+        questionids_other,
+        question_embeddings,
+    )
 
 
-def main(answers_path, experiment_path, out_path, n_clusters=5, cached_filename=None):
+def main(answers_path, experiment_path, out_path, cached_filename=None):
     """Create new experiment file with item cluster information.
 
     Args:
         answers_path (str): Path to answers data file.
         experiment_path (str): Path to experiment file.
         out_path (str): Path to augmented experiment file.
-        n_clusters (Optional[int]): Number of clusters to use. Defaults to 5.
         cached_filename (Optional[str])
 
     """
-    # TODO: Don't default to 5 clusters.
     if cached_filename is None:
         cached_filename = os.path.basename(answers_path) + '.pickle.CACHED'
     df = pd.read_json(answers_path, orient='records')
 
     def filter1(row):
-        """Select answers less than 100% confident for clustering."""
-        return bool(row['likert_from_mean'] < 2 or row['unclear_reason'] or row['unclear_type'])
+        """Select answers with reasons for clustering."""
+        return bool(row['unclear_reason'] or row['unclear_type'])
     df_filtered = df[df.apply(filter1, axis=1)]
-    clusters, questionids_other, embeddings = cluster_questions(
-        df_filtered, k=n_clusters,
-        cached_filename=cached_filename)
+    clusters, exemplars, questionids_other, embeddings = cluster_questions(
+        df_filtered, cached_filename=cached_filename)
     question_to_cluster = dict()
     for i, clust in enumerate(clusters):
         for questionid in clust:
@@ -115,7 +142,9 @@ def main(answers_path, experiment_path, out_path, n_clusters=5, cached_filename=
         item['cluster'] = question_to_cluster[
             questionid] if questionid in question_to_cluster else -1
         if questionid in embeddings:
-            item['vector'] = embeddings[questionid].tolist()
+            item['vector'] = embeddings[questionid]
+        if questionid in exemplars:
+            item['exemplar'] = True
 
     with open(out_path, 'w') as f:
         json.dump(experiment, f)
@@ -125,21 +154,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--experiment',
-        type=str,
-        default='../src/static/private/pilot_instructions_experiment.json')
+        type=str)
     parser.add_argument(
         '--answers',
-        type=str,
-        default='../src/static/private/pilot_instructions_data_anon.json')
+        type=str)
     parser.add_argument(
         '--out',
-        type=str,
-        default='../src/static/private/pilot_instructions_experiment.with_vec.json')
-    parser.add_argument(
-        '--n_clusters',
-        type=int)
+        type=str)
     args = parser.parse_args()
-    main(n_clusters=args.n_clusters,
-         answers_path=args.answers,
+    main(answers_path=args.answers,
          experiment_path=args.experiment,
          out_path=args.out)

@@ -17,6 +17,12 @@ In order to access the remote API to pull logs from the backend server, obtain a
 2. For the App Engine default service account, create a local `{FILENAME}.json` key by selecting Options -> Create key, where `{FILENAME}` is assigned by Google.
 3. Set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to point to this file, for instance by adding `export GOOGLE_APPLICATION_CREDENTIALS="{PATH/TO/FILENAME.json}"` to your `~/.bashrc`.
 
+To install utility dependencies (for preparing data files and performing analysis locally):
+```
+conda env install -f util/environment.yml -n {ENVIRONMENT_NAME}
+```
+You can also choose to use `util/environment_dev.yml` for useful development dependencies.
+
 ## Usage
 
 To build a development bundle:
@@ -104,6 +110,8 @@ Replace the project ID above with your actual project id. Data will be stored by
 
 Steps 1 through 3 are from [here](https://cloud.google.com/appengine/docs/python/tools/remoteapi#using_the_remote_api_in_a_local_client).
 
+Use `util/analyze.py` to generate analysis for experiment records.
+
 ## Front-end input files
 NOTE: File locations are temporary.
 
@@ -116,6 +124,7 @@ object {
     object {
       integer id?;  # defaults to position in array
       integer cluster?;  # cluster item belongs to, based on vector embedding of worker answers
+      boolean exemplar?;  # exemplar for cluster
       array [
         integer*;
       ] vector?;  # aggregate embedding for answers associated with the item

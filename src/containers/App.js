@@ -107,7 +107,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.isExperiment) {
+    if (this.props.isExperiment || this.props.tutorial) {
       this.timerID = setInterval(
         () => this.tick(),
         1000,
@@ -117,7 +117,8 @@ class App extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.experimentPhase.name !== nextProps.experimentPhase.name) {
-      this.setState({ warnings: defaults.warnings[nextProps.experimentPhase.name] || [] });
+      const warnings = defaults.warnings[nextProps.experimentPhase.name] || [];
+      this.setState({ warnings });
       if (nextProps.experimentPhase.name === States.LOADED) {
         if (nextProps.prefetchAll) {
           this.setState({
@@ -139,7 +140,7 @@ class App extends React.Component {
   }
 
   componentWillUnmount() {
-    if (this.props.isExperiment) {
+    if (this.props.isExperiment || this.props.tutorial) {
       clearInterval(this.timerID);
     }
   }
@@ -246,10 +247,10 @@ class App extends React.Component {
                   <h3>Customer Instructions</h3>
                   <p>Your task is to improve these instructions:</p>
                   <Well bsSize="sm">{initialInstructions}</Well>
-                  {isExperiment && <Oracle />}
+                  {(isExperiment || tutorial) && <Oracle />}
                 </div>
                 <Instructions />
-                {isExperiment && (
+                {isExperiment && !tutorial && (
                   <Countdown
                     remainingTime={remainingSeconds}
                     onFinished={() => { this.advanceExperimentPhase(experimentState); }}
@@ -362,10 +363,12 @@ class App extends React.Component {
               ref={(c) => { this.joyride = c; }}
               steps={this.state.tutorialSteps}
               run={this.state.tutorialRunning}
-              type="continuous"
+              type={'continuous' && 'single'}
+              scrollToSteps={false}
             />
           )}
           {this.props.isExperiment
+              && !this.props.tutorial
               && this.state.warnings.length > 0
               && this.state.warnings[0][0] <= this.elapsedTime()
               && (
@@ -409,8 +412,8 @@ const mapStateToProps = (state, { location }) => {
     multiPhase: parse(location.search).multiPhase !== undefined,
     tutorial: Boolean(state.tutorial),
     isExperiment: Boolean(state.isExperiment),
-    prefetchAll: Boolean(state.isExperiment),
-    waitForImagesFrac: state.isExperiment ? 1 : 0,
+    prefetchAll: Boolean(state.isExperiment && !state.tutorial),
+    waitForImagesFrac: 1,
     items: isLoaded
       ? [...itemDataSelector(state).byId.values()]
       : null,

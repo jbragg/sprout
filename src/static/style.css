@@ -31,6 +31,13 @@
   font-size: 24px;
 }
 
+.item-group p {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
 .panel-heading-less-padding {
   padding: 4px !important;
 }
@@ -50,7 +57,22 @@
 }
 
 .unlabeled-items .item-thumb.labeled {
+  position: relative;
+}
+
+.unlabeled-items .item-thumb.labeled img {
   opacity: 0.1;
+}
+
+.item-thumb.labeled .check-label {
+  display: none;
+}
+
+.unlabeled-items .item-thumb.labeled .check-label {
+  position: absolute;
+  top: 0px;
+  left: 1em;
+  display: block;
 }
 
 .item-thumb img {

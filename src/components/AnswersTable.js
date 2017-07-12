@@ -48,7 +48,11 @@ const AnswersTable = ({ answers, useReasons }) => (
                 </div>
               </OverlayTrigger>
             </td>
-            {useReasons ? <td>{answer.data.unclearReasonString}</td> : null}
+            {useReasons && (
+              <td>
+                {`${answer.data.unclear_type ? answer.data.unclear_type + ' | ' : ''}${answer.data.unclear_reason || ''}`}
+              </td>
+            )}
           </tr>
         ))
       }

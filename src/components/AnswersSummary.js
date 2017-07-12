@@ -9,11 +9,7 @@ const propTypes = {
   answers: PropTypes.arrayOf(
     PropTypes.shape({
       data: PropTypes.shape({
-        answer: PropTypes.string.isRequired.isRequired,
-        uncertainty: PropTypes.string.isRequired,
-        uncertainty_input: PropTypes.string.isRequired,
-        unclear_type: PropTypes.string,
-        unclear_reason: PropTypes.string,
+        answer: PropTypes.number.isRequired,
       }).isRequired,
     }),
   ).isRequired,

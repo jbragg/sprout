@@ -7,9 +7,7 @@ const propTypes = {
   answers: PropTypes.arrayOf(
     PropTypes.shape({
       data: PropTypes.shape({
-        answer: PropTypes.string.isRequired.isRequired,
-        uncertainty: PropTypes.string.isRequired,
-        uncertainty_input: PropTypes.string.isRequired,
+        answer: PropTypes.number.isRequired,
         unclear_type: PropTypes.string,
         unclear_reason: PropTypes.string,
       }).isRequired,
@@ -23,17 +21,15 @@ const confusionsToTable = (confusions, icon = true, head = true) => (
       <thead>
         <tr>
           {icon && <th />}
-          <th>Category</th>
-          <th>Confusion</th>
+          <th></th>
         </tr>
       </thead>
     )}
     <tbody>
-      {confusions.map(([type, reason], index) => (
-        <tr key={index}>
+      {confusions.map(([id, type, reason]) => (
+        <tr key={id}>
           {icon && <td><span className="glyphicon glyphicon-user" /></td>}
-          <td>{type}</td>
-          <td>{reason}</td>
+          <td>{type ? `${type} | ${reason}` : reason}</td>
         </tr>
       ))}
     </tbody>
@@ -43,7 +39,7 @@ const confusionsToTable = (confusions, icon = true, head = true) => (
 const ConfusionsTable = ({ answers }) => {
   const confusions = answers
     .filter(answer => answer.data.unclear_type || answer.data.unclear_reason)
-    .map(answer => [answer.data.unclear_type, answer.data.unclear_reason]);
+    .map(answer => [answer.id, answer.data.unclear_type, answer.data.unclear_reason]);
   let component = null;
   if (confusions.length === 0) {
     component = <div className="text-center">No worker confusions to show</div>;

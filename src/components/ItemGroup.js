@@ -37,7 +37,7 @@ const ItemGroup = ({
   isNameable, name, nameEditFunc, isDragging, thumbnails,
 }) => (
   <div
-    className={`class-container panel panel-primary ${recommended ? 'recommended' : ''} ${isOver ? 'over' : ''} ${isTarget ? 'target' : ''}`}
+    className={`class-container item-group panel panel-primary ${recommended ? 'recommended' : ''} ${isOver ? 'over' : ''} ${isTarget ? 'target' : ''}`}
     style={{
       opacity: isDragging ? 0.5 : null,
     }}

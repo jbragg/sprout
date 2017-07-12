@@ -51,14 +51,23 @@ export const defaults = {
 
 export const tutorialSteps = [
   {
+    text: 'Imagine a customer has given you these instructions for how to label a set of items. Your goal is to clarify these instructions for crowd workers, who will use them to label a large set of items for the customer.',
+    selector: '.instructions-customer',
+  },
+  /*{
+    text: 'Now we will proceed to describe the 4 main sections of the application interface you will be using.',
+    selector: '.instructions',
+  },
+  */
+  {
     title: 'Instructions section (1/4)',
-    text: "The interface is organized into four main sections. This is the instructions panel section, where you will interact with the customer and create your improved instructions.",
+    text: 'This is the instructions panel section, where you will interact with the customer (top) and create your improved instructions (bottom).',
     selector: '.instructions',
     position: 'top-left',
   },
   {
-    title: 'Unlabeled items section (2/4)',
-    text: 'Items you have not yet labeled can be found here.',
+    title: 'Item navigation section (2/4)',
+    text: 'This section is for finding new items to label.',
     selector: '.unlabeled-items',
     position: 'top',
   },
@@ -70,28 +79,28 @@ export const tutorialSteps = [
   },
   {
     title: 'Labeled items section (4/4)',
-    text: 'The labeled items section should help you organize items for the purpose of improving the instructions.',
+    text: 'Drag items to this section to label and organize them. Remember this is not your goal, since workers will be doing this later. Your goal is to improve the instructions for the workers!',
     selector: '.labeled-column',
     position: 'top',
   },
   {
-    text: 'An enlarged version of the item to label appears here.',
+    text: 'An enlarged version of the item to label appears in the item preview. You can also zoom in further by clicking here.',
     selector: '.item-large .item',
     position: 'right',
   },
   {
-    text: 'Worker answers are summarized here.',
+    text: 'Worker answers are summarized here (when available).',
     selector: '.item-large .answers-summary',
     position: 'top',
   },
   {
-    title: 'Worker confusions are summarized here.',
+    text: 'Worker confusions are summarized here (when available).',
     selector: '.item-large .confusions-summary',
     position: 'top',
   },
   {
     title: 'Additional information indicator',
-    text: 'This shows the number of workers that are summarized here. Try hovering to see additional information.',
+    text: 'This shows the number of workers that are summarized in this section. Hover to see details.',
     selector: '.item-large .answers-summary .workers-indicator',
     position: 'right',
   },
@@ -110,9 +119,14 @@ export const tutorialSteps = [
     selector: '.labeled-column .label-section.label-maybe .new-group',
   },
   {
+    text: "The shaking means that the system is thinks this item might belong in the group with a star. Please drag it there now.",
+    selector: '.item-large',
+  },
+  {
     text: 'This bar shows your progress towards labeling all items (the number shows how many you have labeled). Your goal is to improve the instructions, not label all items.',
     selector: '.labeling-progress',
   },
+  /*
   {
     text: 'This is the next unlabeled item with the most disagreement. Click on this item or any other item to display it in the current item panel.',
     selector: '.similar-item-list .next',
@@ -121,12 +135,41 @@ export const tutorialSteps = [
     text: 'Unlabeled items that are most similar to the next item appear here.',
     selector: '.similar-item-list .similar',
   },
+  */
   {
-    text: 'This tab shows clusters of similar unlabeled items. Please click here now.',
+    text: 'This tab shows clusters of similar unlabeled items.',// Please click here now.',
     selector: '.clusters-nav',
   },
   {
-    text: "Please scroll to the third cluster and drag the entire cluster to the 'no' label on the right now.",
+    text: "Please scroll to the third cluster.",
     selector: '.cluster-item-list .page',
+  },
+  {
+    text: "Use these arrows to scroll to different items within a group.",
+    selector: '.cluster-item-list .slick-next',
+  },
+  {
+    text: "The progress bar tells you your scrolling position.",
+    selector: '.cluster-item-list .progress',
+  },
+  {
+    text: "Now drag the cluster to the 'no' label.",
+    selector: '.cluster-item-list',
+  },
+  {
+    text: "All the items are here, sorted in order of decreasing amounts of worker disagreement. Use the 'Go to first unlabeled' button to go to the next unlabeled item with the most disagreement. 'Go to current' scrolls to the item that is currently being previewed.",
+    selector: '.items-nav',
+  },
+  {
+    text: "Now try asking the customer how they'd like an item labeled by dragging it to the 'Ask for a clarification' section.",
+    selector: '.instructions',
+  },
+  {
+    text: 'Now try editing the instructions (including referring to an example item) and previewing your edits.',
+    selector: '.instructions',
+  },
+  {
+    text: 'Now try creating a test question and creating a reason for it.',
+    selector: '.instructions',
   },
 ];

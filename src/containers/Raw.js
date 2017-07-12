@@ -19,7 +19,11 @@ const Raw = ({ itemIds }) => (
         }}
         key={id}
       >
-        <ItemLargeContainer itemId={id} draggable />
+        <ItemLargeContainer
+          itemId={id}
+          aggregateOnly={false}
+          draggable
+        />
       </div>
     ))}
   </div>

@@ -223,10 +223,13 @@ const getSimilarItemIds = (itemId, state, unlabeledOnly = true) => {
 
 export const getItemsSummary = (itemIds, state) => (
   []
-    .concat(...itemIds.map(id => itemAnswersSelector(state).get(id)))
-    .map(answer => answer.data.unclear_type || answer.data.unclear_reason)
-    .filter(s => s)
-    .join(', ')
+  .concat(...itemIds
+    //.filter(id => itemDataSelector(state).byId.get(id).exemplar)  // Select only exemplar for cluster?
+    .map(id => itemAnswersSelector(state).get(id)),
+  )
+  .map(answer => answer.data.unclear_type || answer.data.unclear_reason)
+  .filter(s => s)
+  .join(' ... ')
 );
 
 /*
@@ -261,7 +264,7 @@ function InstructionsApp(state = initialState, action) {
             {
               ...nextQueuedItem,
               answerTime: Date.now(),
-              label: state.entities.items.byId.get(nextQueuedItem.id).labelGT || state.uncertainLabel,
+              label: state.entities.itemData.byId.get(nextQueuedItem.id).labelGT || state.uncertainLabel,
             },
           ]
           : state.oracle.answeredItems,
