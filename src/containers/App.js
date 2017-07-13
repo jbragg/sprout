@@ -3,43 +3,37 @@ import PropTypes from 'prop-types';
 import { HotKeys } from 'react-hotkeys';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
-import { parse } from 'query-string';
 import { connect } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
-import Joyride from 'react-joyride';
 import { Grid, Col, Well, Button, Alert } from 'react-bootstrap';
-import { AutoAffix } from 'react-overlays';
 import Instructions from '../components/Instructions';
 import Loading from '../components/Loading';
 import UnlabeledColumn from './UnlabeledColumn';
 import LabeledColumn from '../components/LabeledColumn';
 import Countdown from '../components/Countdown';
+import Combined from '../components/Combined';
 import Survey from './Survey';
 import Oracle from './Oracle';
 import CustomDragLayer from '../CustomDragLayer';
 import Clusters from './Clusters';
 import Raw from './Raw';
-import Export from './Export';
 import Thanks from '../components/Thanks';
 import ExperimentProgress from '../components/ExperimentProgress';
-import Progress from './Progress';
-import { fetchExperiment, changeExperimentPhase, setLightbox } from '../actions';
+import { changeExperimentPhase, setLightbox } from '../actions';
 import { itemDataSelector } from '../reducers/index';
-import { States, defaults, tutorialSteps } from '../constants';
+import { States, defaults } from '../constants';
+
 
 const propTypes = {
   experimentPhase: PropTypes.shape({
     name: PropTypes.string,
     startTime: PropTypes.number,
   }).isRequired,
+  experimentPosition: PropTypes.shape({
+    taskIndex: PropTypes.number,
+    tutorial: PropTypes.bool,
+  }),
   labels: PropTypes.arrayOf(PropTypes.string.isRequired),
-  initialize: PropTypes.func.isRequired,
-  match: PropTypes.shape({
-    params: PropTypes.object.isRequired,
-  }).isRequired,
-  location: PropTypes.shape({
-    search: PropTypes.string.isRequired,
-  }).isRequired,
   items: PropTypes.arrayOf(
     PropTypes.shape({
       data: PropTypes.shape({
@@ -53,11 +47,14 @@ const propTypes = {
   clusterView: PropTypes.bool,
   rawView: PropTypes.bool,
   tutorial: PropTypes.bool,
-  isExperiment: PropTypes.bool,
   multiPhase: PropTypes.bool,
   waitForImagesFrac: PropTypes.number,
   prefetchAll: PropTypes.bool,
   onSetLightbox: PropTypes.func.isRequired,
+  exportButton: PropTypes.bool.isRequired,
+  countdown: PropTypes.bool.isRequired,
+  oracle: PropTypes.bool.isRequired,
+  warnings: PropTypes.bool.isRequired,
 };
 
 const defaultProps = {
@@ -68,81 +65,47 @@ const defaultProps = {
   clusterView: false,
   rawView: false,
   tutorial: false,
-  isExperiment: true,
   multiPhase: false,
-  waitForImagesFrac: 0,
-  prefetchAll: false,
+  waitForImagesFrac: 1,
+  prefetchAll: true,
+  experimentPosition: null,
 };
 
 class App extends React.Component {
   constructor(props) {
     super(props);
-    const { initialize } = this.props;
-    const params = {
-      ...this.props.match.params,
-      ...parse(this.props.location.search),
-    };
-    ['participantIndex', 'taskIndex', 'systemVersion'].forEach((key) => {
-      if (params[key] != null) {
-        params[key] = Number(params[key]);
-      }
-    });
-    ['tutorial'].forEach((key) => {
-      params[key] = params[key] !== undefined;
-    });
-    initialize(params);
-
     this.state = {
       date: Date.now(),
       warnings: [],
-      tutorialSteps: [],
-      tutorialRunning: false,
-      params,
+      itemsLoaded: new Map(props.items.map(item => [item.id, false])),
     };
     this.handleImageLoaded = this.handleImageLoaded.bind(this);
     this.advanceExperimentPhase = this.advanceExperimentPhase.bind(this);
     this.dismissExpiredAlerts = this.dismissExpiredAlerts.bind(this);
     this.remainingTime = this.remainingTime.bind(this);
     this.elapsedTime = this.elapsedTime.bind(this);
+
+    if (!props.prefetchAll) {
+      this.advanceExperimentPhase(props.experimentPhase.name);
+    }
   }
 
   componentDidMount() {
-    if (this.props.isExperiment || this.props.tutorial) {
-      this.timerID = setInterval(
-        () => this.tick(),
-        1000,
-      );
-    }
+    this.timerID = setInterval(
+      () => this.tick(),
+      1000,
+    );
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.experimentPhase.name !== nextProps.experimentPhase.name) {
       const warnings = defaults.warnings[nextProps.experimentPhase.name] || [];
       this.setState({ warnings });
-      if (nextProps.experimentPhase.name === States.LOADED) {
-        if (nextProps.prefetchAll) {
-          this.setState({
-            itemsLoaded: new Map(nextProps.items.map(item => [item.id, false])),
-          });
-        } else {
-          this.advanceExperimentPhase(nextProps.experimentPhase.name);
-        }
-        if (nextProps.tutorial) {
-          setTimeout(() => {
-            this.setState({
-              tutorialRunning: true,
-              tutorialSteps,
-            });
-          }, 6000);  // TODO: Check subcomponents mounted for more robust solution.
-        }
-      }
     }
   }
 
   componentWillUnmount() {
-    if (this.props.isExperiment || this.props.tutorial) {
-      clearInterval(this.timerID);
-    }
+    clearInterval(this.timerID);
   }
 
   tick() {
@@ -180,7 +143,7 @@ class App extends React.Component {
         0,
       ) / itemsLoaded.size;
       if (
-        frac >= props.waitForImagesFrac
+        frac >= this.props.waitForImagesFrac
         && props.experimentPhase.name === States.LOADED
       ) {
         this.advanceExperimentPhase(props.experimentPhase.name);
@@ -213,8 +176,8 @@ class App extends React.Component {
 
   render() {
     const {
-      items, labels, masterView, clusterView, initialInstructions, isExperiment,
-      prefetchAll, tutorial, onSetLightbox, rawView,
+      items, labels, masterView, clusterView, initialInstructions, oracle,
+      prefetchAll, tutorial, onSetLightbox, rawView, countdown, exportButton,
     } = this.props;
     const experimentState = this.props.experimentPhase.name;
     if (experimentState == null || experimentState === States.LOADING) {
@@ -228,56 +191,18 @@ class App extends React.Component {
     const remainingSeconds = this.remainingTime() / 1000;
     if (experimentState === States.COMBINED) {
       experimentComponent = (
-        <Grid fluid>
-          <Col sm={4}>
-            <AutoAffix>
-              <div>
-                <UnlabeledColumn master={masterView} />
-              </div>
-            </AutoAffix>
-          </Col>
-          <Col sm={4}>
-            <Progress />
-            <LabeledColumn labels={labels} />
-          </Col>
-          <Col className="instructions" sm={4}>
-            <AutoAffix>
-              <div>
-                <div className="instructions-customer">
-                  <h3>Customer Instructions</h3>
-                  <p>Your task is to improve these instructions:</p>
-                  <Well bsSize="sm">{initialInstructions}</Well>
-                  {(isExperiment || tutorial) && <Oracle />}
-                </div>
-                <Instructions />
-                {isExperiment && !tutorial && (
-                  <Countdown
-                    remainingTime={remainingSeconds}
-                    onFinished={() => { this.advanceExperimentPhase(experimentState); }}
-                    confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
-                  />
-                )}
-                {!isExperiment && !tutorial && (
-                  <Export>
-                    <Button
-                      bsStyle="primary"
-                    >
-                      Export
-                    </Button>
-                  </Export>
-                )}
-                {tutorial && (
-                  <Button
-                    bsStyle="primary"
-                    onClick={() => { this.props.onChangeExperimentPhase(States.THANKS); }}
-                  >
-                    Ready for experiment
-                  </Button>
-                )}
-              </div>
-            </AutoAffix>
-          </Col>
-        </Grid>
+        <Combined
+          masterView={masterView}
+          labels={labels}
+          initialInstructions={initialInstructions}
+          oracle={oracle}
+          countdown={countdown}
+          exportButton={exportButton}
+          remainingSeconds={remainingSeconds}
+          advanceExperimentPhase={this.advanceExperimentPhase}
+          onChangeExperimentPhase={this.props.onChangeExperimentPhase}
+          tutorial={tutorial}
+        />
       );
     } else if (experimentState === States.LABELING) {
       experimentComponent = (
@@ -339,7 +264,7 @@ class App extends React.Component {
     } else if (experimentState === States.SURVEY) {
       experimentComponent = <Grid><Survey /></Grid>;
     } else if (experimentState === States.THANKS) {
-      experimentComponent = <Grid><Thanks params={this.state.params} /></Grid>;
+      experimentComponent = <Grid><Thanks params={this.props.experimentPosition} /></Grid>;
     } else {
       experimentComponent = <Grid><h1><Loading /></h1></Grid>;
     }
@@ -358,17 +283,7 @@ class App extends React.Component {
             </div>
           }
           <CustomDragLayer />
-          {this.props.tutorial && (
-            <Joyride
-              ref={(c) => { this.joyride = c; }}
-              steps={this.state.tutorialSteps}
-              run={this.state.tutorialRunning}
-              type={'continuous' && 'single'}
-              scrollToSteps={false}
-            />
-          )}
-          {this.props.isExperiment
-              && !this.props.tutorial
+          {this.props.warnings
               && this.state.warnings.length > 0
               && this.state.warnings[0][0] <= this.elapsedTime()
               && (
@@ -381,10 +296,12 @@ class App extends React.Component {
                 </Alert>
               )
           }
-          {(this.state.params.tutorial || this.state.params.taskIndex != null) && (
+          {this.props.experimentPosition && (
             <ExperimentProgress
               currentIndex={
-                this.state.params.tutorial ? 0 : this.state.params.taskIndex + 1
+                this.props.experimentPosition.tutorial
+                  ? 0
+                  : this.props.experimentPosition.taskIndex + 1
               }
             />
           )}
@@ -398,33 +315,17 @@ class App extends React.Component {
 App.propTypes = propTypes;
 App.defaultProps = defaultProps;
 
-const mapStateToProps = (state, { location }) => {
-  const isLoaded = (
-    state.experimentPhase.name != null
-      && state.experimentPhase.name !== States.LOADING
-  );
-  return {
-    experimentPhase: state.experimentPhase,
-    labels: state.labels,
-    clusterView: parse(location.search).clusters !== undefined,
-    rawView: parse(location.search).raw !== undefined,
-    masterView: parse(location.search).master !== undefined,
-    multiPhase: parse(location.search).multiPhase !== undefined,
-    tutorial: Boolean(state.tutorial),
-    isExperiment: Boolean(state.isExperiment),
-    prefetchAll: Boolean(state.isExperiment && !state.tutorial),
-    waitForImagesFrac: 1,
-    items: isLoaded
-      ? [...itemDataSelector(state).byId.values()]
-      : null,
-    initialInstructions: state.initialInstructions,
-  };
-};
+const mapStateToProps = state => ({
+  experimentPhase: state.experimentPhase,
+  labels: state.labels,
+  tutorial: Boolean(state.tutorial),
+  waitForImagesFrac: 1,
+  items: [...itemDataSelector(state).byId.values()],
+  initialInstructions: state.initialInstructions,
+  experimentPosition: state.experimentPosition,
+});
 
 const mapDispatchToProps = dispatch => ({
-  initialize: (params) => {
-    dispatch(fetchExperiment(params));
-  },
   onChangeExperimentPhase: (phase) => {
     dispatch(changeExperimentPhase(phase));
   },

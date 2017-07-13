@@ -541,6 +541,7 @@ function InstructionsApp(state = initialState, action) {
         participantId: action.payload.participantId,
         participantIndex: action.payload.participantIndex,
         experimentId: action.payload.experimentId,
+        experimentPosition: action.payload.experimentPosition,
         taskId: action.payload.taskId,
         initialInstructions: action.payload.initialInstructions,
         generalInstructions: action.payload.instructions,

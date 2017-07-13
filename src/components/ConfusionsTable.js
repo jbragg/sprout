@@ -21,7 +21,7 @@ const confusionsToTable = (confusions, icon = true, head = true) => (
       <thead>
         <tr>
           {icon && <th />}
-          <th></th>
+          <th />
         </tr>
       </thead>
     )}
@@ -39,7 +39,7 @@ const confusionsToTable = (confusions, icon = true, head = true) => (
 const ConfusionsTable = ({ answers }) => {
   const confusions = answers
     .filter(answer => answer.data.unclear_type || answer.data.unclear_reason)
-    .map(answer => [answer.id, answer.data.unclear_type, answer.data.unclear_reason]);
+    .map(answer => [answer.assignmentid, answer.data.unclear_type, answer.data.unclear_reason]);
   let component = null;
   if (confusions.length === 0) {
     component = <div className="text-center">No worker confusions to show</div>;

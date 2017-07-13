@@ -1,8 +1,6 @@
 import fetch from 'isomorphic-fetch';
 import { OrderedSet as Set } from 'immutable';
-import latin3x3 from './rand/latin/latin3x3';
 import { groupsSelector } from './reducers/index';
-import config from './config';
 
 /*
  * action types
@@ -177,19 +175,8 @@ function formatAnswerData(answerData) {
     ...answerData,
     answer: answerValue,
     answerString: answerKey.get(answerValue),
-    //unclearReasonString: (answerData.unclear_type || answerData.unclear_reason) ? `Questions about ${answerData.unclear_type || '[MISSING]'} may be unclear because ${answerData.unclear_reason || '[MISSING]'}` : null,
   };
 }
-
-const getTreatment = (participantIndex, taskIndex) => {
-  if (participantIndex == null || taskIndex == null) {
-    return 2;  // full system
-  }
-  const participant = Number(participantIndex);
-  const task = Number(taskIndex);
-  const squareIndex = Math.floor(participant / 3) % latin3x3.length;
-  return latin3x3[squareIndex][participant % 3][task] - 1;
-};
 
 const getItemLabels = (items, groups = null) => {
   const groupsMap = new Map(groups.map(group => [group.id, group]));
@@ -250,31 +237,21 @@ const setUpExperiment = (
 export function fetchExperiment(params) {
   return (dispatch) => {
     dispatch(requestExperiment());
-    let task = null;
-    let experimentId = null;
-    let taskId = params.taskId;
-    if (params.tutorial || params.taskIndex != null) {
-      experimentId = params.experimentId || 'default';
-      taskId = params.tutorial
-        ? config.experiments[experimentId].tutorial
-        : config.experiments[experimentId].tasks[params.taskIndex];
-    }
-    task = config.tasks[taskId];
-    const experimentPromise = fetch(task.experimentPath)
+    const experimentPromise = fetch(params.experimentPath)
       .then(response => response.json());
     const promises = [
       experimentPromise,
-      (task.answersPath == null
+      (params.answersPath == null
         ? Promise.resolve(null)
-        : fetch(task.answersPath).then(response => response.json())
+        : fetch(params.answersPath).then(response => response.json())
       ),
-      (task.statePath == null
+      (params.statePath == null
         ? Promise.resolve(null)
-        : fetch(task.statePath).then(response => response.json())
+        : fetch(params.statePath).then(response => response.json())
       ),
-      (task.oraclePath == null
+      (params.oraclePath == null
         ? Promise.resolve(null)
-        : fetch(task.oraclePath).then(response => response.json())
+        : fetch(params.oraclePath).then(response => response.json())
       ),
     ];
 
@@ -282,35 +259,28 @@ export function fetchExperiment(params) {
       .then((result) => {
         const [experiment, answers, state, oracle] = result;
 
-        let systemVersion = null;
-        if (params.participantIndex != null) {
-          systemVersion = params.tutorial
-            ? 2
-            : getTreatment(params.participantIndex, params.taskIndex);
-        } else {
-          systemVersion = params.systemVersion == null ? 2 : params.systemVersion;
-        }
         dispatch(receiveExperiment({
           ...setUpExperiment(
             experiment,
-            task.itemRootPath,
+            params.itemRootPath,
             answers,
             state,
             oracle,
           ),
-          initialInstructions: task.initialInstructions,
-          instructions: (state && state.instructions) || task.initialInstructions,
-          tutorial: task.tutorial,
-          isExperiment: task.isExperiment,
+          experimentPosition: params.experimentPosition,
+          initialInstructions: params.initialInstructions,
+          instructions: params.initialInstructions,
+          tutorial: params.tutorial,
+          isExperiment: params.isExperiment,
           participantId: params.participantId,
           participantIndex: params.participantIndex,
-          systemVersion,
-          similarNav: task.similarNav,
-          experimentId,
-          taskId,
+          systemVersion: params.systemVersion,
+          similarNav: params.similarNav,
+          experimentId: params.experimentId,
+          taskId: params.taskId,
         }));
         dispatch(setCurrentItem());
-        if (task.isExperiment) {
+        if (params.oracle) {
           dispatch(startOracle());
         }
       });
