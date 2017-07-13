@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 import { HotKeys } from 'react-hotkeys';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -33,14 +34,14 @@ const propTypes = {
     taskIndex: PropTypes.number,
     tutorial: PropTypes.bool,
   }),
-  labels: PropTypes.arrayOf(PropTypes.string.isRequired),
-  items: PropTypes.arrayOf(
+  labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+  items: ImmutablePropTypes.orderedMapOf(
     PropTypes.shape({
       data: PropTypes.shape({
         path: PropTypes.string.isRequired,
       }).isRequired,
     }),
-  ),
+  ).isRequired,
   initialInstructions: PropTypes.string,
   onChangeExperimentPhase: PropTypes.func.isRequired,
   masterView: PropTypes.bool,
@@ -58,9 +59,7 @@ const propTypes = {
 };
 
 const defaultProps = {
-  items: null,
   initialInstructions: null,
-  labels: null,
   masterView: false,
   clusterView: false,
   rawView: false,
@@ -77,7 +76,7 @@ class App extends React.Component {
     this.state = {
       date: Date.now(),
       warnings: [],
-      itemsLoaded: new Map(props.items.map(item => [item.id, false])),
+      itemsLoaded: new Map([...props.items.keys()].map(id => [id, false])),
     };
     this.handleImageLoaded = this.handleImageLoaded.bind(this);
     this.advanceExperimentPhase = this.advanceExperimentPhase.bind(this);
@@ -273,7 +272,7 @@ class App extends React.Component {
         <div id="app">
           {prefetchAll &&
             <div className="hidden">
-              {items.map(item => (
+              {[...items.values()].map(item => (
                 <img
                   src={item.data.path}
                   key={item.id}
@@ -317,12 +316,12 @@ App.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
   experimentPhase: state.experimentPhase,
-  labels: state.labels,
-  tutorial: Boolean(state.tutorial),
-  waitForImagesFrac: 1,
-  items: [...itemDataSelector(state).byId.values()],
-  initialInstructions: state.initialInstructions,
-  experimentPosition: state.experimentPosition,
+  labels: state.config.labels,
+  tutorial: state.config.tutorial,
+  waitForImagesFrac: state.config.waitForImagesFrac,
+  items: itemDataSelector(state).byId,
+  initialInstructions: state.config.initialInstructions,
+  experimentPosition: state.config.experimentPosition,
 });
 
 const mapDispatchToProps = dispatch => ({

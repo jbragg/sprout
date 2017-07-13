@@ -46,8 +46,8 @@ UnlabeledColumn.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
   currentItemId: state.currentItemId,
-  useReasons: conditions[state.systemVersion].useReasons,
-  similarNav: state.similarNav,
+  useReasons: conditions[state.config.systemVersion].useReasons,
+  similarNav: state.config.similarNav,
 });
 
 export default connect(mapStateToProps)(UnlabeledColumn);

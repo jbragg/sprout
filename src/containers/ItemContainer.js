@@ -34,7 +34,7 @@ const collect = (dndConnect, monitor) => ({
 
 const mapStateToProps = (state, { itemId, useReasons, useAnswers, metric }) => {
   const useAnswersVal = useAnswers == null
-    ? conditions[state.systemVersion].useAnswers
+    ? conditions[state.config.systemVersion].useAnswers
     : useAnswers;
   const metricVal = metric != null ? defaultMetrics.color : metric;
   const answers = itemAnswersSelector(state).get(itemId);
@@ -57,13 +57,13 @@ const mapStateToProps = (state, { itemId, useReasons, useAnswers, metric }) => {
     answers,
     backgroundColor,
     textColor,
-    useReasons: useReasons == null ? conditions[state.systemVersion].useReasons : useReasons,
+    useReasons: useReasons == null ? conditions[state.config.systemVersion].useReasons : useReasons,
     useAnswers: useAnswersVal,
     answerKey: state.answerKey,
     recommendedGroup: recommendedGroupSelector(state),
     lightboxOpen: state.lightboxId === itemId,
     itemSimilarities: itemSimilaritiesSelector(state).get(itemId),
-    similarItems: !state.similarNav,
+    similarItems: !state.config.similarNav,
   };
 };
 

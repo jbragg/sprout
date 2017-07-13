@@ -68,13 +68,19 @@ class AppLoader extends React.Component {
       ...this.props.match.params,
       ...parse(this.props.location.search),
     };
-    ['participantIndex', 'taskIndex', 'systemVersion'].forEach((key) => {
+    const numberParams = [
+      'participantIndex', 'taskIndex', 'systemVersion',
+    ];
+    const boolParams = [
+      'tutorial', 'clusters', 'raw', 'master', 'multiPhase', 'exemplar',
+    ];
+    numberParams.forEach((key) => {
       if (params[key] != null) {
         params[key] = Number(params[key]);
       }
     });
-    ['tutorial'].forEach((key) => {
-      params[key] = params[key] !== undefined;
+    boolParams.forEach((key) => {
+      params[key] = params[key] !== undefined && params[key] !== 'false';
     });
     const allParams = getAllParams(params);
     initialize(allParams);
@@ -93,10 +99,10 @@ class AppLoader extends React.Component {
         }}
       >
         <App
-          clusterView={this.state.params.clusters !== undefined}
-          rawView={this.state.params.raw !== undefined}
-          masterView={this.state.params.master !== undefined}
-          multiPhase={this.state.params.multiPhase !== undefined}
+          clusterView={this.state.params.clusters}
+          rawView={this.state.params.raw}
+          masterView={this.state.params.master}
+          multiPhase={this.state.params.multiPhase}
           prefetchAll={this.state.params.prefetchAll}
           exportButton={this.state.params.exportButton}
           countdown={this.state.params.countdown}

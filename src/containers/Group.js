@@ -176,7 +176,7 @@ const mapStateToProps = (state, { groupId }) => ({
   summary: getItemsSummary([...state.entities.groups.byId.get(groupId).itemIds], state),
   recommended: recommendedGroupSelector(state) === groupId,
   currentItemId: state.currentItemId,
-  useReasons: conditions[state.systemVersion].useReasons,
+  useReasons: conditions[state.config.systemVersion].useReasons,
   autoAdvance: state.autoAdvance,
 });
 

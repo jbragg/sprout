@@ -221,9 +221,9 @@ const collect = (dndConnect, monitor) => ({
 const mapStateToProps = state => ({
   items: new Map(testItemsSelector(state).map(item => [item.id, item])),
   itemLabels: itemLabelsSelector(state),
-  labels: state.labels,
-  uncertainLabel: state.uncertainLabel,
-  finalLabels: state.finalLabels,
+  labels: state.config.labels,
+  uncertainLabel: state.config.uncertainLabel,
+  finalLabels: state.config.finalLabels,
 });
 
 const mapDispatchToProps = dispatch => ({

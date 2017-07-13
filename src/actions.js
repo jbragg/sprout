@@ -231,6 +231,7 @@ const setUpExperiment = (
     itemData,
     groups,
     answers: formattedAnswers,
+    instructions: state && state.instructions,
   };
 };
 
@@ -267,17 +268,9 @@ export function fetchExperiment(params) {
             state,
             oracle,
           ),
-          experimentPosition: params.experimentPosition,
-          initialInstructions: params.initialInstructions,
-          instructions: params.initialInstructions,
-          tutorial: params.tutorial,
-          isExperiment: params.isExperiment,
-          participantId: params.participantId,
-          participantIndex: params.participantIndex,
-          systemVersion: params.systemVersion,
-          similarNav: params.similarNav,
-          experimentId: params.experimentId,
-          taskId: params.taskId,
+          config: {
+            ...params,
+          },
         }));
         dispatch(setCurrentItem());
         if (params.oracle) {

@@ -16,31 +16,33 @@ const finalLabels = [Labels.YES, Labels.NO];
 const uncertainLabel = Labels.MAYBE;
 
 const initialState = {
-  participantIndex: null,
-  systemVersion: null,
   answerKey: null,
-  labels,
-  finalLabels,
-  tutorial: false,
-  isExperiment: true,
+  config: {
+    participantIndex: null,
+    systemVersion: null,
+    labels,
+    finalLabels,
+    tutorial: false,
+    uncertainLabel,
+    similarNav: false,
+    initialInstructions: null,
+  },
+  experimentPhase: {
+    name: null,
+    startTime: null,
+  },
   lightboxId: null,
   autoAdvance: true,
+  currentItemId: null,
+  primaryItemId: null,
+  similarItemIds: [],
+  clusterId: 0,
+  generalInstructions: null,
   oracle: {
     queuedItems: [],
     answerInterval: 30 * 1000,  // seconds to milliseconds
     answeredItems: [],
   },
-  uncertainLabel,
-  experimentPhase: {
-    name: null,
-    startTime: null,
-  },
-  currentItemId: null,
-  primaryItemId: null,
-  similarNav: false,
-  similarItemIds: [],
-  clusterId: 0,
-  initialInstructions: null,
   entities: {
     groups: { byId: new Map() },
     itemData: { byId: new Map() },
@@ -48,7 +50,6 @@ const initialState = {
     answers: { byId: new Map() },
     labels: new Map(labels.map(label => [label, { itemIds: new Set() }])),
   },
-  generalInstructions: null,
 };
 
 /*
@@ -91,7 +92,7 @@ export const groupLabelsSelector = createSelector(
 );
 export const labelGroupsSelector = createDeepEqualSelector(
   groupLabelsSelector,
-  state => state.labels,
+  state => state.config.labels,
   (groups, labs) => new Map(labs.map(label => [
     label,
     [...groups].filter(([, value]) => value === label).map(([id]) => id),
@@ -307,7 +308,7 @@ function InstructionsApp(state = initialState, action) {
       let primaryItemId = state.primaryItemId;
       let similarItemIds = state.similarItemIds;
       if (action.itemId == null && currentItemId == null && state.primaryItemId == null) {
-        const { useReasons, useAnswers } = conditions[state.systemVersion];
+        const { useReasons, useAnswers } = conditions[state.config.systemVersion];
         // Choose next primaryItem.
         if (unlabeledItemIdsSelector(state).size === 0) {
           primaryItemId = null;
@@ -537,27 +538,15 @@ function InstructionsApp(state = initialState, action) {
           name: States.LOADED,
           startTime: Date.now(),
         },
-        systemVersion: action.payload.systemVersion,
-        participantId: action.payload.participantId,
-        participantIndex: action.payload.participantIndex,
-        experimentId: action.payload.experimentId,
-        experimentPosition: action.payload.experimentPosition,
-        taskId: action.payload.taskId,
-        initialInstructions: action.payload.initialInstructions,
-        generalInstructions: action.payload.instructions,
+        config: {
+          ...state.config,
+          ...action.payload.config,
+        },
+        generalInstructions: (action.payload.instructions != null
+          ? action.payload.instructions
+          : action.payload.config.initialInstructions
+        ),
         answerKey: action.payload.answerKey,
-        tutorial: (action.payload.tutorial != null
-          ? action.payload.tutorial
-          : state.tutorial
-        ),
-        isExperiment: (action.payload.isExperiment != null
-          ? action.payload.isExperiment
-          : state.isExperiment
-        ),
-        similarNav: (action.payload.similarNav != null
-          ? action.payload.similarNav
-          : state.similarNav
-        ),
         entities: {
           ...state.entities,
           itemData: {

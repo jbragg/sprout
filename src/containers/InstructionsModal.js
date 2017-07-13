@@ -122,7 +122,7 @@ InstructionsModal.defaultProps = defaultProps;
 const mapStateToProps = (state, { itemId }) => ({
   item: itemId == null ? null : state.entities.items.byId.get(itemId),
   itemLabel: itemId == null ? null : itemLabelsSelector(state).get(itemId),
-  finalLabels: state.finalLabels,
+  finalLabels: state.config.finalLabels,
 });
 
 const mapDispatchToProps = (dispatch, { itemId }) => ({
