@@ -18,6 +18,16 @@
   20% { transform: rotate(0deg); }
 }
 
+@keyframes wiggleSmall {
+  0% { transform: rotate(0deg); }
+  3% { transform: rotate(.5deg); }
+  7% { transform: rotate(-.5deg); }
+  10% { transform: rotate(0deg); }
+  13% { transform: rotate(.5deg); }
+  17% { transform: rotate(-.5deg); }
+  20% { transform: rotate(0deg); }
+}
+
 #left {
   position: absolute;
   top: 0px;
@@ -56,6 +66,7 @@
 .css-6bx4c3 {
   text-transform: none !important;
   font-size: 14px !important;
+  text-align: left !important;
 }
 
 /*
@@ -71,8 +82,12 @@ div[tabindex="-1"]:focus {
   -webkit-animation: spin2 1s infinite linear;
 }
 
-.recommended {
+.recommended.item-group {
   animation: wiggle 2s 3;
+}
+
+.recommended.item-large {
+  animation: wiggleSmall 2s 3;
 }
 
 .large {
