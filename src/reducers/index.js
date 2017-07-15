@@ -26,6 +26,9 @@ const initialState = {
     uncertainLabel,
     similarNav: false,
     initialInstructions: null,
+    sortMetric: defaultMetrics.sort,
+    exemplarsFirst: true,
+    clusters: false,
   },
   experimentPhase: {
     name: null,
@@ -151,6 +154,10 @@ export const unlabeledClusterItemsSelector = createSelector(
   itemDataSelector,
   (clusterId, itemIds, items) => clusterId == null ? [] : itemIds.filter(id => items.byId.get(id).cluster === clusterId),
 );
+export const clusterExemplarIdsSelector = createSelector(
+  itemDataSelector,
+  items => [...items.byId.filter(item => item.exemplar).keys()],  // Unsorted.
+);
 export const itemAnswersSelector = createSelector(
   itemDataSelector,
   answersSelector,
@@ -161,18 +168,30 @@ export const itemAnswersSelector = createSelector(
 );
 export const itemScoresSelector = createSelector(
   itemAnswersSelector,
-  itemAnswers => new Map([...itemAnswers].map(([id, answers]) => [
-    id,
-    getScore(defaultMetrics.sort)(
-      ...answers.map(answer => answer.data.answer),
-    ).color,
-  ])),
+  state => state.config.sortMetric,
+  (itemAnswers, sortMetric) => new Map(
+    [...itemAnswers].map(([id, answers]) => [
+      id,
+      getScore(sortMetric)(
+        ...answers.map(answer => answer.data.answer),
+      ).color,
+    ]),
+  ),
 );
 export const sortedItemIdsSelector = createSelector(
   itemScoresSelector,
-  scores => [...scores.keys()].sort(
-    (id1, id2) => scores.get(id1) - scores.get(id2),
-  ),
+  clusterExemplarIdsSelector,
+  state => state.config.exemplarsFirst,
+  (scores, exemplars, exemplarsFirst) => {
+    const sortedItemIds = [...scores.keys()].sort(
+      (id1, id2) => scores.get(id1) - scores.get(id2),
+    );
+    const sorted = (exemplarsFirst
+      ? [...exemplars, ...sortedItemIds.filter(id => !exemplars.includes(id))]
+      : sortedItemIds
+    );
+    return sorted;
+  },
 );
 export const unlabeledSortedItemIdsSelector = createSelector(
   unlabeledItemIdsSelector,

@@ -1,43 +1,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { PanelGroup, Panel } from 'react-bootstrap';
-import { ItemLargeContainer } from '../containers/ItemContainer';
+import { PanelGroup } from 'react-bootstrap';
 import UnlabeledSection from '../components/UnlabeledSection';
+import CurrentItemPreview from './CurrentItemPreview';
 import conditions from '../experiment';
 
 const propTypes = {
-  currentItemId: PropTypes.number,
   useReasons: PropTypes.bool,
   master: PropTypes.bool,
   similarNav: PropTypes.bool.isRequired,
 };
 
 const defaultProps = {
-  currentItemId: null,
   useReasons: true,
   master: false,
 };
 
-const UnlabeledColumn = ({ useReasons, currentItemId, master, similarNav }) => (
+const UnlabeledColumn = ({ useReasons, master, similarNav, clusters }) => (
   <PanelGroup>
     <UnlabeledSection
       className="panel"
       useReasons={useReasons}
       similarNav={similarNav}
+      clusters={clusters}
     />
-    {currentItemId != null
-        ? (
-          <ItemLargeContainer
-            draggable
-            itemId={currentItemId}
-            master={master}
-          />
-        )
-        : (
-          <Panel><div className="text-center">Select an item to preview it here.</div></Panel>
-        )
-    }
+    <CurrentItemPreview
+      draggable
+      master={master}
+    />
   </PanelGroup>
 );
 
@@ -45,9 +36,9 @@ UnlabeledColumn.propTypes = propTypes;
 UnlabeledColumn.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
-  currentItemId: state.currentItemId,
   useReasons: conditions[state.config.systemVersion].useReasons,
   similarNav: state.config.similarNav,
+  clusters: state.config.clusters,
 });
 
 export default connect(mapStateToProps)(UnlabeledColumn);

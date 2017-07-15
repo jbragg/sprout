@@ -6,7 +6,8 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
-import { Grid, Col, Well, Button, Alert } from 'react-bootstrap';
+import { Grid, Col, Well, Button } from 'react-bootstrap';
+import AlertContainer from 'react-alert';
 import Instructions from '../components/Instructions';
 import Loading from '../components/Loading';
 import UnlabeledColumn from './UnlabeledColumn';
@@ -80,7 +81,6 @@ class App extends React.Component {
     };
     this.handleImageLoaded = this.handleImageLoaded.bind(this);
     this.advanceExperimentPhase = this.advanceExperimentPhase.bind(this);
-    this.dismissExpiredAlerts = this.dismissExpiredAlerts.bind(this);
     this.remainingTime = this.remainingTime.bind(this);
     this.elapsedTime = this.elapsedTime.bind(this);
 
@@ -98,6 +98,7 @@ class App extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.experimentPhase.name !== nextProps.experimentPhase.name) {
+      this.alert.removeAll();
       const warnings = defaults.warnings[nextProps.experimentPhase.name] || [];
       this.setState({ warnings });
     }
@@ -111,7 +112,10 @@ class App extends React.Component {
     this.setState((state) => {
       // Keep at most one expired warning.
       const pastWarnings = state.warnings.filter(([time]) => time <= this.elapsedTime());
-      const newWarnings = state.warnings.slice(Math.max(0, pastWarnings.length - 1));
+      pastWarnings.forEach(([, warning]) => {
+        this.alert.info(<ReactMarkdown source={warning} />, { time: 0 });
+      });
+      const newWarnings = state.warnings.slice(pastWarnings.length);
       return {
         warnings: newWarnings,
         date: Date.now(),
@@ -165,12 +169,6 @@ class App extends React.Component {
     } else if (currentPhase === States.ORACLE) {
       this.props.onChangeExperimentPhase(States.INSTRUCTIONS);
     }
-  }
-
-  dismissExpiredAlerts() {
-    this.setState(state => ({
-      warnings: state.warnings.filter(([time]) => time > this.elapsedTime()),
-    }));
   }
 
   render() {
@@ -282,19 +280,6 @@ class App extends React.Component {
             </div>
           }
           <CustomDragLayer />
-          {this.props.warnings
-              && this.state.warnings.length > 0
-              && this.state.warnings[0][0] <= this.elapsedTime()
-              && (
-                <Alert
-                  bsStyle="warning"
-                  onDismiss={this.dismissExpiredAlerts}
-                  className="text-center"
-                >
-                  <ReactMarkdown source={this.state.warnings[0][1]} />
-                </Alert>
-              )
-          }
           {this.props.experimentPosition && (
             <ExperimentProgress
               currentIndex={
@@ -305,6 +290,12 @@ class App extends React.Component {
             />
           )}
           {experimentComponent}
+          {this.props.warnings && (
+            <AlertContainer
+              ref={(c) => { this.alert = c; }}
+              position="top left"
+            />
+          )}
         </div>
       </HotKeys>
     );

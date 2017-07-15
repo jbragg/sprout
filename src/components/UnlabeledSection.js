@@ -9,14 +9,16 @@ const propTypes = {
   useReasons: PropTypes.bool.isRequired,
   similarNav: PropTypes.bool,
   className: PropTypes.string,
+  clusters: PropTypes.bool,
 };
 
 const defaultProps = {
   similarNav: false,
   className: null,
+  clusters: false,
 };
 
-const UnlabeledSection = ({ useReasons, className, similarNav }) => (
+const UnlabeledSection = ({ useReasons, clusters, className, similarNav }) => (
   <div className={classNames(className, 'unlabeled-items')}>
     <div className="items-nav">
       {similarNav
@@ -24,7 +26,7 @@ const UnlabeledSection = ({ useReasons, className, similarNav }) => (
           : <UnreviewedItemList thumbnails />
       }
     </div>
-    {useReasons && (
+    {useReasons && clusters && (
       <div className="clusters-nav">
         <ClusterItemList />
       </div>

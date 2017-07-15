@@ -160,7 +160,7 @@ class ItemLarge extends React.Component {
         className={`panel panel-default item-large ${imageStatus === 'loaded' && recommendedGroup >= 0 ? 'recommended' : ''}`}
         style={{ opacity: isDragging ? 0.5 : null }}
       >
-        {!draggable ? null : (
+        {draggable && (
           <div
             className="panel-heading panel-heading-less-padding"
             style={{

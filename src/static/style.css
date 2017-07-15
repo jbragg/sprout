@@ -18,6 +18,54 @@
   20% { transform: rotate(0deg); }
 }
 
+#left {
+  position: absolute;
+  top: 0px;
+  bottom: 0;
+  left: 0;
+  width: 33.3%;
+  overflow-y: scroll;
+}
+
+#center {
+  position: absolute;
+  top: 0px;
+  bottom: 0;
+  left: 33.3%;
+  width: 33.3%;
+  overflow-y: scroll;
+}
+
+#right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  overflow-y: scroll;
+  width: 33.3%;
+}
+
+
+/*
+ * override react-alert
+ */
+.css-1vm9g5e {
+  width: 50% !important;
+}
+
+.css-6bx4c3 {
+  text-transform: none !important;
+  font-size: 14px !important;
+}
+
+/*
+ * fix react-hotkeys blue outline
+ * NOTE: Seems to still be an extra closing div.
+ */
+div[tabindex="-1"]:focus {
+  outline: 0;
+}
+
 .glyphicon.spinning {
   animation: spin 1s infinite linear;
   -webkit-animation: spin2 1s infinite linear;

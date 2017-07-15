@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid, Col, Well, Button } from 'react-bootstrap';
-import { AutoAffix } from 'react-overlays';
 import Joyride from 'react-joyride';
 import { States, tutorialSteps } from '../constants';
 import UnlabeledColumn from '../containers/UnlabeledColumn';
@@ -58,53 +57,49 @@ class Combined extends React.Component {
             scrollToSteps={false}
           />
         )}
-        <Col sm={4}>
-          <AutoAffix>
-            <div>
-              <UnlabeledColumn master={masterView} />
-            </div>
-          </AutoAffix>
+        <Col id="left" sm={4}>
+          <div>
+            <UnlabeledColumn master={masterView} />
+          </div>
         </Col>
-        <Col sm={4}>
+        <Col id="center" sm={4}>
           <Progress />
           <LabeledColumn labels={labels} />
         </Col>
-        <Col className="instructions" sm={4}>
-          <AutoAffix>
-            <div>
-              <div className="instructions-customer">
-                <h3>Customer Instructions</h3>
-                <p>Your task is to improve these instructions:</p>
-                <Well bsSize="sm">{initialInstructions}</Well>
-                {oracle && <Oracle />}
-              </div>
-              <Instructions />
-              {countdown && (
-                <Countdown
-                  remainingTime={remainingSeconds}
-                  onFinished={() => { advanceExperimentPhase(States.COMBINED); }}
-                  confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
-                />
-              )}
-              {exportButton && (
-                <Export>
-                  <Button
-                    bsStyle="primary"
-                  >
-                    Export
-                  </Button>
-                </Export>
-              )}
-              {tutorial && (
+        <Col id="right" className="instructions" sm={4}>
+          <div>
+            <div className="instructions-customer">
+              <h3>Customer Instructions</h3>
+              <p>Your task is to improve these instructions:</p>
+              <Well bsSize="sm">{initialInstructions}</Well>
+              {oracle && <Oracle />}
+            </div>
+            <Instructions />
+            {countdown && (
+              <Countdown
+                remainingTime={remainingSeconds}
+                onFinished={() => { advanceExperimentPhase(States.COMBINED); }}
+                confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
+              />
+            )}
+            {exportButton && (
+              <Export>
                 <Button
                   bsStyle="primary"
-                  onClick={() => { onChangeExperimentPhase(States.THANKS); }}
                 >
-                  Ready for experiment
+                  Export
                 </Button>
-              )}
-            </div>
-          </AutoAffix>
+              </Export>
+            )}
+            {tutorial && (
+              <Button
+                bsStyle="primary"
+                onClick={() => { onChangeExperimentPhase(States.THANKS); }}
+              >
+                Ready for experiment
+              </Button>
+            )}
+          </div>
         </Col>
       </Grid>
     );
