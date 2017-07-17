@@ -4,11 +4,15 @@ import { stringify } from 'query-string';
 import Loading from './Loading';
 
 const propTypes = {
-  params: PropTypes.object.isRequired,
+  params: PropTypes.shape({
+    tutorial: PropTypes.bool,
+    taskIndex: PropTypes.number,
+  }),
   redirectTime: PropTypes.number,
 };
 
 const defaultProps = {
+  params: null,
   redirectTime: 6000,
 };
 
@@ -29,7 +33,9 @@ class Thanks extends React.Component {
 
   shouldRedirect() {
     const { params } = this.props;
-    return params.tutorial || params.taskIndex === 0 || params.taskIndex === 1;
+    return params && (
+      params.tutorial || params.taskIndex === 0 || params.taskIndex === 1
+    );
   }
 
   redirectUrl() {
