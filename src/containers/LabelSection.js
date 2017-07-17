@@ -29,7 +29,7 @@ const propTypes = {
 };
 
 const defaultProps = {
-  fixedTarget: true,
+  fixedTarget: false,
 };
 
 class LabelSection extends React.Component {
@@ -89,7 +89,10 @@ class LabelSection extends React.Component {
             const id = monitor.getItem().id;
             this.confirm(() => { onGroupDelete(id, label); }, deleteMessage);
           }}
-          onCanDrop={(_, monitor) => monitor.getItemType() === ItemTypes.GROUP && groupIds.indexOf(monitor.getItem().id) >= 0}
+          onCanDrop={(_, monitor) => (
+            monitor.getItemType() === ItemTypes.GROUP
+            && groupIds.indexOf(monitor.getItem().id) >= 0
+          )}
         >
           <div className="panel-heading">
             <h4 className="panel-title">{label}</h4>
@@ -170,6 +173,7 @@ const mapStateToProps = (state, { label }) => ({
   groupIds: labelGroupsSelector(state).get(label),
   itemIds: state.entities.labels.get(label).itemIds,
   autoAdvance: state.autoAdvance,
+  fixedTarget: state.config.fixedLabelTargets,
 });
 
 const mapDispatchToProps = dispatch => ({
