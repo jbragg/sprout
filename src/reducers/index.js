@@ -86,6 +86,10 @@ export const itemSimilaritiesSelector = createSelector(
     return [id, new Map(otherItems)];
   })),
 );
+export const itemIdsSelector = createSelector(
+  itemsSelector,
+  items => [...items.byId.keys()],
+);
 export const isUnlabeled = item => (item.group == null && item.label == null);
 export const unlabeledItemIdsSelector = createSelector(
   itemsSelector,
@@ -147,8 +151,13 @@ export const itemScoresSelector = createSelector(
 export const sortedItemIdsSelector = createSelector(
   itemScoresSelector,
   clusterExemplarIdsSelector,
-  state => state.config.exemplarsFirst,
-  (scores, exemplars, exemplarsFirst) => {
+  itemIdsSelector,
+  state => state.config.useAnswers,
+  state => state.config.exemplarsFirst && state.config.useReasons,
+  (scores, exemplars, allItemIds, shouldSort, exemplarsFirst) => {
+    if (!shouldSort) {
+      return allItemIds;
+    }
     const sortedItemIds = [...scores.keys()].sort(
       (id1, id2) => scores.get(id1) - scores.get(id2),
     );

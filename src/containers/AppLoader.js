@@ -10,6 +10,7 @@ import { fetchExperiment } from '../actions';
 import { States } from '../constants';
 import config from '../config';
 import latin3x3 from '../rand/latin/latin3x3';
+import conditions from '../experiment';
 
 const getTreatment = (participantIndex, taskIndex) => {
   if (participantIndex == null || taskIndex == null) {
@@ -23,7 +24,7 @@ const getTreatment = (participantIndex, taskIndex) => {
 
 const getAllParams = (params) => {
   let taskId = params.taskId;
-  const relevantParams = { ...params };
+  let relevantParams = { ...params };
   if (params.experimentId) {
     taskId = params.tutorial
       ? config.experiments[params.experimentId].tutorial
@@ -39,6 +40,12 @@ const getAllParams = (params) => {
         params.participantIndex, params.taskIndex,
       );
     }
+  }
+  if (relevantParams.systemVersion != null) {
+    relevantParams = {
+      ...relevantParams,
+      ...conditions[relevantParams.systemVersion],
+    };
   }
   const task = config.tasks[taskId];
   return {

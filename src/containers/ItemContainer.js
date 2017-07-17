@@ -6,7 +6,6 @@ import ItemThumb from '../components/ItemThumb';
 import ItemBtn from '../components/ItemBtn';
 import { setCurrentItem, setLightbox } from '../actions';
 import { DragItemTypes as ItemTypes } from '../constants';
-import conditions from '../experiment';
 import getScore, { defaults as defaultMetrics } from '../score';
 import { getColor, getContrastColor } from '../color';
 import {
@@ -35,7 +34,7 @@ const collect = (dndConnect, monitor) => ({
 
 const mapStateToProps = (state, { itemId, useReasons, useAnswers, metric }) => {
   const useAnswersVal = useAnswers == null
-    ? conditions[state.config.systemVersion].useAnswers
+    ? state.config.useAnswers
     : useAnswers;
   const metricVal = metric != null ? defaultMetrics.color : metric;
   const answers = itemAnswersSelector(state).get(itemId);
@@ -58,7 +57,7 @@ const mapStateToProps = (state, { itemId, useReasons, useAnswers, metric }) => {
     answers,
     backgroundColor,
     textColor,
-    useReasons: useReasons == null ? conditions[state.config.systemVersion].useReasons : useReasons,
+    useReasons: useReasons == null ? state.config.useReasons : useReasons,
     useAnswers: useAnswersVal,
     answerKey: state.config.answerKey,
     recommendedGroup: recommendedGroupSelector(state),

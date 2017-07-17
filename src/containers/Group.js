@@ -9,7 +9,6 @@ import { editGroup, mergeGroup, assignItems } from '../actions';
 import { recommendedGroupSelector, getItemsSummary } from '../reducers/index';
 import { currentItemIdSelector } from '../reducers/currentItem';
 import { DragItemTypes as ItemTypes } from '../constants';
-import conditions from '../experiment';
 
 const propTypes = {
   group: PropTypes.shape({
@@ -177,7 +176,7 @@ const mapStateToProps = (state, { groupId }) => ({
   summary: getItemsSummary([...state.entities.groups.byId.get(groupId).itemIds], state),
   recommended: recommendedGroupSelector(state) === groupId,
   currentItemId: currentItemIdSelector(state),
-  useReasons: conditions[state.config.systemVersion].useReasons,
+  useReasons: state.config.useReasons,
   autoAdvance: state.autoAdvance,
 });
 

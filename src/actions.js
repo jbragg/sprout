@@ -5,7 +5,6 @@ import {
   itemSimilaritiesSelector, isUnlabeled,
 } from './reducers/index';
 import { currentItemIdSelector } from './reducers/currentItem';
-import conditions from './experiment';
 
 /*
  * action types
@@ -90,12 +89,9 @@ export function setCurrentItem(itemId = null) {
     if (
       itemId == null && currentItemId == null && state.currentItem.primaryItemId == null
     ) {
-      const { useReasons, useAnswers } = conditions[state.config.systemVersion];
       // Choose next primaryItem.
       if (unlabeledItemIdsSelector(state).size === 0) {
         primaryItemId = null;
-      } else if (!useReasons && !useAnswers) {
-        primaryItemId = [...unlabeledItemIdsSelector(state)][0];
       } else {
         primaryItemId = unlabeledSortedItemIdsSelector(state)[0];
       }
