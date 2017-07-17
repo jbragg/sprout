@@ -13,6 +13,7 @@ import {
   itemDataSelector, itemsSelector, itemAnswersSelector,
   recommendedGroupSelector, itemSimilaritiesSelector,
 } from '../reducers/index';
+import { currentItemIdSelector } from '../reducers/currentItem';
 
 /*
  * react-dnd
@@ -48,7 +49,7 @@ const mapStateToProps = (state, { itemId, useReasons, useAnswers, metric }) => {
     ? getContrastColor(backgroundColor)
     : null;
   return {
-    selected: state.currentItem.currentItemId === itemId,
+    selected: currentItemIdSelector(state) === itemId,
     item: itemDataSelector(state).byId.get(itemId),
     isLabeled: (
       itemsSelector(state).byId.get(itemId).group != null

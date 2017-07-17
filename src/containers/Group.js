@@ -7,6 +7,7 @@ import { DragSource, DropTarget } from 'react-dnd';
 import ItemGroup from '../components/ItemGroup';
 import { editGroup, mergeGroup, assignItems } from '../actions';
 import { recommendedGroupSelector, getItemsSummary } from '../reducers/index';
+import { currentItemIdSelector } from '../reducers/currentItem';
 import { DragItemTypes as ItemTypes } from '../constants';
 import conditions from '../experiment';
 
@@ -175,7 +176,7 @@ const mapStateToProps = (state, { groupId }) => ({
   group: state.entities.groups.byId.get(groupId),
   summary: getItemsSummary([...state.entities.groups.byId.get(groupId).itemIds], state),
   recommended: recommendedGroupSelector(state) === groupId,
-  currentItemId: state.currentItem.currentItemId,
+  currentItemId: currentItemIdSelector(state),
   useReasons: conditions[state.config.systemVersion].useReasons,
   autoAdvance: state.autoAdvance,
 });

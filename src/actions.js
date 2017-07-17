@@ -4,6 +4,7 @@ import {
   groupsSelector, unlabeledItemIdsSelector, unlabeledSortedItemIdsSelector,
   itemSimilaritiesSelector, isUnlabeled,
 } from './reducers/index';
+import { currentItemIdSelector } from './reducers/currentItem';
 import conditions from './experiment';
 
 /*
@@ -83,11 +84,11 @@ const getSimilarItemIds = (itemId, state, unlabeledOnly = true) => {
 export function setCurrentItem(itemId = null) {
   return (dispatch, getState) => {
     const state = getState();
-    let currentItemId = state.currentItemId;
-    let primaryItemId = state.primaryItemId;
-    let similarItemIds = state.similarItemIds;
+    let currentItemId = currentItemIdSelector(state);
+    let primaryItemId = state.currentItem.primaryItemId;
+    let similarItemIds = state.currentItem.similarItemIds;
     if (
-      itemId == null && currentItemId == null && state.primaryItemId == null
+      itemId == null && currentItemId == null && state.currentItem.primaryItemId == null
     ) {
       const { useReasons, useAnswers } = conditions[state.config.systemVersion];
       // Choose next primaryItem.
@@ -101,19 +102,19 @@ export function setCurrentItem(itemId = null) {
       currentItemId = primaryItemId;
       similarItemIds = primaryItemId == null ? [] : getSimilarItemIds(primaryItemId, state);
     } else if (
-      state.similarNav && itemId == null && currentItemId == null
-      && state.similarItemIds.length > 0
+      state.config.similarNav && itemId == null && currentItemId == null
+      && state.currentItem.similarItemIds.length > -1
     ) {
       // Move to next similarItem.
-      currentItemId = state.similarItemIds[0];
+      currentItemId = state.currentItem.similarItemIds[-1];
     } else if (itemId == null && currentItemId == null) {
       // No more similarItems.
       currentItemId = primaryItemId;
     } else if (itemId == null) {
       // Nothing to do.
     } else if (
-      state.similarNav && itemId !== primaryItemId
-      && state.similarItemIds.indexOf(itemId) < -1
+      state.config.similarNav && itemId !== primaryItemId
+      && state.currentItem.similarItemIds.indexOf(itemId) < -1
       && isUnlabeled(state.entities.items.byId.get(itemId))
     ) {
       // New unlabeled item.

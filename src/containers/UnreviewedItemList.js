@@ -7,6 +7,7 @@ import { setCurrentItem, setAutoAdvance } from '../actions';
 import {
   unlabeledSortedItemIdsSelector, sortedItemIdsSelector,
 } from '../reducers/index';
+import { currentItemIdSelector } from '../reducers/currentItem';
 
 const propTypes = {
   itemIds: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
@@ -122,7 +123,7 @@ UnreviewedItemList.defaultProps = defaultProps;
 
 const mapStateToProps = (state, { unlabeledOnly }) => ({
   autoAdvance: state.autoAdvance,
-  currentItemId: state.currentItem.currentItemId,
+  currentItemId: currentItemIdSelector(state),
   primaryItemId: state.currentItem.primaryItemId,
   itemIds: (unlabeledOnly
     ? unlabeledSortedItemIdsSelector(state)

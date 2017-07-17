@@ -23,6 +23,7 @@ import Thanks from '../components/Thanks';
 import ExperimentProgress from '../components/ExperimentProgress';
 import { changeExperimentPhase, setLightbox } from '../actions';
 import { itemDataSelector } from '../reducers/index';
+import { currentItemIdSelector } from '../reducers/currentItem';
 import { States, defaults } from '../constants';
 
 
@@ -326,7 +327,7 @@ const mapStateToProps = state => ({
   items: itemDataSelector(state).byId,
   initialInstructions: state.config.initialInstructions,
   experimentPosition: state.config.experimentPosition,
-  currentItemId: state.currentItem.currentItemId,
+  currentItemId: currentItemIdSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({

@@ -7,7 +7,7 @@ import { defaults } from '../constants';
 import config from './config';
 import autoAdvance from './autoAdvance';
 import entities from './entities';
-import currentItem from './currentItem';
+import currentItem, { currentItemIdSelector } from './currentItem';
 import clusterId from './clusterId';
 import lightboxId from './lightboxId';
 import generalInstructions from './generalInstructions';
@@ -42,7 +42,6 @@ const createDeepEqualSelector = createSelectorCreator(
 export const itemDataSelector = state => state.entities.itemData;
 export const itemsSelector = state => state.entities.items;
 export const groupsSelector = state => state.entities.groups;
-export const currentItemIdSelector = state => state.currentItem.currentItemId;
 export const answersSelector = state => state.entities.answers;
 export const clusterIdsSelector = createSelector(
   itemDataSelector,
