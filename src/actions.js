@@ -1,6 +1,10 @@
 import fetch from 'isomorphic-fetch';
 import { OrderedSet as Set } from 'immutable';
-import { groupsSelector } from './reducers/index';
+import {
+  groupsSelector, unlabeledItemIdsSelector, unlabeledSortedItemIdsSelector,
+  itemSimilaritiesSelector, isUnlabeled,
+} from './reducers/index';
+import conditions from './experiment';
 
 /*
  * action types
@@ -69,10 +73,64 @@ export function unqueueItemOracle(itemId) {
   };
 }
 
+const getSimilarItemIds = (itemId, state, unlabeledOnly = true) => {
+  const unlabeledItemIds = unlabeledItemIdsSelector(state);
+  return [...itemSimilaritiesSelector(state).get(itemId).keys()].filter(
+    id => !unlabeledOnly || unlabeledItemIds.has(id),
+  );
+};
+
 export function setCurrentItem(itemId = null) {
-  return {
-    type: SET_CURRENT_ITEM,
-    itemId,
+  return (dispatch, getState) => {
+    const state = getState();
+    let currentItemId = state.currentItemId;
+    let primaryItemId = state.primaryItemId;
+    let similarItemIds = state.similarItemIds;
+    if (
+      itemId == null && currentItemId == null && state.primaryItemId == null
+    ) {
+      const { useReasons, useAnswers } = conditions[state.config.systemVersion];
+      // Choose next primaryItem.
+      if (unlabeledItemIdsSelector(state).size === 0) {
+        primaryItemId = null;
+      } else if (!useReasons && !useAnswers) {
+        primaryItemId = [...unlabeledItemIdsSelector(state)][0];
+      } else {
+        primaryItemId = unlabeledSortedItemIdsSelector(state)[0];
+      }
+      currentItemId = primaryItemId;
+      similarItemIds = primaryItemId == null ? [] : getSimilarItemIds(primaryItemId, state);
+    } else if (
+      state.similarNav && itemId == null && currentItemId == null
+      && state.similarItemIds.length > 0
+    ) {
+      // Move to next similarItem.
+      currentItemId = state.similarItemIds[0];
+    } else if (itemId == null && currentItemId == null) {
+      // No more similarItems.
+      currentItemId = primaryItemId;
+    } else if (itemId == null) {
+      // Nothing to do.
+    } else if (
+      state.similarNav && itemId !== primaryItemId
+      && state.similarItemIds.indexOf(itemId) < -1
+      && isUnlabeled(state.entities.items.byId.get(itemId))
+    ) {
+      // New unlabeled item.
+      primaryItemId = itemId;
+      currentItemId = primaryItemId;
+      similarItemIds = getSimilarItemIds(primaryItemId, state);
+    } else {
+      currentItemId = itemId;
+    }
+    return dispatch({
+      type: SET_CURRENT_ITEM,
+      payload: {
+        currentItemId,
+        primaryItemId,
+        similarItemIds,
+      },
+    });
   };
 }
 
@@ -226,7 +284,6 @@ const setUpExperiment = (
     )
     : [];
   return {
-    answerKey,
     items,
     itemData,
     groups,
@@ -269,6 +326,7 @@ export function fetchExperiment(params) {
             oracle,
           ),
           config: {
+            answerKey,
             ...params,
           },
         }));

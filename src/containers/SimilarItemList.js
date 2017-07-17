@@ -101,8 +101,8 @@ SimilarItemList.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
   isFinished: unlabeledItemIdsSelector(state).length === 0,
-  primaryItemId: state.primaryItemId,
-  similarItemIds: state.similarItemIds,
+  primaryItemId: state.currentItem.primaryItemId,
+  similarItemIds: state.currentItem.similarItemIds,
 });
 
 export default connect(mapStateToProps)(SimilarItemList);

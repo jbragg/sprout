@@ -57,6 +57,7 @@ const propTypes = {
   countdown: PropTypes.bool.isRequired,
   oracle: PropTypes.bool.isRequired,
   warnings: PropTypes.bool.isRequired,
+  currentItemId: PropTypes.number,
 };
 
 const defaultProps = {
@@ -69,6 +70,7 @@ const defaultProps = {
   waitForImagesFrac: 1,
   prefetchAll: true,
   experimentPosition: null,
+  currentItemId: null,
 };
 
 class App extends React.Component {
@@ -97,7 +99,10 @@ class App extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.experimentPhase.name !== nextProps.experimentPhase.name) {
+    if (
+      this.props.warnings
+      && this.props.experimentPhase.name !== nextProps.experimentPhase.name
+    ) {
       this.alert.removeAll();
       const warnings = defaults.warnings[nextProps.experimentPhase.name] || [];
       this.setState({ warnings });
@@ -112,9 +117,11 @@ class App extends React.Component {
     this.setState((state) => {
       // Keep at most one expired warning.
       const pastWarnings = state.warnings.filter(([time]) => time <= this.elapsedTime());
-      pastWarnings.forEach(([, warning]) => {
-        this.alert.info(<ReactMarkdown source={warning} />, { time: 0 });
-      });
+      if (this.props.warnings) {
+        pastWarnings.forEach(([, warning]) => {
+          this.alert.info(<ReactMarkdown source={warning} />, { time: 0 });
+        });
+      }
       const newWarnings = state.warnings.slice(pastWarnings.length);
       return {
         warnings: newWarnings,
@@ -175,6 +182,7 @@ class App extends React.Component {
     const {
       items, labels, masterView, clusterView, initialInstructions, oracle,
       prefetchAll, tutorial, onSetLightbox, rawView, countdown, exportButton,
+      currentItemId,
     } = this.props;
     const experimentState = this.props.experimentPhase.name;
     if (experimentState == null || experimentState === States.LOADING) {
@@ -266,7 +274,11 @@ class App extends React.Component {
       experimentComponent = <Grid><h1><Loading /></h1></Grid>;
     }
     return (
-      <HotKeys handlers={{ preview: () => { onSetLightbox(true); } }}>
+      <HotKeys
+        handlers={{
+          preview: () => { onSetLightbox({ id: currentItemId }); },
+        }}
+      >
         <div id="app">
           {prefetchAll &&
             <div className="hidden">
@@ -294,6 +306,7 @@ class App extends React.Component {
             <AlertContainer
               ref={(c) => { this.alert = c; }}
               position="top left"
+              theme="light"
             />
           )}
         </div>
@@ -313,6 +326,7 @@ const mapStateToProps = state => ({
   items: itemDataSelector(state).byId,
   initialInstructions: state.config.initialInstructions,
   experimentPosition: state.config.experimentPosition,
+  currentItemId: state.currentItem.currentItemId,
 });
 
 const mapDispatchToProps = dispatch => ({

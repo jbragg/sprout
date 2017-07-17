@@ -80,7 +80,9 @@ class AppLoader extends React.Component {
       }
     });
     boolParams.forEach((key) => {
-      params[key] = params[key] !== undefined && params[key] !== 'false';
+      if (params[key] !== undefined) {
+        params[key] = params[key] !== 'false';
+      }
     });
     const allParams = getAllParams(params);
     initialize(allParams);

@@ -19,16 +19,22 @@ const propTypes = {
       label: PropTypes.string.isRequired,
     }).isRequired,
   ).isRequired,
+  itemData: ImmutablePropTypes.orderedMapOf(
+    PropTypes.shape({
+      labelGT: PropTypes.string,
+    }).isRequired,
+  ).isRequired,
   connectDropTarget: PropTypes.func.isRequired,
   isOver: PropTypes.bool.isRequired,
   canDrop: PropTypes.bool.isRequired,
   labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+  uncertainlabel: PropTypes.string.isRequired,
   onUnqueue: PropTypes.func.isRequired,
 };
 
 const Oracle = ({
   queuedItems, answeredItems, labels, connectDropTarget, isOver, canDrop,
-  onUnqueue,
+  onUnqueue, itemData, uncertainLabel,
 }) => connectDropTarget(
     <div className={`panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
       <RemoveTarget
@@ -59,7 +65,7 @@ const Oracle = ({
           {queuedItems.size === 0 ? null : <ItemList itemIds={queuedItems} />}
         </div>
         {labels.map((label) => {
-          const itemIds = answeredItems.filter(val => val.label === label).map(val => val.id);
+          const itemIds = answeredItems.filter(val => (itemData.get(val.id).labelGT || uncertainLabel) === label).map(val => val.id);
           if (itemIds.length > 0) {
             return (
               <Panel
@@ -102,7 +108,9 @@ const collect = (dndConnect, monitor) => ({
 const mapStateToProps = state => ({
   queuedItems: queuedItemsSelector(state),
   answeredItems: state.oracle.answeredItems,
-  labels: state.labels,
+  labels: state.config.labels,
+  uncertainLabel: state.config.uncertainLabel,
+  itemData: state.entities.itemData.byId,
 });
 
 const mapDispatchToProps = dispatch => ({

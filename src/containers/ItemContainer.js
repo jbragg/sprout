@@ -48,7 +48,7 @@ const mapStateToProps = (state, { itemId, useReasons, useAnswers, metric }) => {
     ? getContrastColor(backgroundColor)
     : null;
   return {
-    selected: state.currentItemId === itemId,
+    selected: state.currentItem.currentItemId === itemId,
     item: itemDataSelector(state).byId.get(itemId),
     isLabeled: (
       itemsSelector(state).byId.get(itemId).group != null
@@ -59,7 +59,7 @@ const mapStateToProps = (state, { itemId, useReasons, useAnswers, metric }) => {
     textColor,
     useReasons: useReasons == null ? conditions[state.config.systemVersion].useReasons : useReasons,
     useAnswers: useAnswersVal,
-    answerKey: state.answerKey,
+    answerKey: state.config.answerKey,
     recommendedGroup: recommendedGroupSelector(state),
     lightboxOpen: state.lightboxId === itemId,
     itemSimilarities: itemSimilaritiesSelector(state).get(itemId),

@@ -32,7 +32,7 @@ CurrentItemPreview.propTypes = propTypes;
 CurrentItemPreview.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
-  currentItemId: state.currentItemId,
+  currentItemId: state.currentItem.currentItemId,
 });
 
 export default connect(mapStateToProps)(CurrentItemPreview);

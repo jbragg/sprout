@@ -122,8 +122,8 @@ UnreviewedItemList.defaultProps = defaultProps;
 
 const mapStateToProps = (state, { unlabeledOnly }) => ({
   autoAdvance: state.autoAdvance,
-  currentItemId: state.currentItemId,
-  primaryItemId: state.primaryItemId,
+  currentItemId: state.currentItem.currentItemId,
+  primaryItemId: state.currentItem.primaryItemId,
   itemIds: (unlabeledOnly
     ? unlabeledSortedItemIdsSelector(state)
     : sortedItemIdsSelector(state)

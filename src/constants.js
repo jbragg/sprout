@@ -30,6 +30,9 @@ export const defaults = {
   },
   similarityThreshold: 0.5,
   structuredInstructions: false,
+  labels: [Labels.YES, Labels.MAYBE, Labels.NO],
+  finalLabels: [Labels.YES, Labels.NO],
+  uncertainLabel: Labels.MAYBE,
   durations: {
     [States.COMBINED]: 15 * 60 * 1000,  // minutes to milliseconds
     [States.LABELING]: 5 * 60 * 1000,
