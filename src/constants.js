@@ -42,11 +42,11 @@ export const defaults = {
     [States.COMBINED]: [
       [
         5 * 60 * 1000,
-        "It's been a few minutes. Remember your goal is to improve the instructions. You should **ask for clarifications**, **edit the instructions**, and **create test questions**.",
+        "It's been a few minutes. Remember your goal is to improve the instructions!", // You should **ask for clarifications**, **edit the instructions**, and **create test questions**.",
       ],
       [
         10 * 60 * 1000,
-        'You have only a few minutes remaining. You should be improving the instructions. Remember to **ask for clarifications**, **edit the instructions**, and **create test questions**.',
+        'You have only a few minutes remaining. You should be improving the instructions by now!', // Remember to **ask for clarifications**, **edit the instructions**, and **create test questions**.',
       ],
     ],
   },
@@ -87,7 +87,7 @@ export const tutorialSteps = [
     position: 'top',
   },
   {
-    text: 'An enlarged version of the item to label appears in the item preview. You can also zoom in further by clicking here.',
+    text: 'An enlarged version of the item to label appears in the item preview. **Action required**: Try zooming into the item now by clicking here.',
     selector: '.item-large .item',
     position: 'right',
   },
@@ -103,12 +103,12 @@ export const tutorialSteps = [
   },
   {
     title: 'Additional information indicator',
-    text: 'This shows the number of workers that are summarized in this section. Hover to see details.',
+    text: 'This shows the number of workers that are summarized in this section. **Action required**: Hover to see details.',
     selector: '.item-large .answers-summary .workers-indicator',
     position: 'right',
   },
   {
-    text: "Dragging an item into one of these sections assigns a label. Please drag the current item here now to label it 'yes'. Notice that when you start dragging, the possible drop targets have dashed-red borders.",
+    text: "Dragging an item into one of these sections assigns a label. **Action required**: Please drag the current item here now to label it 'yes'. Notice that when you start dragging, the possible drop targets have dashed-red borders.",
     selector: '.labeled-column .label-section.label-yes',
     position: 'left',
   },
@@ -118,11 +118,11 @@ export const tutorialSteps = [
     position: 'left',
   },
   {
-    text: "Drag an item to one of these targets to create a new group. Please drag the next current item here to assign it to a new group in the 'maybe' category.",
+    text: "Drag an item to one of these targets to create a new group. **Action required**: Please drag the next current item here to assign it to a new group in the 'maybe' category.",
     selector: '.labeled-column .label-section.label-maybe .new-group',
   },
   {
-    text: "The shaking means that the system is thinks this item might belong in the group with a star. Please drag it there now.",
+    text: "The shaking means that the system is thinks this item might belong in the group with a star. **Action required**: Please drag it there now.",
     selector: '.item-large',
   },
   {
@@ -139,6 +139,7 @@ export const tutorialSteps = [
     selector: '.similar-item-list .similar',
   },
   */
+  /*
   {
     text: 'This tab shows clusters of similar unlabeled items.',// Please click here now.',
     selector: '.clusters-nav',
@@ -148,31 +149,40 @@ export const tutorialSteps = [
     selector: '.cluster-item-list .page',
   },
   {
-    text: "Use these arrows to scroll to different items within a group.",
-    selector: '.cluster-item-list .slick-next',
-  },
-  {
-    text: "The progress bar tells you your scrolling position.",
-    selector: '.cluster-item-list .progress',
-  },
-  {
     text: "Now drag the cluster to the 'no' label.",
     selector: '.cluster-item-list',
   },
+  */
   {
     text: "All the items are here, sorted in order of decreasing amounts of worker disagreement. Use the 'Go to first unlabeled' button to go to the next unlabeled item with the most disagreement. 'Go to current' scrolls to the item that is currently being previewed.",
     selector: '.items-nav',
   },
   {
+    text: "Use these arrows to scroll to different items within this group. **Action required**: Try scrolling now.",
+    selector: '.items-nav .slick-next',
+  },
+  {
+    text: "The progress bar tells you your scrolling position.",
+    selector: '.items-nav .progress',
+  },
+  /*
+  {
     text: "Now try asking the customer how they'd like an item labeled by dragging it to the 'Ask for a clarification' section.",
     selector: '.instructions',
   },
+  */
   {
-    text: 'Now try editing the instructions (including referring to an example item) and previewing your edits.',
+    text: '**Action required**: Now try editing the instructions (including referring to an example item) and previewing your edits.',
     selector: '.instructions',
   },
+  {
+    text: 'During the real experiment, this button will show the time remaining and optionally let you end the experiment if you are done early. **Action required**: Continue to familiarize yourself with the interface and ask the experimenter if anything is unclear. Click this button when you are ready to begin the real experiment.',
+    selector: '.btn-ready',
+  },
+  /*
   {
     text: 'Now try creating a test question and creating a reason for it.',
     selector: '.instructions',
   },
+  */
 ];

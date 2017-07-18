@@ -11,7 +11,7 @@ const defaultProps = {
 };
 
 const ExperimentProgress = ({ phases, currentIndex }) => (
-  <div>
+  <div className="experiment-progress">
     {phases.map((phase, index) => (
       <div
         key={phase}

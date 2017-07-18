@@ -28,6 +28,22 @@
   20% { transform: rotate(0deg); }
 }
 
+/*
+ * Hide the experiment progress bar during the tutorial because
+ * react-joyride positioning is messed up.
+ */
+.experiment-tutorial .experiment-progress {
+  display: none;
+}
+
+.experiment .combined {
+  position: absolute;
+  top: 1.5em;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
 #left {
   position: absolute;
   top: 0px;

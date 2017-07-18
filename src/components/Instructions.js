@@ -6,13 +6,15 @@ import TestQuestions from '../containers/TestQuestions';
 
 const propTypes = {
   structured: PropTypes.bool,
+  testQuestions: PropTypes.bool,
 };
 
 const defaultProps = {
   structured: false,
+  testQuestions: true,
 };
 
-const Instructions = ({ structured }) => (
+const Instructions = ({ structured, testQuestions }) => (
   <div>
     {structured
         ? <StructuredInstructionsEditor />
@@ -23,7 +25,7 @@ const Instructions = ({ structured }) => (
           </div>
         )
     }
-    <TestQuestions />
+    {testQuestions && <TestQuestions />}
   </div>
 );
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ImmutablePropTypes from 'react-immutable-proptypes';
+import classNames from 'classnames';
 import { HotKeys } from 'react-hotkeys';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -59,6 +60,7 @@ const propTypes = {
   oracle: PropTypes.bool.isRequired,
   warnings: PropTypes.bool.isRequired,
   currentItemId: PropTypes.number,
+  testQuestions: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -72,6 +74,7 @@ const defaultProps = {
   prefetchAll: true,
   experimentPosition: null,
   currentItemId: null,
+  testQuestions: true,
 };
 
 class App extends React.Component {
@@ -183,7 +186,7 @@ class App extends React.Component {
     const {
       items, labels, masterView, clusterView, initialInstructions, oracle,
       prefetchAll, tutorial, onSetLightbox, rawView, countdown, exportButton,
-      currentItemId,
+      currentItemId, testQuestions,
     } = this.props;
     const experimentState = this.props.experimentPhase.name;
     if (experimentState == null || experimentState === States.LOADING) {
@@ -208,6 +211,7 @@ class App extends React.Component {
           advanceExperimentPhase={this.advanceExperimentPhase}
           onChangeExperimentPhase={this.props.onChangeExperimentPhase}
           tutorial={tutorial}
+          testQuestions={testQuestions}
         />
       );
     } else if (experimentState === States.LABELING) {
@@ -280,7 +284,19 @@ class App extends React.Component {
           preview: () => { onSetLightbox({ id: currentItemId }); },
         }}
       >
-        <div id="app">
+        <div
+          id="app"
+          className={classNames({
+            experiment: (
+              this.props.experimentPosition
+              && !this.props.experimentPosition.tutorial
+            ),
+            'experiment-tutorial': (
+              this.props.experimentPosition
+              && this.props.experimentPosition.tutorial
+            ),
+          })}
+        >
           {prefetchAll &&
             <div className="hidden">
               {[...items.values()].map(item => (
@@ -328,6 +344,16 @@ const mapStateToProps = state => ({
   initialInstructions: state.config.initialInstructions,
   experimentPosition: state.config.experimentPosition,
   currentItemId: currentItemIdSelector(state),
+  clusterView: state.config.clusters,
+  rawView: state.config.raw,
+  masterView: state.config.master,
+  multiPhase: state.config.multiPhase,
+  prefetchAll: state.config.prefetchAll,
+  exportButton: state.config.exportButton,
+  countdown: state.config.countdown,
+  oracle: state.config.oracle,
+  warnings: state.config.warnings,
+  testQuestions: state.config.testQuestions,
 });
 
 const mapDispatchToProps = dispatch => ({

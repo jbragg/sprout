@@ -92,7 +92,6 @@ class AppLoader extends React.Component {
     });
     const allParams = getAllParams(params);
     initialize(allParams);
-    this.state = { params: allParams };
   }
 
   render() {
@@ -106,17 +105,7 @@ class AppLoader extends React.Component {
           preview: '1',
         }}
       >
-        <App
-          clusterView={this.state.params.clusters}
-          rawView={this.state.params.raw}
-          masterView={this.state.params.master}
-          multiPhase={this.state.params.multiPhase}
-          prefetchAll={this.state.params.prefetchAll}
-          exportButton={this.state.params.exportButton}
-          countdown={this.state.params.countdown}
-          oracle={this.state.params.oracle}
-          warnings={this.state.params.warnings}
-        />
+        <App />
       </HotKeys>
     );
   }

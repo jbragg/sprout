@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid, Col, Well, Button } from 'react-bootstrap';
 import Joyride from 'react-joyride';
+import ReactMarkdown from 'react-markdown';
 import { States, tutorialSteps } from '../constants';
 import UnlabeledColumn from '../containers/UnlabeledColumn';
 import LabeledColumn from './LabeledColumn';
@@ -16,6 +17,7 @@ const propTypes = {
   onChangeExperimentPhase: PropTypes.func.isRequired,
   advanceExperimentPhase: PropTypes.func.isRequired,
   oracle: PropTypes.bool.isRequired,
+  testQuestions: PropTypes.bool.isRequired,
   exportButton: PropTypes.bool.isRequired,
   tutorial: PropTypes.bool.isRequired,
   countdown: PropTypes.bool.isRequired,
@@ -34,9 +36,11 @@ class Combined extends React.Component {
 
   componentDidMount() {
     if (this.props.tutorial) {
-      this.setState({
-        tutorialRunning: true,
-      });
+      setTimeout(() => {
+        this.setState({
+          tutorialRunning: true,
+        });
+      }, 3000);
     }
   }
 
@@ -44,14 +48,17 @@ class Combined extends React.Component {
     const {
       masterView, oracle, tutorial, exportButton, countdown,
       advanceExperimentPhase, onChangeExperimentPhase, labels,
-      initialInstructions, remainingSeconds,
+      initialInstructions, remainingSeconds, testQuestions,
     } = this.props;
     return (
-      <Grid fluid>
+      <Grid fluid className="combined">
         {tutorial && (
           <Joyride
             ref={(c) => { this.joyride = c; }}
-            steps={tutorialSteps}
+            steps={tutorialSteps.map(step => ({
+              ...step,
+              text: <ReactMarkdown source={step.text} />,
+            }))}
             run={this.state.tutorialRunning}
             type={'continuous' && 'single'}
             scrollToSteps={false}
@@ -74,7 +81,7 @@ class Combined extends React.Component {
               <Well bsSize="sm">{initialInstructions}</Well>
               {oracle && <Oracle />}
             </div>
-            <Instructions />
+            <Instructions testQuestions={testQuestions} />
             {countdown && (
               <Countdown
                 remainingTime={remainingSeconds}
@@ -93,6 +100,7 @@ class Combined extends React.Component {
             )}
             {tutorial && (
               <Button
+                className="btn-ready"
                 bsStyle="primary"
                 onClick={() => { onChangeExperimentPhase(States.THANKS); }}
               >
