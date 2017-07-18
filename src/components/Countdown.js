@@ -10,15 +10,6 @@ const propTypes = {
 };
 
 class Countdown extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      clicked: false,
-    };
-    this.confirmed = this.confirmed.bind(this);
-    this.confirm = this.confirm.bind(this);
-  }
-
   componentWillReceiveProps(nextProps) {
     if (
       nextProps.remainingTime !== this.props.remainingTime &&
@@ -26,14 +17,6 @@ class Countdown extends React.Component {
     ) {
       this.props.onFinished();
     }
-  }
-
-  confirm() {
-    this.setState({ clicked: true });
-  }
-
-  confirmed() {
-    this.setState({ clicked: false });
   }
 
   render() {
@@ -44,17 +27,15 @@ class Countdown extends React.Component {
     return (
       <div>
         <Confirm
-          onConfirm={() => { this.props.onFinished(); this.confirmed(); }}
-          onDismiss={this.confirmed}
-          show={this.state.clicked}
+          onConfirm={this.props.onFinished}
           text={this.props.confirmText}
-        />
-        <Button
-          bsStyle="primary"
-          onClick={this.confirm}
         >
-          {`Submit (${formatNumber(remainingMinutes)}:${formatNumber(remainingSeconds)} remaining)`}
-        </Button>
+          <Button
+            bsStyle="primary"
+          >
+            {`Submit (${formatNumber(remainingMinutes)}:${formatNumber(remainingSeconds)} remaining)`}
+          </Button>
+        </Confirm>
       </div>
     );
   }

@@ -11,6 +11,7 @@ import Progress from '../containers/Progress';
 import Oracle from '../containers/Oracle';
 import Instructions from './Instructions';
 import Countdown from '../components/Countdown';
+import Confirm from './Confirm';
 
 const propTypes = {
   masterView: PropTypes.bool.isRequired,
@@ -99,13 +100,17 @@ class Combined extends React.Component {
               </Export>
             )}
             {tutorial && (
-              <Button
-                className="btn-ready"
-                bsStyle="primary"
-                onClick={() => { onChangeExperimentPhase(States.THANKS); }}
+              <Confirm
+                onConfirm={() => { onChangeExperimentPhase(States.THANKS); }}
+                text="Have you completed the tutorial? Check with the experimenter."
               >
-                Ready for experiment
-              </Button>
+                <Button
+                  className="btn-ready"
+                  bsStyle="primary"
+                >
+                  Ready for experiment
+                </Button>
+              </Confirm>
             )}
           </div>
         </Col>
