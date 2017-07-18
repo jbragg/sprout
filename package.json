@@ -54,7 +54,6 @@
     "browserify": "^14.4.0",
     "browserify-shim": "^3.8.14",
     "browserify-versionify": "^1.0.6",
-    "bundle-collapser": "^1.2.1",
     "envify": "^4.1.0",
     "eslint": "^3.19.0",
     "eslint-config-airbnb": "^15.0.2",
@@ -63,7 +62,6 @@
     "eslint-plugin-react": "^7.1.0",
     "jstransform": "^11.0.3",
     "uglify": "^0.1.5",
-    "uglifyify": "^4.0.2",
     "watchify": "^3.9.0"
   }
 }
