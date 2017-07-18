@@ -88,6 +88,7 @@ class Combined extends React.Component {
                 remainingTime={remainingSeconds}
                 onFinished={() => { advanceExperimentPhase(States.COMBINED); }}
                 confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
+                expireText={'Time is up! Are you ready to proceed to the next part of the experiment?'}
               />
             )}
             {exportButton && (

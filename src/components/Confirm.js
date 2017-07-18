@@ -5,15 +5,21 @@ import { Modal, Button } from 'react-bootstrap';
 const propTypes = {
   onConfirm: PropTypes.func.isRequired,
   onDismiss: PropTypes.func,
+  dismissable: PropTypes.bool,
   text: PropTypes.string.isRequired,
   show: PropTypes.bool,
   children: PropTypes.node,
+  confirmText: PropTypes.string,
+  dismissText: PropTypes.string,
 };
 
 const defaultProps = {
   show: null,
   onDismiss: () => {},
+  dismissable: true,
   children: null,
+  confirmText: 'Yes',
+  dismissText: 'Never mind',
 };
 
 class Confirm extends React.Component {
@@ -33,7 +39,10 @@ class Confirm extends React.Component {
   }
 
   render() {
-    const { onConfirm, onDismiss, text, children } = this.props;
+    const {
+      onConfirm, onDismiss, text, dismissable,
+      confirmText, dismissText, children,
+    } = this.props;
     const show = this.props.show == null ? this.state.show : this.props.show;
     const modalComponent = (
       <Modal show={show}>
@@ -41,16 +50,18 @@ class Confirm extends React.Component {
           <p>{text}</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            onClick={() => { onDismiss(); this.hide(); }}
-          >
-            Never mind
-          </Button>
+          {dismissable && (
+            <Button
+              onClick={() => { onDismiss(); this.hide(); }}
+            >
+              {dismissText}
+            </Button>
+          )}
           <Button
             bsStyle="primary"
             onClick={() => { onConfirm(); this.hide(); }}
           >
-            Yes
+            {confirmText}
           </Button>
         </Modal.Footer>
       </Modal>
