@@ -49,7 +49,6 @@ const getAllParams = (params) => {
   }
   const task = config.tasks[taskId];
   return {
-    systemVersion: 2,
     ...task,
     ...relevantParams,
     taskId,
