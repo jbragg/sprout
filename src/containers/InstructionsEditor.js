@@ -17,9 +17,13 @@ const defaultProps = {
   help: true,
 };
 
-const instructions = 'Your instructions for workers go here. To reference an item, use the notation `[](itemid)`. For example, `[](0)` refers to item 0 and will preview as [](0). You may also use other types of [Markdown](http://commonmark.org/help/).';
+const itemRe = /@([0-9]+)/g;
 
-const InstructionsEditor = ({ generalInstructions, onEditGeneralInstructions, defaultActiveKey, help }) => (
+const instructions = 'Your instructions for workers go here. Use twitter mention notation to reference items, for example, `@33` refers to item 33 and will preview as [](0). You may also use other types of [Markdown](http://commonmark.org/help/) to format your instructions, like `-` for bullet lists.';
+
+const InstructionsEditor = ({
+  generalInstructions, onEditGeneralInstructions, defaultActiveKey, help,
+}) => (
   <div>
     {help ? <Markdown source={instructions} /> : null}
     <Tabs defaultActiveKey={defaultActiveKey} id="instructions-editor">
@@ -35,7 +39,7 @@ const InstructionsEditor = ({ generalInstructions, onEditGeneralInstructions, de
       </Tab>
       <Tab eventKey={1} title="Preview">
         <Well bsSize="sm">
-          <Markdown source={generalInstructions} />
+          <Markdown source={generalInstructions.replace(itemRe, '[]($1)')} />
         </Well>
       </Tab>
     </Tabs>
