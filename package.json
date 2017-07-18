@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "",
   "engines": {
-    "node": "^8.0.0",
+    "node": "^8.1.4",
     "npm": "^5.3.0"
   },
   "scripts": {
@@ -37,7 +37,7 @@
     "react-markdown": "^2.5.0",
     "react-overlays": "^0.7.0",
     "react-redux": "^5.0.5",
-    "react-router-dom": "^4.1.1",
+    "react-router-dom": "^4.1.2",
     "react-slick": "^0.14.11",
     "react-vega-lite": "^0.0.1",
     "redux": "^3.7.2",
