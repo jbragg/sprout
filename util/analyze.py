@@ -66,11 +66,15 @@ class Session(object):
             (df['action.type'] == 'CHANGE_EXPERIMENT_PHASE')
             & (df['action.phase'] == 'singlePage')
         ].index.values[0]
-        end = df[
-            (df['action.type'] == 'CHANGE_EXPERIMENT_PHASE')
-            & (df['action.phase'] == 'survey')
-        ].index.values[0]
-        return df.index.get_loc(start), df.index.get_loc(end)
+        try:
+            end = df[
+                (df['action.type'] == 'CHANGE_EXPERIMENT_PHASE')
+                & (df['action.phase'] == 'survey')
+            ].index.values[0]
+            end = df.index.get_loc(end)
+        except IndexError:
+            end = len(df) - 1
+        return df.index.get_loc(start), end
 
     def final_state(self):
         """Get final state."""
@@ -83,10 +87,13 @@ class Session(object):
     def feedback(self):
         """Get participant feedback."""
         df = self.df
-        return df[
-            (df['action.type'] == 'CHANGE_EXPERIMENT_PHASE')
-            & (df['action.phase'] == 'thanks')
-        ].iloc[0]['action.payload.comments']
+        try:
+            return df[
+                (df['action.type'] == 'CHANGE_EXPERIMENT_PHASE')
+                & (df['action.phase'] == 'thanks')
+            ].iloc[0]['action.payload.comments']
+        except IndexError:
+            return None
 
     @staticmethod
     def to_application_state(state):
@@ -131,8 +138,10 @@ class Session(object):
         with open(os.path.join(output_dir, 'last_state.json'), 'w') as f:
             self.save_final_state(f)
 
-        with open(os.path.join(output_dir, 'feedback.txt'), 'w') as f:
-            f.write(self.feedback())
+        feedback = self.feedback()
+        if feedback is not None:
+            with open(os.path.join(output_dir, 'feedback.txt'), 'w') as f:
+                f.write(feedback)
 
 
 def main(fp, output_dir):
