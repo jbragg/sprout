@@ -116,10 +116,13 @@ def main(project_id, data_dir=DATA_DIR, separate=True):
                                 ).order(entity_type.start_time)
                             )
                         ]
-                        for rec in records:
-                            # TODO: Don't log history server-side.
-                            del rec['next_state']['currentItem']['currentItemId']['history']
-                            del rec['prev_state']['currentItem']['currentItemId']['history']
+                        try:
+                            for rec in records:
+                                del rec['next_state']['currentItem']['currentItemId']['history']
+                                del rec['prev_state']['currentItem']['currentItemId']['history']
+                        except KeyError:
+                            pass
+
                         json.dump(records, f, default=json_serial)
 
 

@@ -23,12 +23,20 @@ Mousetrap.prototype.stopCallback = (e, element) => (
  *
  * NOTE: Catches errors and does not re-raise them.
  */
-const stateTransformer = state => ({
+const productionStateTransformer = state => ({
   ...state,
   entities: {
     groups: state.entities.groups,
     items: state.entities.items,
     labels: state.entities.labels,  // Ignore itemData and answers, which don't change.
+  },
+  currentItem: {
+    ...state.currentItem,
+    currentItemId: {
+      present: state.currentItem.currentItemId.present,
+      past: state.currentItem.currentItemId.past,
+      future: state.currentItem.currentItemId.future,  // Ignore nested history, which we don't care about.
+    }
   },
 });
 const productionLogger = store => next => (action) => {
@@ -39,7 +47,7 @@ const productionLogger = store => next => (action) => {
   }
   const logEntry = {};
   logEntry.start_time = new Date();
-  logEntry.prev_state = stateTransformer(prevState);
+  logEntry.prev_state = productionStateTransformer(prevState);
   logEntry.action = action;
 
   let returnedValue;
@@ -50,7 +58,7 @@ const productionLogger = store => next => (action) => {
   }
 
   logEntry.duration = new Date() - logEntry.start_time;
-  logEntry.next_state = stateTransformer(store.getState());
+  logEntry.next_state = productionStateTransformer(store.getState());
 
   logEntry.participant_id = logEntry.next_state.config.participantId;
   logEntry.participant_index = logEntry.next_state.config.participantIndex;
