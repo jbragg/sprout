@@ -1,7 +1,8 @@
+from __future__ import print_function
 import argparse
+import datetime
 import json
 import os
-import datetime
 
 DATA_DIR = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), 'experiment_data')
@@ -33,10 +34,28 @@ def fetch_all(query, limit=100):
     while more:
         results.extend(entities)
         entities, cursor, more = query.fetch_page(limit, start_cursor=cursor)
-        print len(results), 'entities at', datetime.datetime.now()  # Progress and time tracker.
+        print(
+            len(results),
+            'entities at',
+            datetime.datetime.now(),
+        )  # Progress and time tracker.
     results.extend(entities)
-    print len(results), 'total entities fetched in', (datetime.datetime.now() - start_dt).seconds, 'seconds'  # Progress and time tracker.
+    print(
+        len(results),
+        'total entities fetched in',
+        (datetime.datetime.now() - start_dt).seconds,
+        'seconds',
+    )  # Progress and time tracker.
     return results
+
+
+def filter_to_str(filter):
+    return '{}.{}.{}.{}.json'.format(
+        filter.experiment_id or '',
+        filter.task_id or '',
+        filter.participant_id or '',
+        filter.participant_index or '',
+    )
 
 
 def main(project_id, data_dir=DATA_DIR, separate=True):
@@ -68,13 +87,14 @@ def main(project_id, data_dir=DATA_DIR, separate=True):
             ).fetch()
         if not separate:
             with open(os.path.join(data_dir, fname), 'w') as f:
-                print 'fetching {}...'.format(fname)
+                print('fetching {}...'.format(fname))
                 records = [
                     rec.to_dict() for rec in fetch_all(
                         entity_type.query().order(entity_type.date))
                 ]
-                json.dump(records, f, default=json_serial)
+                json.dump(records, f, cls=Encoder, default=json_serial)
         else:
+            print('about to fetch {}'.format(map(filter_to_str, filters)))
             for filter in filters:
                 name = '{}.{}.{}.{}.json'.format(
                     filter.experiment_id or '',
@@ -82,18 +102,25 @@ def main(project_id, data_dir=DATA_DIR, separate=True):
                     filter.participant_id or '',
                     filter.participant_index or '',
                 )
-                with open(os.path.join(data_dir, name), 'w') as f:
-                    records = [
-                        rec.to_dict() for rec in fetch_all(
-                            entity_type.query(
-                                entity_type.experiment_id == filter.experiment_id,
-                                entity_type.task_id == filter.task_id,
-                                entity_type.participant_id == filter.participant_id,
-                                entity_type.participant_index == filter.participant_index,
-                            ).order(entity_type.start_time)
-                        )
-                    ]
-                    json.dump(records, f, default=json_serial)
+                path = os.path.join(data_dir, name)
+                if not os.path.exists(path):
+                    print('fetching {}...'.format(name))
+                    with open(path, 'w') as f:
+                        records = [
+                            rec.to_dict() for rec in fetch_all(
+                                entity_type.query(
+                                    entity_type.experiment_id == filter.experiment_id,
+                                    entity_type.task_id == filter.task_id,
+                                    entity_type.participant_id == filter.participant_id,
+                                    entity_type.participant_index == filter.participant_index,
+                                ).order(entity_type.start_time)
+                            )
+                        ]
+                        for rec in records:
+                            # TODO: Don't log history server-side.
+                            del rec['next_state']['currentItem']['currentItemId']['history']
+                            del rec['prev_state']['currentItem']['currentItemId']['history']
+                        json.dump(records, f, default=json_serial)
 
 
 if __name__ == '__main__':
