@@ -141,7 +141,7 @@ class ItemLarge extends React.Component {
           }
         </ListGroupItem>
         {useReasons && similarItems && (
-          <ListGroupItem>
+          <ListGroupItem className="similar-items">
             {itemSimilarities && itemSimilarities.size > 0
                 ? (
                   <div>

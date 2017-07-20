@@ -19,12 +19,12 @@ const defaultProps = {
 
 const itemRe = /@([0-9]+)/g;
 
-const instructions = 'Your instructions for workers go here. Use twitter mention notation to reference items, for example, `@33` refers to item 33 and will preview as [](0). You may also use other types of [Markdown](http://commonmark.org/help/) to format your instructions, like `-` for bullet lists.';
+const instructions = 'Your instructions for workers go here. Use twitter mention notation to reference items, for example, `@10` refers to item 10 and will preview as [](10). You may also use other types of [Markdown](http://commonmark.org/help/) to format your instructions, like `-` for bullet lists.';
 
 const InstructionsEditor = ({
   generalInstructions, onEditGeneralInstructions, defaultActiveKey, help,
 }) => (
-  <div>
+  <div className="instructions-editor">
     {help ? <Markdown source={instructions} /> : null}
     <Tabs defaultActiveKey={defaultActiveKey} id="instructions-editor">
       <Tab eventKey={0} title="Write">

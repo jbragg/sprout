@@ -28,7 +28,7 @@ const CurrentItemPreview = ({
   currentItemId != null
     ? (
       <div>
-        <Clearfix>
+        <Clearfix className="item-undo">
           <ButtonGroup className="pull-right">
             <Button disabled={!canUndo} onClick={undo} >
               <Glyphicon glyph="chevron-left" />

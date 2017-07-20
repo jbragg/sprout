@@ -11,6 +11,7 @@ const propTypes = {
     data: PropTypes.shape({
       path: PropTypes.string.isRequired,
     }).isRequired,
+    exemplar: PropTypes.bool,
   }).isRequired,
   connectDragSource: PropTypes.func.isRequired,
   connectDragPreview: PropTypes.func,
@@ -47,7 +48,7 @@ class ItemThumb extends React.Component {
       <button
         className={classNames(
           'item-thumb btn btn-default',
-          { labeled: isLabeled },
+          { labeled: isLabeled, exemplar: item.exemplar },
         )}
         onClick={(e) => { onClick(item.id); e.preventDefault(); }}
         style={{

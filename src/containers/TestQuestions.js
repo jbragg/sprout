@@ -76,7 +76,7 @@ class TestQuestions extends React.Component {
       </Alert>
     );
     return connectDropTarget(
-      <div className={`panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
+      <div className={`test-questions panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
         <InstructionsModal
           show={this.state.current != null}
           itemId={this.state.current}

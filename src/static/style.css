@@ -44,6 +44,10 @@
   right: 0;
 }
 
+.items-nav .exemplar {
+  box-shadow: 5px 5px 5px #000
+}
+
 #left {
   position: absolute;
   top: 0px;
