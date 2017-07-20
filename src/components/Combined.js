@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid, Col, Well, Button } from 'react-bootstrap';
+import { Grid, Well, Button } from 'react-bootstrap';
 import Joyride from 'react-joyride';
 import ReactMarkdown from 'react-markdown';
 import { States, tutorialSteps } from '../constants';
@@ -65,56 +65,52 @@ class Combined extends React.Component {
             scrollToSteps={false}
           />
         )}
-        <Col id="left" sm={4}>
-          <div>
-            <UnlabeledColumn master={masterView} />
-          </div>
-        </Col>
-        <Col id="center" sm={4}>
+        <div id="left">
+          <UnlabeledColumn master={masterView} />
+        </div>
+        <div id="center">
           <Progress />
           <LabeledColumn labels={labels} />
-        </Col>
-        <Col id="right" className="instructions" sm={4}>
-          <div>
-            <div className="instructions-customer">
-              <h3>Customer Instructions</h3>
-              <p>Your task is to improve these instructions:</p>
-              <Well bsSize="sm">{initialInstructions}</Well>
-              {oracle && <Oracle />}
-            </div>
-            <Instructions testQuestions={testQuestions} />
-            {countdown && (
-              <Countdown
-                remainingTime={remainingSeconds}
-                onFinished={() => { advanceExperimentPhase(States.COMBINED); }}
-                confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
-                expireText={'Time is up! Are you ready to proceed to the next part of the experiment?'}
-              />
-            )}
-            {exportButton && (
-              <Export>
-                <Button
-                  bsStyle="primary"
-                >
-                  Export
-                </Button>
-              </Export>
-            )}
-            {tutorial && (
-              <Confirm
-                onConfirm={() => { onChangeExperimentPhase(States.THANKS); }}
-                text="Have you completed the tutorial? Check with the experimenter."
-              >
-                <Button
-                  className="btn-ready"
-                  bsStyle="primary"
-                >
-                  Ready for experiment
-                </Button>
-              </Confirm>
-            )}
+        </div>
+        <div id="right" className="instructions">
+          <div className="instructions-customer">
+            <h3>Customer Instructions</h3>
+            <p>Your task is to improve these instructions:</p>
+            <Well bsSize="sm">{initialInstructions}</Well>
+            {oracle && <Oracle />}
           </div>
-        </Col>
+          <Instructions testQuestions={testQuestions} />
+          {countdown && (
+            <Countdown
+              remainingTime={remainingSeconds}
+              onFinished={() => { advanceExperimentPhase(States.COMBINED); }}
+              confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
+              expireText={'Time is up! Are you ready to proceed to the next part of the experiment?'}
+            />
+          )}
+          {exportButton && (
+            <Export>
+              <Button
+                bsStyle="primary"
+              >
+                Export
+              </Button>
+            </Export>
+          )}
+          {tutorial && (
+            <Confirm
+              onConfirm={() => { onChangeExperimentPhase(States.THANKS); }}
+              text="Have you completed the tutorial? Check with the experimenter."
+            >
+              <Button
+                className="btn-ready"
+                bsStyle="primary"
+              >
+                Ready for experiment
+              </Button>
+            </Confirm>
+          )}
+        </div>
       </Grid>
     );
   }

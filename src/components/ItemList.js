@@ -23,7 +23,7 @@ const propTypes = {
 const defaultProps = {
   onClick: null,
   thumbnails: false,
-  dots: false,
+  dots: true,
   itemInFocus: null,
 };
 

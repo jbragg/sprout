@@ -19,8 +19,8 @@ const defaultProps = {
 };
 
 const UnlabeledSection = ({ useReasons, clusters, className, similarNav }) => (
-  <div className={classNames(className, 'unlabeled-items')}>
-    <div className="items-nav">
+  <div className={classNames(className, 'unlabeled-items panel panel-default')}>
+    <div className="items-nav panel-body">
       {similarNav
           ? <SimilarItemList similar={useReasons} />
           : <UnreviewedItemList thumbnails />

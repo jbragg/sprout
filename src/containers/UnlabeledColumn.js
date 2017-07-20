@@ -20,15 +20,14 @@ const defaultProps = {
 
 const UnlabeledColumn = ({ useReasons, master, similarNav, clusters }) => (
   <PanelGroup>
-    <UnlabeledSection
-      className="panel"
-      useReasons={useReasons}
-      similarNav={similarNav}
-      clusters={clusters}
-    />
     <CurrentItemPreview
       draggable
       master={master}
+    />
+    <UnlabeledSection
+      useReasons={useReasons}
+      similarNav={similarNav}
+      clusters={clusters}
     />
   </PanelGroup>
 );

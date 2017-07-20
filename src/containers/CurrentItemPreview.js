@@ -25,29 +25,32 @@ const defaultProps = {
 const CurrentItemPreview = ({
   currentItemId, master, undo, redo, canUndo, canRedo,
 }) => (
-  currentItemId != null
-    ? (
-      <div>
-        <Clearfix className="item-undo">
-          <ButtonGroup className="pull-right">
-            <Button disabled={!canUndo} onClick={undo} >
-              <Glyphicon glyph="chevron-left" />
-            </Button>
-            <Button disabled={!canRedo} onClick={redo} >
-              <Glyphicon glyph="chevron-right" />
-            </Button>
-          </ButtonGroup>
-        </Clearfix>
-        <ItemLargeContainer
-          draggable
-          itemId={currentItemId}
-          master={master}
-        />
-      </div>
-    )
-    : (
-      <Panel><div className="text-center">Select an item to preview it here.</div></Panel>
-    )
+  <div className="current-item-preview">
+    <Clearfix className="item-undo">
+      <ButtonGroup>
+        <Button disabled={!canUndo} onClick={undo} bsSize="xsmall" >
+          <Glyphicon glyph="chevron-left" />
+        </Button>
+        <Button disabled={!canRedo} onClick={redo} bsSize="xsmall" >
+          <Glyphicon glyph="chevron-right" />
+        </Button>
+      </ButtonGroup>
+    </Clearfix>
+    {currentItemId != null
+        ? (
+          <ItemLargeContainer
+            draggable
+            itemId={currentItemId}
+            master={master}
+          />
+        )
+        : (
+          <Panel className="item-large">
+            <div className="text-center">Select an item to preview it here.</div>
+          </Panel>
+        )
+    }
+  </div>
 );
 
 CurrentItemPreview.propTypes = propTypes;

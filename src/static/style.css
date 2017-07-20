@@ -54,7 +54,6 @@
   bottom: 0;
   left: 0;
   width: 33.3%;
-  overflow-y: scroll;
 }
 
 #center {
@@ -75,13 +74,57 @@
   width: 33.3%;
 }
 
+.current-item-preview {
+  position: absolute;
+  top: 5px;
+  bottom: 280px;
+  left: 5px;
+  right: 5px;
+}
+
+.unlabeled-items {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
+}
+
+.current-item-preview .similar-items {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+}
+
+.current-item-preview .similar-items {
+  min-height: 215px;
+}
+
+.current-item-preview .item-large {
+  position: absolute;
+  top: 23px;
+  bottom: 220px;
+  left: 0px;
+  right: 0px;
+}
+
+.current-item-preview .no-similar-items .item-large {
+  bottom: 0px;
+}
+
+.current-item-preview .item-large .item-details {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  top: 3em;
+  overflow-y: scroll;
+}
+
 
 /*
  * override react-alert
  */
-.css-1vm9g5e, .css-hx30u2 {
-  width: 50% !important;
-}
 
 .css-6bx4c3 {
   text-transform: none !important;
@@ -135,7 +178,7 @@ div[tabindex="-1"]:focus {
 
 .item-thumb {
   max-width: 6em;
-  max-height: 10em;
+  max-height: 150px;
   padding: 0px;
 }
 
@@ -229,6 +272,10 @@ div[tabindex="-1"]:focus {
   padding-left: 0;
 }
 
+/*
+ * override react-slick
+ */
+
 .slick-prev:before,
 .slick-next:before {
   color: blue;
@@ -236,6 +283,18 @@ div[tabindex="-1"]:focus {
 
 .slick-slider {
   margin: 0px 30px 10px;
+}
+
+.slick-dots {
+  max-height: 100px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.slick-dots li {
+  width: 8px;
+  height: 8px;
+  margin: 0 1px;
 }
 
 .clusters .page {

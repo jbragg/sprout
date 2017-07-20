@@ -140,60 +140,70 @@ class ItemLarge extends React.Component {
             />
           }
         </ListGroupItem>
+      </ListGroup>
+    );
+    const showSimilarItems = useReasons && similarItems;
+    return connectDragSource(
+      <div className={classNames({ 'no-similar-items': !showSimilarItems })}>
+        <div
+          className={classNames(
+            'panel panel-default item-large',
+            { recommended: imageStatus === 'loaded' && recommendedGroup >= 0 },
+          )}
+          style={{
+            opacity: isDragging ? 0.5 : null,
+          }}
+        >
+          {draggable && (
+            <div
+              className="panel-heading panel-heading-less-padding"
+              style={{
+                color: textColor,
+                backgroundColor,
+              }}
+            >
+              <Row className="no-gutter">
+                <Col xs={2} />
+                <Col className="text-center panel-title" xs={8}>
+                  {item.id}
+                </Col>
+                <Col className="text-right" xs={2}>
+                  <Glyphicon className="large" glyph="move" />
+                </Col>
+              </Row>
+            </div>
+          )}
+          <div className="item-details">
+            {editReason
+              ? (
+                <div className={imageStatus === 'loaded' ? '' : 'hidden'}>
+                  <FormGroup>
+                    {itemComponent}
+                  </FormGroup>
+                  <FormGroup>
+                    <ControlLabel>Reason</ControlLabel>
+                    <ReasonFormControl itemId={item.id} />
+                  </FormGroup>
+                </div>
+              )
+              : itemComponent
+            }
+            {imageStatus !== 'loaded' && <h1><Loading /></h1>}
+          </div>
+        </div>
         {useReasons && similarItems && (
-          <ListGroupItem className="similar-items">
+          <div className="similar-items panel panel-default">
             {itemSimilarities && itemSimilarities.size > 0
                 ? (
-                  <div>
+                  <div className="panel-body">
                     <strong>Similar items</strong>
                     <ItemList itemIds={itemSimilarities} thumbnails />
                   </div>
                 )
-                : <div className="text-center">No similar items to show</div>
+                : <div className="panel-body text-center">No similar items to show</div>
             }
-          </ListGroupItem>
-        )}
-      </ListGroup>
-    );
-    return connectDragSource(
-      <div
-        className={`panel panel-default item-large ${imageStatus === 'loaded' && recommendedGroup >= 0 ? 'recommended' : ''}`}
-        style={{ opacity: isDragging ? 0.5 : null }}
-      >
-        {draggable && (
-          <div
-            className="panel-heading panel-heading-less-padding"
-            style={{
-              color: textColor,
-              backgroundColor,
-            }}
-          >
-            <Row className="no-gutter">
-              <Col xs={2} />
-              <Col className="text-center panel-title" xs={8}>
-                {item.id}
-              </Col>
-              <Col className="text-right" xs={2}>
-                <Glyphicon className="large" glyph="move" />
-              </Col>
-            </Row>
           </div>
         )}
-        {editReason
-          ? (
-            <div className={imageStatus === 'loaded' ? '' : 'hidden'}>
-              <FormGroup>
-                {itemComponent}
-              </FormGroup>
-              <FormGroup>
-                <ControlLabel>Reason</ControlLabel>
-                <ReasonFormControl itemId={item.id} />
-              </FormGroup>
-            </div>
-          )
-          : itemComponent
-        }
-        {imageStatus !== 'loaded' && <h1><Loading /></h1>}
       </div>,
     );
   }
