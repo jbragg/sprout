@@ -37,6 +37,9 @@ const propTypes = {
     taskIndex: PropTypes.number,
     tutorial: PropTypes.bool,
   }),
+  experimentId: PropTypes.string,
+  participantId: PropTypes.string,
+  participantIndex: PropTypes.number,
   labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
   items: ImmutablePropTypes.orderedMapOf(
     PropTypes.shape({
@@ -73,6 +76,9 @@ const defaultProps = {
   waitForImagesFrac: 1,
   prefetchAll: true,
   experimentPosition: null,
+  experimentId: null,
+  participantId: undefined,
+  participantIndex: undefined,
   currentItemId: null,
   testQuestions: true,
 };
@@ -274,7 +280,18 @@ class App extends React.Component {
     } else if (experimentState === States.SURVEY) {
       experimentComponent = <Grid><Survey /></Grid>;
     } else if (experimentState === States.THANKS) {
-      experimentComponent = <Grid><Thanks params={this.props.experimentPosition} /></Grid>;
+      experimentComponent = (
+        <Grid>
+          <Thanks
+            params={{
+              ...this.props.experimentPosition,
+              experimentId: this.props.experimentId,
+              participantId: this.props.participantId,
+              participantIndex: this.props.participantIndex,
+            }}
+          />
+        </Grid>
+      );
     } else {
       experimentComponent = <Grid><h1><Loading /></h1></Grid>;
     }
@@ -343,9 +360,12 @@ const mapStateToProps = state => ({
   items: itemDataSelector(state).byId,
   initialInstructions: state.config.initialInstructions,
   experimentPosition: state.config.experimentPosition,
+  experimentId: state.config.experimentId,
+  participantId: state.config.participantId,
+  participantIndex: state.config.participantIndex,
   currentItemId: currentItemIdSelector(state),
-  clusterView: state.config.clusters,
-  rawView: state.config.raw,
+  clusterView: state.config.clusterView,
+  rawView: state.config.rawView,
   masterView: state.config.master,
   multiPhase: state.config.multiPhase,
   prefetchAll: state.config.prefetchAll,
