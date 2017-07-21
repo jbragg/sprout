@@ -25,7 +25,7 @@ const defaultProps = {
 const CurrentItemPreview = ({
   currentItemId, master, undo, redo, canUndo, canRedo,
 }) => (
-  <div className="current-item-preview">
+  <div className="current-item-preview panel">
     <Clearfix className="item-undo">
       <ButtonGroup>
         <Button disabled={!canUndo} onClick={undo} bsSize="xsmall" >

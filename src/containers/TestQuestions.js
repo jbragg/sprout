@@ -143,9 +143,10 @@ class TestQuestions extends React.Component {
             if (needsReview.size > 0) {
               return (
                 <Panel
+                  className={`label-${label}`}
                   header={<span>{label}</span>}
                   key={label}
-                  bsStyle={label === uncertainLabel ? 'danger' : 'default'}
+                  bsStyle={label === uncertainLabel ? 'default' : null}
                 >
                   <div>
                     {label === uncertainLabel ? warning : null}

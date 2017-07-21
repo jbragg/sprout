@@ -32,7 +32,7 @@ const HistogramSummary = ({ values }) => (
       <Col xs={8}>
         <div style={{ width: '130px', padding: '0 15px' }}>
           <img
-            src="/static/RdYlGn.png"
+            src="/static/PiYG.png"
             height="10"
             width="100%"
           />

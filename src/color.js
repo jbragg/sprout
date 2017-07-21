@@ -1,4 +1,4 @@
-import { interpolateRdYlGn, interpolateReds, interpolateGreens } from 'd3-scale-chromatic';
+import { interpolatePiYG, interpolateReds, interpolateGreens } from 'd3-scale-chromatic';
 
 // from https://24ways.org/2010/calculating-color-contrast/
 const getContrastColor = (rgbColor) => {
@@ -13,7 +13,7 @@ const getColor = (metric) => {
   } else if (metric === 'agreement') {
     return interpolateGreens;
   }
-  return interpolateRdYlGn;  // color === 'answer'
+  return interpolatePiYG;  // color === 'answer'
 };
 
 export { getContrastColor, getColor };

@@ -37,7 +37,7 @@ const ItemGroup = ({
   isNameable, name, nameEditFunc, isDragging, thumbnails,
 }) => (
   <div
-    className={`class-container item-group panel panel-primary ${recommended ? 'recommended' : ''} ${isOver ? 'over' : ''} ${isTarget ? 'target' : ''}`}
+    className={`class-container item-group panel ${recommended ? 'recommended' : ''} ${isOver ? 'over' : ''} ${isTarget ? 'target' : ''}`}
     style={{
       opacity: isDragging ? 0.5 : null,
     }}
@@ -52,7 +52,6 @@ const ItemGroup = ({
               <Glyphicon
                 className="large"
                 glyph="star"
-                style={{ color: 'yellow' }}
               />
             )
             : null

@@ -64,16 +64,19 @@ class LabelSection extends React.Component {
           'label-section',
           `label-${label}`,
           'panel',
-          'panel-default',
-          { over: isOver, target: canDrop },
+          {
+            over: isOver,
+            target: canDrop,
+            'panel-default': label === 'maybe',
+          },
         )}
       >
         {fixedTarget && (
           <div
             className={classNames(
               'fixed-target',
-              { over: isOver, target: canDrop, hidden: !canDrop })
-            }
+              { over: isOver, target: canDrop, hidden: !canDrop },
+            )}
           >
             {label}
           </div>
@@ -99,20 +102,22 @@ class LabelSection extends React.Component {
           </div>
         </RemoveTarget>
         <div className="panel-body">
-          <div>
-            <ItemList itemIds={itemIds} />
-          </div>
-          {groupIds.length > 0 && (
-            <div className="panel-group">
-              {groupIds.map(key => (
-                <Group
-                  groupId={key}
-                  key={key}
-                  confirmMerge={(f) => { this.confirm(f, mergeMessage); }}
-                />
-              ))}
+          <div className="group-contents">
+            <div>
+              <ItemList itemIds={itemIds} />
             </div>
-          )}
+            {groupIds.length > 0 && (
+              <div className="panel-group">
+                {groupIds.map(key => (
+                  <Group
+                    groupId={key}
+                    key={key}
+                    confirmMerge={(f) => { this.confirm(f, mergeMessage); }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
           <NewGroup
             onGroupCreate={(ids) => {
               onGroupCreate(ids, label, this.props.autoAdvance);

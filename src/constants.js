@@ -34,18 +34,18 @@ export const defaults = {
   finalLabels: [Labels.YES, Labels.NO],
   uncertainLabel: Labels.MAYBE,
   durations: {
-    [States.COMBINED]: 15 * 60 * 1000,  // minutes to milliseconds
+    [States.COMBINED]: 20 * 60 * 1000,  // minutes to milliseconds
     [States.LABELING]: 5 * 60 * 1000,
     [States.INSTRUCTIONS]: 5 * 60 * 1000,
   },
   warnings: {
     [States.COMBINED]: [
       [
-        5 * 60 * 1000,
+        6 * 60 * 1000,
         "It's been a few minutes. Remember your goal is to improve the instructions!", // You should **ask for clarifications**, **edit the instructions**, and **create test questions**.",
       ],
       [
-        10 * 60 * 1000,
+        12 * 60 * 1000,
         'You have only a few minutes remaining. You should be improving the instructions by now!', // Remember to **ask for clarifications**, **edit the instructions**, and **create test questions**.',
       ],
     ],
@@ -64,7 +64,8 @@ export const tutorialSteps = [
   */
   {
     title: 'Instructions section (1/4)',
-    text: 'This is the instructions panel section, where you will interact with the customer (top) and create your improved instructions (bottom).',
+    // text: 'This is the instructions panel section, where you will interact with the customer (top) and create your improved instructions (bottom).',
+    text: 'This is the instructions panel section, where you will create your improved instructions (including test questions).',
     selector: '.instructions',
     position: 'top-left',
   },
@@ -76,7 +77,7 @@ export const tutorialSteps = [
   },
   {
     title: 'Item preview section (3/4)',
-    text: 'You can view more details about an item in this section.',
+    text: 'You can view more details about an item in the current item preview.',
     selector: '.item-large',
     position: 'top',
   },
@@ -87,25 +88,47 @@ export const tutorialSteps = [
     position: 'top',
   },
   {
-    text: 'An enlarged version of the item to label appears in the item preview. **Action required**: Try zooming into the item now by clicking here.',
+    text: "All the items are here. The front of the list has items with shadows that represent groups of similar items, followed by items with high worker disagreement. Use the 'Go to first unlabeled' button to go to the left-most unlabeled item. 'Go to current' scrolls to the item that is currently being previewed.",
+    selector: '.items-nav',
+  },
+  {
+    text: "Use these arrows to scroll to different items within this group. **Action required**: Try scrolling now.",
+    selector: '.items-nav .slick-next',
+  },
+  /*
+  {
+    text: "The progress bar tells you your scrolling position.",
+    selector: '.items-nav .progress',
+  },
+  */
+  {
+    text: 'An enlarged version of the current item appears here. **Action required**: Try zooming into the item now by clicking here and scrolling the mouse (or using the magnification buttons).',
     selector: '.item-large .item',
     position: 'right',
   },
   {
-    text: 'Worker answers are summarized here (when available).',
+    text: "Worker answers are summarized here (when available). Notice that the color at the top of the item corresponds to the average answer value. You can use these colors to quickly identify if workers disagree with a label you have assigned (for instance, if an item is red but you labeled it 'yes').",
     selector: '.item-large .answers-summary',
     position: 'top',
   },
   {
-    text: 'Worker confusions are summarized here (when available).',
+    title: 'Additional information indicator',
+    text: 'This shows the number of workers that are summarized in this section. **Action required**: Hover to see a detailed breakdown of answers.',
+    selector: '.item-large .answers-summary .workers-indicator',
+    position: 'right',
+  },
+  {
+    text: 'Reasons for worker labels are summarized here (when available). **Action required**: Hover to see additional reasons (if available).',
     selector: '.item-large .confusions-summary',
     position: 'top',
   },
   {
-    title: 'Additional information indicator',
-    text: 'This shows the number of workers that are summarized in this section. **Action required**: Hover to see details.',
-    selector: '.item-large .answers-summary .workers-indicator',
-    position: 'right',
+    text: 'Items that are similar to the current item appear here. **Action required**: Try clicking on one of these.',
+    selector: '.current-item-preview .similar-items',
+  },
+  {
+    text: 'You can use these buttons to navigate backwards and forwards like in a web browser. **Action required**: Go back to the previous item.',
+    selector: '.item-undo',
   },
   {
     text: "Dragging an item into one of these sections assigns a label. **Action required**: Please drag the current item here now to label it 'yes'. Notice that when you start dragging, the possible drop targets have dashed-red borders.",
@@ -153,18 +176,6 @@ export const tutorialSteps = [
     selector: '.cluster-item-list',
   },
   */
-  {
-    text: "All the items are here, sorted in order of decreasing amounts of worker disagreement. Use the 'Go to first unlabeled' button to go to the next unlabeled item with the most disagreement. 'Go to current' scrolls to the item that is currently being previewed.",
-    selector: '.items-nav',
-  },
-  {
-    text: "Use these arrows to scroll to different items within this group. **Action required**: Try scrolling now.",
-    selector: '.items-nav .slick-next',
-  },
-  {
-    text: "The progress bar tells you your scrolling position.",
-    selector: '.items-nav .progress',
-  },
   /*
   {
     text: "Now try asking the customer how they'd like an item labeled by dragging it to the 'Ask for a clarification' section.",
@@ -173,16 +184,14 @@ export const tutorialSteps = [
   */
   {
     text: '**Action required**: Now try editing the instructions (including referring to an example item) and previewing your edits.',
-    selector: '.instructions',
+    selector: '.instructions .instructions-editor',
+  },
+  {
+    text: 'Now try creating a test question and creating a reason for it.',
+    selector: '.instructions .test-questions',
   },
   {
     text: 'During the real experiment, this button will show the time remaining and optionally let you end the experiment if you are done early. **Action required**: Continue to familiarize yourself with the interface and ask the experimenter if anything is unclear. Click this button when you are ready to begin the real experiment.',
     selector: '.btn-ready',
   },
-  /*
-  {
-    text: 'Now try creating a test question and creating a reason for it.',
-    selector: '.instructions',
-  },
-  */
 ];

@@ -1,10 +1,17 @@
 import React from 'react';
-import { PanelGroup } from 'react-bootstrap';
+import PropTypes from 'prop-types';
 import LabelSection from '../containers/LabelSection';
 
-export default ({ labels }) => (
-  <PanelGroup className="labeled-column">
+const propTypes = {
+  labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+};
+
+const LabeledColumn = ({ labels }) => (
+  <div className="labeled-column">
     {labels.map(label => <LabelSection label={label} key={label} />)}
-  </PanelGroup>
+  </div>
 );
 
+LabeledColumn.propTypes = propTypes;
+
+export default LabeledColumn;

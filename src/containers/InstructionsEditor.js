@@ -31,7 +31,7 @@ const InstructionsEditor = ({
         <FormGroup>
           <FormControl
             componentClass="textarea"
-            rows="6"
+            rows="12"
             value={generalInstructions}
             onChange={(e) => { onEditGeneralInstructions(e.target.value); }}
           />

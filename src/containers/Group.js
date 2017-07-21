@@ -64,6 +64,9 @@ class Group extends React.Component {
       this.setState({ recommended: false }, () => {
         setTimeout(() => this.setState({ recommended: nextProps.recommended }), 0);
       });
+      if (nextProps.recommended && this.node) {
+        this.node.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   }
 
@@ -77,7 +80,7 @@ class Group extends React.Component {
     // ignore its own items to prevent the parent label from handling.
     const isTarget = canDrop && !group.itemIds.has(monitorItemId);
     return connectDragSource(connectDropTarget(
-      <div className="panel">
+      <div className="panel" ref={(c) => { this.node = c; }}>
         <ItemGroup
           itemIds={group.itemIds}
           isOver={isOver}

@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { PanelGroup } from 'react-bootstrap';
 import UnlabeledSection from '../components/UnlabeledSection';
 import CurrentItemPreview from './CurrentItemPreview';
+import Progress from './Progress';
 
 const propTypes = {
   useReasons: PropTypes.bool,
@@ -20,6 +21,7 @@ const defaultProps = {
 
 const UnlabeledColumn = ({ useReasons, master, similarNav, clusters }) => (
   <PanelGroup>
+    <Progress />
     <CurrentItemPreview
       draggable
       master={master}
