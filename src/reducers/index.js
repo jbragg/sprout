@@ -182,10 +182,11 @@ export const groupItemsSelector = createSelector(
  */
 export const recommendedGroupSelector = createSelector(
   currentItemIdSelector,
+  unlabeledItemIdsSelector,
   groupItemsSelector,
   itemSimilaritiesSelector,
-  (itemId, groups, similarities) => {
-    if (itemId == null) {
+  (itemId, unlabeledItems, groups, similarities) => {
+    if (itemId == null || !unlabeledItems.has(itemId)) {
       return -1;
     }
     const groupSimilarities = new Map([...groups]
