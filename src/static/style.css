@@ -330,6 +330,7 @@ div[tabindex="-1"]:focus {
 
 .labeling-progress .progress-bar {
   min-width: 2em;
+  background-color: #808080;
 }
 
 .labeling-progress .progress {
@@ -338,6 +339,12 @@ div[tabindex="-1"]:focus {
 
 .histogram .progress {
   margin: 1px 1em;
+}
+
+.alert.alert-danger {
+  background-color: #f5f5f5;
+  border-color: #ddd;
+  color: #333;
 }
 
 .target {
@@ -408,13 +415,27 @@ div[tabindex="-1"]:focus {
   padding-left: 0;
 }
 
+.experiment-progress div {
+  outline: 2px solid white;
+  display: inline-block;
+  background-color: #f5f5f5;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.experiment-progress div.selected {
+  background-color: #333;
+  color: white;
+}
+
 /*
  * override react-slick
  */
 
 .slick-prev:before,
 .slick-next:before {
-  color: blue;
+  /* color: blue;*/
+  color: #333;
 }
 
 .slick-slider {

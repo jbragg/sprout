@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 const propTypes = {
   phases: PropTypes.arrayOf(PropTypes.string.isRequired),
@@ -15,14 +16,13 @@ const ExperimentProgress = ({ phases, currentIndex }) => (
     {phases.map((phase, index) => (
       <div
         key={phase}
-        className="text-center"
+        className={classNames(
+          'text-center',
+          { selected: currentIndex === index },
+        )}
         style={{
           display: 'inline-block',
           width: `${100 / phases.length}%`,
-          outline: '2px solid white',
-          backgroundColor: currentIndex === index ? '#21618C' : '#EBF5FB',
-          color: currentIndex === index ? 'white' : '#ABB2B9',
-          marginBottom: '10px',
         }}
       >
         <span>{phase}</span>
