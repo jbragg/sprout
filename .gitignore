@@ -1,6 +1,7 @@
 *.py[co]
 *.log
 *.swp
+.DS_Store
 src/static/js/
 src/static/private/
 src/config.js
