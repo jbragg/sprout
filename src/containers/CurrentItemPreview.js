@@ -10,45 +10,44 @@ import {
 
 const propTypes = {
   currentItemId: PropTypes.number,
-  master: PropTypes.bool,
   undo: PropTypes.func.isRequired,
   redo: PropTypes.func.isRequired,
   canUndo: PropTypes.bool.isRequired,
   canRedo: PropTypes.bool.isRequired,
+  draggable: PropTypes.bool,
 };
 
 const defaultProps = {
   currentItemId: null,
-  master: false,
+  draggable: false,
 };
 
 const CurrentItemPreview = ({
-  currentItemId, master, undo, redo, canUndo, canRedo,
+  currentItemId, undo, redo, canUndo, canRedo, draggable,
 }) => (
   <div className="current-item-preview panel">
     <Clearfix className="item-undo">
       <ButtonGroup>
-        <Button disabled={!canUndo} onClick={undo} bsSize="xsmall" >
+        <Button disabled={!canUndo} onClick={undo} bsSize="small" >
           <Glyphicon glyph="chevron-left" />
         </Button>
-        <Button disabled={!canRedo} onClick={redo} bsSize="xsmall" >
+        <Button disabled={!canRedo} onClick={redo} bsSize="small" >
           <Glyphicon glyph="chevron-right" />
         </Button>
       </ButtonGroup>
     </Clearfix>
     {currentItemId != null
-        ? (
-          <ItemLargeContainer
-            draggable
-            itemId={currentItemId}
-            master={master}
-          />
-        )
-        : (
-          <Panel className="item-large">
-            <div className="text-center">Select an item to preview it here.</div>
-          </Panel>
-        )
+      ? (
+        <ItemLargeContainer
+          itemId={currentItemId}
+          draggable={draggable}
+        />
+      )
+      : (
+        <Panel className="item-large">
+          <div className="text-center">Select an item to preview it here.</div>
+        </Panel>
+      )
     }
   </div>
 );
@@ -60,6 +59,8 @@ const mapStateToProps = state => ({
   currentItemId: currentItemIdSelector(state),
   canUndo: pastItemIdsSelector(state).length > 0,
   canRedo: futureItemIdsSelector(state).length > 0,
+  // similarItems: !state.config.similarNav,
+  draggable: state.config.draggable,
 });
 
 export default connect(

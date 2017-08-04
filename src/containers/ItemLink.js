@@ -1,12 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 import { connect } from 'react-redux';
 import { ItemBtnContainer } from './ItemContainer';
 import { itemsSelector } from '../reducers/index';
 
 const propTypes = {
-  itemId: PropTypes.number.isRequired,
-  isItem: PropTypes.bool.isRequired,
+  itemIds: ImmutablePropTypes.mapOf(
+    PropTypes.any,
+    PropTypes.number.isRequired,
+  ).isRequired,
   href: PropTypes.string,
   title: PropTypes.string,
 };
@@ -16,9 +19,10 @@ const defaultProps = {
   title: null,
 };
 
-const ItemLink = ({ itemId, isItem, href, children, title }) => (
-  isItem
-    ? <ItemBtnContainer itemId={itemId} useAnswers={false} />
+const ItemLink = ({ itemIds, href, children, title }) => {
+  const id = Number(href);
+  return (href != null && href.length > 0 && itemIds.has(id)
+    ? <ItemBtnContainer itemId={id} useAnswers={false} />
     : (
       <a
         href={href}
@@ -29,13 +33,14 @@ const ItemLink = ({ itemId, isItem, href, children, title }) => (
         {children}
       </a>
     )
-);
+  );
+};
 
 ItemLink.propTypes = propTypes;
+ItemLink.defaultProps = defaultProps;
 
-const mapStateToProps = (state, { href }) => ({
-  isItem: href != null && href.length > 0 && itemsSelector(state).byId.has(Number(href)),
-  itemId: Number(href),
+const mapStateToProps = state => ({
+  itemIds: itemsSelector(state).byId,
 });
 
 export default connect(mapStateToProps)(ItemLink);

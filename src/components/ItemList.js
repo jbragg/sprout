@@ -18,6 +18,7 @@ const propTypes = {
   thumbnails: PropTypes.bool,
   dots: PropTypes.bool,
   itemInFocus: PropTypes.number,
+  draggable: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -25,6 +26,7 @@ const defaultProps = {
   thumbnails: false,
   dots: true,
   itemInFocus: null,
+  draggable: true,
 };
 
 const sliderSettings = {
@@ -94,7 +96,7 @@ class ItemList extends React.Component {
   }
 
   render() {
-    const { onClick, thumbnails, dots } = this.props;
+    const { onClick, thumbnails, dots, draggable } = this.props;
     const itemIds = getArray(this.props.itemIds);
     return (
       <div className="form-group itemlist">
@@ -123,14 +125,14 @@ class ItemList extends React.Component {
               >
                 {itemIds.map(id => (
                   <div key={id}>
-                    <ItemThumbContainer draggable itemId={id} />
+                    <ItemThumbContainer draggable={draggable} itemId={id} />
                   </div>
                 ))}
               </Slider>
             ))
             : itemIds.map(itemId => (
               <ItemBtnContainer
-                draggable
+                draggable={draggable}
                 itemId={itemId}
                 key={itemId}
                 onClick={onClick}

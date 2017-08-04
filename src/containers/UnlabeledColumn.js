@@ -8,24 +8,21 @@ import Progress from './Progress';
 
 const propTypes = {
   useReasons: PropTypes.bool,
-  master: PropTypes.bool,
   similarNav: PropTypes.bool.isRequired,
   clusters: PropTypes.bool,
 };
 
 const defaultProps = {
   useReasons: true,
-  master: false,
   clusters: false,
 };
 
-const UnlabeledColumn = ({ useReasons, master, similarNav, clusters }) => (
+const UnlabeledColumn = ({
+  useReasons, similarNav, clusters,
+}) => (
   <PanelGroup>
     <Progress />
-    <CurrentItemPreview
-      draggable
-      master={master}
-    />
+    <CurrentItemPreview />
     <UnlabeledSection
       useReasons={useReasons}
       similarNav={similarNav}
@@ -41,6 +38,7 @@ const mapStateToProps = state => ({
   useReasons: state.config.useReasons,
   similarNav: state.config.similarNav,
   clusters: state.config.clusters,
+
 });
 
 export default connect(mapStateToProps)(UnlabeledColumn);

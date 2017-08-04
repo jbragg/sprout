@@ -33,12 +33,14 @@ const propTypes = {
   currentItemId: PropTypes.number,
   useReasons: PropTypes.bool,
   monitorItemId: PropTypes.number,
+  draggableItems: PropTypes.bool,
 };
 
 const defaultProps = {
   currentItemId: null,
   useReasons: true,
   monitorItemId: null,
+  draggableItems: true,
 };
 
 class Group extends React.Component {
@@ -74,6 +76,7 @@ class Group extends React.Component {
     const {
       group, connectDropTarget, connectDragSource, isOver, canDrop,
       isDragging, summary, useReasons, monitorItemId, onGroupEdit,
+      draggableItems,
     } = this.props;
     const recommended = this.state.recommended && useReasons;
     // canDrop is not sufficient here because a group should catch but
@@ -93,6 +96,7 @@ class Group extends React.Component {
             onGroupEdit({ name: e.target.value }, group.id);
           }}
           summary={useReasons ? summary : null}
+          draggableItems={draggableItems}
         />
       </div>,
     ));

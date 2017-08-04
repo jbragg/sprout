@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import { Row, Col, FormControl, Glyphicon } from 'react-bootstrap';
 import ItemList from './ItemList';
@@ -18,6 +19,9 @@ const propTypes = {
   isNameable: PropTypes.bool,
   name: PropTypes.string,
   nameEditFunc: PropTypes.func,
+  draggableItems: PropTypes.bool,
+  draggable: PropTypes.bool,
+  lessPadding: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -30,11 +34,14 @@ const defaultProps = {
   isNameable: false,
   name: '',
   nameEditFunc: null,
+  draggableItems: true,
+  draggable: true,
+  lessPadding: true,
 };
 
 const ItemGroup = ({
-  itemIds, summary, isOver, isTarget, recommended,
-  isNameable, name, nameEditFunc, isDragging, thumbnails,
+  itemIds, summary, isOver, isTarget, recommended, draggable, lessPadding,
+  isNameable, name, nameEditFunc, isDragging, thumbnails, draggableItems,
 }) => (
   <div
     className={`class-container item-group panel ${recommended ? 'recommended' : ''} ${isOver ? 'over' : ''} ${isTarget ? 'target' : ''}`}
@@ -43,7 +50,10 @@ const ItemGroup = ({
     }}
   >
     <div
-      className="panel-heading panel-heading-less-padding"
+      className={classNames({
+        'panel-heading': true,
+        'panel-heading-less-padding': lessPadding,
+      })}
     >
       <Row className="no-gutter">
         <Col xs={2}>
@@ -68,13 +78,17 @@ const ItemGroup = ({
           )}
         </Col>
         <Col className="text-right" xs={2}>
-          <Glyphicon className="large" glyph="move" />
+          {draggable && <Glyphicon className="large" glyph="move" />}
         </Col>
       </Row>
     </div>
     <div className="panel-body">
       {summary && <p>{summary}</p>}
-      <ItemList itemIds={itemIds} thumbnails={thumbnails} />
+      <ItemList
+        itemIds={itemIds}
+        thumbnails={thumbnails}
+        draggable={draggableItems}
+      />
     </div>
   </div>
 );

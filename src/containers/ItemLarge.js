@@ -1,19 +1,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import classNames from 'classnames';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import {
-  Image, Glyphicon, FormGroup, ControlLabel, Row, Col,
-  ListGroup, ListGroupItem,
+  Image, Glyphicon, Row, Col, ListGroup, ListGroupItem, OverlayTrigger,
+  Popover,
 } from 'react-bootstrap';
 import Lightbox from 'react-image-lightbox';
-import AnswersTable from './AnswersTable';
-import ConfusionsTable from './ConfusionsTable';
-import AnswersSummary from './AnswersSummary';
-import ReasonFormControl from '../containers/ReasonFormControl';
-import ItemList from './ItemList';
-import Loading from './Loading';
+import AnswersTable from '../components/AnswersTable';
+import ConfusionsTable from '../components/ConfusionsTable';
+import AnswersSummary from '../components/AnswersSummary';
+import ExplanationTips from '../components/ExplanationTips';
+import ReasonFormControl from './ReasonFormControl';
+import ItemList from '../components/ItemList';
+import Loading from '../components/Loading';
+import {
+  recommendedGroupSelector, itemSimilaritiesSelector,
+} from '../reducers/index';
 
 const propTypes = {
   answers: PropTypes.array.isRequired,
@@ -32,10 +37,12 @@ const propTypes = {
   itemSimilarities: ImmutablePropTypes.orderedMapOf(
     PropTypes.number.isRequired,
   ),
-  aggregateOnly: PropTypes.bool,
+  confusionsTable: PropTypes.bool,
+  answersTable: PropTypes.bool,
+  answersSummary: PropTypes.bool,
   answerKey: PropTypes.objectOf(PropTypes.string.isRequired).isRequired,
   editReason: PropTypes.bool,
-  draggable: PropTypes.bool.isRequired,
+  draggable: PropTypes.bool,
   recommendedGroup: PropTypes.number,
   master: PropTypes.bool,
   zoomable: PropTypes.bool,
@@ -53,8 +60,11 @@ const defaultProps = ({
   useAnswers: true,
   similarItems: true,
   itemSimilarities: null,
-  aggregateOnly: true,
-  editReason: false,
+  confusionsTable: false,
+  answersTable: true,
+  answersSummary: false,
+  editReason: true,
+  draggable: false,
   recommendedGroup: null,
   master: false,
   zoomable: true,
@@ -93,26 +103,62 @@ class ItemLarge extends React.Component {
   render() {
     const {
       item, answers, connectDragSource, isDragging, useReasons,
-      useAnswers, answerKey, aggregateOnly, editReason, draggable,
+      useAnswers, answerKey, editReason, draggable,
       recommendedGroup, master, lightboxOpen, onSetLightbox,
       similarItems, itemSimilarities, textColor, backgroundColor, zoomable,
+      answersSummary, confusionsTable, answersTable,
     } = this.props;
     const { imageStatus } = this.state;
     const itemComponent = (
-      <ListGroup className={imageStatus === 'loaded' ? '' : 'hidden'}>
-        {useAnswers && (
+      <ListGroup>
+        {useAnswers && answersSummary && (
           <ListGroupItem>
             <AnswersSummary answers={answers} answerKey={answerKey} />
           </ListGroupItem>
         )}
-        {useAnswers && useReasons && aggregateOnly && (
+        {useAnswers && useReasons && confusionsTable && (
           <ListGroupItem>
             <ConfusionsTable answers={answers} />
           </ListGroupItem>
         )}
-        {useAnswers && !aggregateOnly && (
+        {useAnswers && answersTable && (
           <ListGroupItem>
-            <AnswersTable useReasons={useReasons} answers={answers} />
+            <AnswersTable
+              useReasons={useReasons}
+              answers={answers}
+              overlay={!editReason}
+            />
+          </ListGroupItem>
+        )}
+        {editReason && (
+          <ListGroupItem>
+            <table className="table table-condensed">
+              <thead>
+                <tr>
+                  <th>
+                    Your Answer
+                  </th>
+                  <th>
+                    Your explanation
+                    {' '}
+                    <OverlayTrigger
+                      overlay={
+                        <Popover id="popover">
+                          Tips for explanations:
+                          <ExplanationTips />
+                        </Popover>
+                      }
+                      placement="top"
+                    >
+                      <Glyphicon glyph="question-sign" />
+                    </OverlayTrigger>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <ReasonFormControl itemId={item.id} />
+              </tbody>
+            </table>
           </ListGroupItem>
         )}
         {master && (
@@ -121,10 +167,14 @@ class ItemLarge extends React.Component {
           </ListGroupItem>
         )}
         <ListGroupItem>
+          {imageStatus !== 'loaded' && <h1><Loading /></h1>}
           <Image
             className={classNames(
               'item',
-              { zoomable },
+              {
+                zoomable,
+                hidden: imageStatus !== 'loaded',
+              },
             )}
             responsive
             src={item.data.path}
@@ -155,54 +205,38 @@ class ItemLarge extends React.Component {
               opacity: isDragging ? 0.5 : null,
             }}
           >
-            {draggable && (
-              <div
-                className="panel-heading panel-heading-less-padding"
-                style={{
-                  color: textColor,
-                  backgroundColor,
-                }}
-              >
-                <Row className="no-gutter">
-                  <Col xs={2} />
-                  <Col className="text-center panel-title" xs={8}>
-                    {item.id}
-                  </Col>
-                  <Col className="text-right" xs={2}>
-                    <Glyphicon className="large" glyph="move" />
-                  </Col>
-                </Row>
-              </div>
-            )}
+            <div
+              className="panel-heading panel-heading-less-padding"
+              style={{
+                color: textColor,
+                backgroundColor,
+              }}
+            >
+              <Row className="no-gutter">
+                <Col xs={2} />
+                <Col className="text-center panel-title" xs={8}>
+                  {item.id}
+                </Col>
+                <Col className="text-right" xs={2}>
+                  {draggable && <Glyphicon className="large" glyph="move" />}
+                </Col>
+              </Row>
+            </div>
             <div className="item-details">
-              {editReason
-                ? (
-                  <div className={imageStatus === 'loaded' ? '' : 'hidden'}>
-                    <FormGroup>
-                      {itemComponent}
-                    </FormGroup>
-                    <FormGroup>
-                      <ControlLabel>Reason</ControlLabel>
-                      <ReasonFormControl itemId={item.id} />
-                    </FormGroup>
-                  </div>
-                )
-                : itemComponent
-              }
-              {imageStatus !== 'loaded' && <h1><Loading /></h1>}
+              {itemComponent}
             </div>
           </div>,
         )}
         {showSimilarItems && (
           <div className="similar-items panel panel-default">
             {itemSimilarities && itemSimilarities.size > 0
-                ? (
-                  <div className="panel-body">
-                    <strong>Similar items</strong>
-                    <ItemList itemIds={itemSimilarities} thumbnails />
-                  </div>
-                )
-                : <div className="panel-body text-center">No similar items to show</div>
+              ? (
+                <div className="panel-body">
+                  <strong>Similar items</strong>
+                  <ItemList itemIds={itemSimilarities} thumbnails />
+                </div>
+              )
+              : <div className="panel-body text-center">No similar items to show</div>
             }
           </div>
         )}
@@ -214,4 +248,13 @@ class ItemLarge extends React.Component {
 ItemLarge.propTypes = propTypes;
 ItemLarge.defaultProps = defaultProps;
 
-export default ItemLarge;
+const mapStateToProps = (state, { itemId }) => ({
+  itemSimilarities: itemSimilaritiesSelector(state).get(itemId),
+  lightboxOpen: state.lightboxId === itemId,
+  recommendedGroup: recommendedGroupSelector(state),
+  answerKey: state.config.answerKey,
+  editReason: state.config.editReason,
+  master: state.config.master,
+});
+
+export default connect(mapStateToProps)(ItemLarge);

@@ -28,11 +28,15 @@ const propTypes = {
   canDrop: PropTypes.bool.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
   onEditTest: PropTypes.func.isRequired,
+  modalEditor: PropTypes.bool,
+  alwaysShowFinalLabels: PropTypes.bool,
   // dropResult: PropTypes.number,
 };
 
 const defaultProps = {
   // dropResult: null,
+  modalEditor: false,
+  alwaysShowFinalLabels: false,
 };
 
 const errors = {
@@ -43,12 +47,15 @@ const errors = {
 class TestQuestions extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { current: null };
-    this.setCurrent = this.setCurrent.bind(this);
-  }
-
-  setCurrent(id) {
-    this.setState({ current: id });
+    if (props.modalEditor) {
+      this.state = { current: null };
+      const setCurrent = (id) => {
+        this.setState({ current: id });
+      };
+      this.setCurrent = setCurrent.bind(this);
+    } else {
+      this.setCurrent = null;
+    }
   }
 
   /*
@@ -66,6 +73,7 @@ class TestQuestions extends React.Component {
       items, itemLabels, labels,
       isOver, canDrop,
       connectDropTarget, uncertainLabel, finalLabels, onEditTest,
+      modalEditor, alwaysShowFinalLabels,
     } = this.props;
     const unlabeledItemIds = [...items.values()]
       .filter(item => item.label == null && item.group == null)
@@ -77,11 +85,13 @@ class TestQuestions extends React.Component {
     );
     return connectDropTarget(
       <div className={`test-questions panel panel-default ${isOver ? 'over' : ''} ${canDrop ? 'target' : ''}`}>
-        <InstructionsModal
-          show={this.state.current != null}
-          itemId={this.state.current}
-          onSubmit={() => { this.setState({ current: null }); }}
-        />
+        {modalEditor && (
+          <InstructionsModal
+            show={this.state.current != null}
+            itemId={this.state.current}
+            onSubmit={() => { this.setState({ current: null }); }}
+          />
+        )}
         <RemoveTarget
           onDrop={(_, monitor) => { onEditTest(monitor.getItem().id, false); }}
           onCanDrop={(_, monitor) => (
@@ -95,9 +105,9 @@ class TestQuestions extends React.Component {
               <OverlayTrigger
                 overlay={
                   <Popover id="popover">
-                    <p>Drag items here to include them in an interactive tutorial.</p>
-                    <p>Select items that test if workers understand the instructions.</p>
-                    <p>Click on an item to edit your explanation.</p>
+                    <p>Drag items here that test understanding of the instructions.</p>
+                    <p>Only workers that pass a sample of these questions will be allowed to answer more questions.</p>
+                    <p>Click on an item to edit your answer to the question.</p>
                   </Popover>
                 }
                 placement="top"
@@ -119,7 +129,7 @@ class TestQuestions extends React.Component {
           )}
           {labels.map((label) => {
             const getError = (item) => {
-              if (item.reason == null || item.reason.text.length === 0) {
+              if (!item.reason || !item.reason.text) {
                 return 'tooShort';
               } else if (itemLabels.get(item.id) !== item.reason.label) {
                 return 'label';
@@ -140,7 +150,7 @@ class TestQuestions extends React.Component {
             const itemsNoError = [...needsReview]
               .filter(([, value]) => value == null)
               .map(([itemid]) => itemid);
-            if (needsReview.size > 0) {
+            if (needsReview.size > 0 || (alwaysShowFinalLabels && label !== uncertainLabel)) {
               return (
                 <Panel
                   className={`label-${label}`}
@@ -151,34 +161,34 @@ class TestQuestions extends React.Component {
                   <div>
                     {label === uncertainLabel ? warning : null}
                     {label === uncertainLabel
-                        ? (
-                          <ItemList
-                            itemIds={[...needsReview.keys()]}
-                            onClick={this.setCurrent}
-                          />
-                        )
-                        : (
-                          <div>
-                            {itemsNoError.length === 0 ? null : (
-                              <ItemList
-                                itemIds={itemsNoError}
-                                onClick={this.setCurrent}
-                              />
-                            )}
-                            {[...Object.keys(itemsByError)].map(error => (
-                              (itemsByError[error].length === 0) ? null : (
-                                <div key={error}>
-                                  <Alert>
-                                    {errors[error]} Edit your explanations for these items by clicking on them.
+                      ? (
+                        <ItemList
+                          itemIds={[...needsReview.keys()]}
+                          onClick={this.setCurrent}
+                        />
+                      )
+                      : (
+                        <div>
+                          {itemsNoError.length > 0 && (
+                            <ItemList
+                              itemIds={itemsNoError}
+                              onClick={this.setCurrent}
+                            />
+                          )}
+                          {[...Object.keys(itemsByError)].map(error => (
+                            (itemsByError[error].length === 0) ? null : (
+                              <div key={error}>
+                                <Alert>
+                                  {errors[error]} Edit your explanations for these items by clicking on them.
                                 </Alert>
-                                  <ItemList
-                                    itemIds={itemsByError[error]}
-                                    onClick={this.setCurrent}
-                                  />
-                                </div>
-                              )))}
-                          </div>
-                        )
+                                <ItemList
+                                  itemIds={itemsByError[error]}
+                                  onClick={this.setCurrent}
+                                />
+                              </div>
+                            )))}
+                        </div>
+                      )
                     }
                   </div>
                 </Panel>

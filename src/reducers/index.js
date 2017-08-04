@@ -6,13 +6,15 @@ import getScore from '../score';
 import { defaults } from '../constants';
 import config from './config';
 import autoAdvance from './autoAdvance';
-import entities from './entities';
+import entities, { itemDataSelector } from './entities';
 import currentItem, { currentItemIdSelector } from './currentItem';
 import clusterId from './clusterId';
 import lightboxId from './lightboxId';
 import generalInstructions from './generalInstructions';
 import experimentPhase from './experimentPhase';
 import oracle from './oracle';
+
+export { itemDataSelector };
 
 /*
  * utilities
@@ -39,7 +41,6 @@ const createDeepEqualSelector = createSelectorCreator(
  * selectors
  */
 
-export const itemDataSelector = state => state.entities.itemData;
 export const itemsSelector = state => state.entities.items;
 export const groupsSelector = state => state.entities.groups;
 export const answersSelector = state => state.entities.answers;
@@ -135,6 +136,17 @@ export const itemAnswersSelector = createSelector(
     id,
     item.answers.map(answerId => answers.byId.get(answerId)),
   ])),
+);
+export const itemAnswerScoresSelector = createSelector(
+  itemAnswersSelector,
+  itemAnswers => new Map(
+    [...itemAnswers].map(([id, answers]) => [
+      id,
+      getScore('answer')(
+        ...answers.map(answer => answer.data.answer),
+      ).color,
+    ]),
+  ),
 );
 export const itemScoresSelector = createSelector(
   itemAnswersSelector,

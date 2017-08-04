@@ -131,11 +131,14 @@ export function setCurrentItem(itemId = null) {
   };
 }
 
-export function assignItems(itemIds, assignment, setCurrent = false) {
+export function assignItems(
+  itemIds, assignment, setCurrent = false, clearCurrent = true,
+) {
   const action = {
     type: ASSIGN_ITEMS,
     itemIds,
-    assignment,  // { label: labelName } or { group: groupId }
+    assignment, // { label: labelName } or { group: groupId }
+    clearCurrent,
   };
   return (setCurrent
     ? (dispatch) => {
@@ -150,7 +153,7 @@ export function editItem(itemId, keyValues) {
   return {
     type: EDIT_ITEM,
     itemId,
-    keyValues,  // { test: true } or { reason: { label: true, text: 'something' } }
+    keyValues, // { test: true } or { reason: { label: true, text: 'something' } }
   };
 }
 
@@ -186,7 +189,7 @@ export function mergeGroup(groupId, target) {
   return {
     type: MERGE_GROUP,
     groupId,
-    target,  // {label: labelName} or {group: groupId}
+    target, // {label: labelName} or {group: groupId}
   };
 }
 
@@ -197,7 +200,7 @@ export function editGeneralInstructions(markdown) {
   };
 }
 
-const ORACLE_CHECK_INTERVAL = 30 * 1000;  // seconds to milliseconds
+const ORACLE_CHECK_INTERVAL = 30 * 1000; // seconds to milliseconds
 let timer = null;
 function startOracle() {
   return (dispatch) => {
@@ -222,14 +225,33 @@ const answerKey = new Map([
   [5, 'Definitely Yes'],
 ]);
 
+const resolveAnswerKey = {
+  Yes: 5,
+  No: 1,
+};
+
 function formatAnswerData(answerData) {
-  // answerData.answer is either a key or value in answerKey.
-  const answerKeyIndex = [...answerKey.values()].indexOf(answerData.answer);
-  const answerValue = (answerKeyIndex >= 0) ? answerKeyIndex + 1 : Number(answerData.answer);
+  // answerData.answer is either a key or value in answerKey, or unavailable.
+  let answerValue = null;
+  let answerString = null;
+  if (answerData.answer != null) {
+    const answerKeyIndex = [...answerKey.values()].indexOf(answerData.answer);
+    answerValue = (answerKeyIndex >= 0) ? answerKeyIndex + 1 : Number(answerData.answer);
+    answerString = answerKey.get(answerValue);
+  } else {
+    answerValue = (answerData.instructions
+      ? 3
+      : resolveAnswerKey[answerData.test_answer]
+    );
+    answerString = answerData.test_answer || '?';
+  }
+  if (answerValue == null) {
+    return answerData;
+  }
   return {
     ...answerData,
     answer: answerValue,
-    answerString: answerKey.get(answerValue),
+    answerString,
   };
 }
 
@@ -327,7 +349,6 @@ export function fetchExperiment(params) {
             ...params,
           },
         }));
-        dispatch(setCurrentItem());
         if (params.oracle) {
           dispatch(startOracle());
         }

@@ -1,120 +1,56 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Well, Button } from 'react-bootstrap';
-import Joyride from 'react-joyride';
-import ReactMarkdown from 'react-markdown';
-import { States, tutorialSteps } from '../constants';
 import UnlabeledColumn from '../containers/UnlabeledColumn';
 import LabeledColumn from './LabeledColumn';
-import Export from '../containers/Export';
-import Oracle from '../containers/Oracle';
-import Instructions from './Instructions';
-import Countdown from '../components/Countdown';
-import Confirm from './Confirm';
+import InstructionsColumn from './InstructionsColumn';
+import { States } from '../constants';
+import withTutorial from '../withTutorial';
 
 const propTypes = {
-  masterView: PropTypes.bool.isRequired,
   onChangeExperimentPhase: PropTypes.func.isRequired,
   advanceExperimentPhase: PropTypes.func.isRequired,
   oracle: PropTypes.bool.isRequired,
-  testQuestions: PropTypes.bool.isRequired,
   exportButton: PropTypes.bool.isRequired,
-  tutorial: PropTypes.bool.isRequired,
+  tutorial: PropTypes.bool,
   countdown: PropTypes.bool.isRequired,
   labels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
-  initialInstructions: PropTypes.string.isRequired,
   remainingSeconds: PropTypes.number.isRequired,
 };
 
-class Combined extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      tutorialRunning: false,
-    };
-  }
+const defaultProps = {
+  tutorial: false,
+};
 
-  componentDidMount() {
-    if (this.props.tutorial) {
-      setTimeout(() => {
-        this.setState({
-          tutorialRunning: true,
-        });
-      }, 3000);
-    }
-  }
-
-  render() {
-    const {
-      masterView, oracle, tutorial, exportButton, countdown,
-      advanceExperimentPhase, onChangeExperimentPhase, labels,
-      initialInstructions, remainingSeconds, testQuestions,
-    } = this.props;
-    return (
-      <div className="combined">
-        {tutorial && (
-          <Joyride
-            ref={(c) => { this.joyride = c; }}
-            steps={tutorialSteps.map(step => ({
-              ...step,
-              text: <ReactMarkdown source={step.text} />,
-            }))}
-            run={this.state.tutorialRunning}
-            type={'continuous' && 'single'}
-            scrollToSteps={false}
-          />
-        )}
-        <div id="left">
-          <UnlabeledColumn master={masterView} />
-        </div>
-        <div id="center">
-          <LabeledColumn labels={labels} />
-        </div>
-        <div id="right" className="instructions">
-          <div>
-            <div className="instructions-customer">
-              <h3>Old Instructions</h3>
-              <Well bsSize="sm">{initialInstructions}</Well>
-              {oracle && <Oracle />}
-            </div>
-            <Instructions testQuestions={testQuestions} />
-            {countdown && (
-              <Countdown
-                remainingTime={remainingSeconds}
-                onFinished={() => { advanceExperimentPhase(States.COMBINED); }}
-                confirmText={'Are you sure you want to submit your instructions and end the experiment?'}
-                expireText={'Time is up! Are you ready to proceed to the next part of the experiment?'}
-              />
-            )}
-            {exportButton && (
-              <Export>
-                <Button
-                  bsStyle="primary"
-                >
-                  Export
-                </Button>
-              </Export>
-            )}
-            {tutorial && (
-              <Confirm
-                onConfirm={() => { onChangeExperimentPhase(States.THANKS); }}
-                text="Have you completed the tutorial? Check with the experimenter."
-              >
-                <Button
-                  className="btn-ready"
-                  bsStyle="primary"
-                >
-                  Ready for experiment
-                </Button>
-              </Confirm>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-}
+const Combined = ({
+  oracle, tutorial, exportButton, countdown,
+  advanceExperimentPhase, onChangeExperimentPhase, labels,
+  remainingSeconds,
+}) => (
+  <div className="combined absolute">
+    <div id="left">
+      <UnlabeledColumn />
+    </div>
+    <div id="center">
+      <LabeledColumn labels={labels} />
+    </div>
+    <div id="right" className="instructions">
+      <InstructionsColumn
+        tutorial={tutorial}
+        countdown={countdown}
+        remainingSeconds={remainingSeconds}
+        advanceExperimentPhase={advanceExperimentPhase}
+        currentState={States.COMBINED}
+        oracle={oracle}
+        exportButton={exportButton}
+        onChangeExperimentPhase={onChangeExperimentPhase}
+        testQuestions
+        testQuestionsModalEditor
+      />
+    </div>
+  </div>
+);
 
 Combined.propTypes = propTypes;
+Combined.defaultProps = defaultProps;
 
-export default Combined;
+export default withTutorial(Combined);

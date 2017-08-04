@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
 import { ItemThumbContainer } from '../containers/ItemContainer';
@@ -47,15 +48,17 @@ class ItemBtn extends React.Component {
       >
         <OverlayTrigger
           overlay={<Popover id="popover">{<ItemThumbContainer itemId={item.id} />}</Popover>}
-          placement="bottom"
+          placement="top"
         >
           <button
-            className={`item-btn btn btn-default ${selected ? 'active' : ''}`}
+            className={classNames(
+              'item-btn btn btn-default',
+              { active: selected },
+            )}
             onClick={(e) => { onClick(item.id); e.preventDefault(); }}
             style={{
               color: textColor,
               backgroundColor,
-              border: selected ? '2px black solid' : null,
             }}
           >
             {item.id}

@@ -26,6 +26,7 @@ const propTypes = {
   label: PropTypes.string.isRequired,
   fixedTarget: PropTypes.bool,
   autoAdvance: PropTypes.bool.isRequired,
+  draggable: PropTypes.bool.isRequired,
 };
 
 const defaultProps = {
@@ -54,7 +55,7 @@ class LabelSection extends React.Component {
   render() {
     const {
       groupIds, label, onGroupCreate, connectDropTarget,
-      isOver, canDrop, itemIds, onGroupDelete, fixedTarget,
+      isOver, canDrop, itemIds, onGroupDelete, fixedTarget, draggable,
     } = this.props;
     const mergeMessage = 'Are you sure? All items being dragged will be moved to the target group. This action is not reversible.';
     const deleteMessage = 'Are you sure you want to delete the group? All items in the group will keep their label. This action is not reversible.';
@@ -104,7 +105,7 @@ class LabelSection extends React.Component {
         <div className="panel-body">
           <div className="group-contents">
             <div>
-              <ItemList itemIds={itemIds} />
+              <ItemList itemIds={itemIds} draggable={draggable} />
             </div>
             {groupIds.length > 0 && (
               <div className="panel-group">
@@ -179,6 +180,7 @@ const mapStateToProps = (state, { label }) => ({
   itemIds: state.entities.labels.get(label).itemIds,
   autoAdvance: state.autoAdvance,
   fixedTarget: state.config.fixedLabelTargets,
+  draggable: state.config.draggable,
 });
 
 const mapDispatchToProps = dispatch => ({

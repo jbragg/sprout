@@ -15,6 +15,7 @@ import UnlabeledColumn from './UnlabeledColumn';
 import LabeledColumn from '../components/LabeledColumn';
 import Countdown from '../components/Countdown';
 import Combined from '../components/Combined';
+import SuggestionsInterface from '../components/SuggestionsInterface';
 import Survey from './Survey';
 import Oracle from './Oracle';
 import CustomDragLayer from '../CustomDragLayer';
@@ -48,9 +49,7 @@ const propTypes = {
       }).isRequired,
     }),
   ).isRequired,
-  initialInstructions: PropTypes.string,
   onChangeExperimentPhase: PropTypes.func.isRequired,
-  masterView: PropTypes.bool,
   clusterView: PropTypes.bool,
   rawView: PropTypes.bool,
   tutorial: PropTypes.bool,
@@ -63,12 +62,10 @@ const propTypes = {
   oracle: PropTypes.bool.isRequired,
   warnings: PropTypes.bool.isRequired,
   currentItemId: PropTypes.number,
-  testQuestions: PropTypes.bool,
+  interfaceName: PropTypes.string.isRequired,
 };
 
 const defaultProps = {
-  initialInstructions: null,
-  masterView: false,
   clusterView: false,
   rawView: false,
   tutorial: false,
@@ -80,7 +77,6 @@ const defaultProps = {
   participantId: undefined,
   participantIndex: undefined,
   currentItemId: null,
-  testQuestions: true,
 };
 
 class App extends React.Component {
@@ -190,9 +186,9 @@ class App extends React.Component {
 
   render() {
     const {
-      items, labels, masterView, clusterView, initialInstructions, oracle,
+      items, labels, clusterView, oracle,
       prefetchAll, tutorial, onSetLightbox, rawView, countdown, exportButton,
-      currentItemId, testQuestions,
+      currentItemId, interfaceName,
     } = this.props;
     const experimentState = this.props.experimentPhase.name;
     if (experimentState == null || experimentState === States.LOADING) {
@@ -205,27 +201,35 @@ class App extends React.Component {
     let experimentComponent = null;
     const remainingSeconds = this.remainingTime() / 1000;
     if (experimentState === States.COMBINED) {
-      experimentComponent = (
-        <Combined
-          masterView={masterView}
-          labels={labels}
-          initialInstructions={initialInstructions}
-          oracle={oracle}
-          countdown={countdown}
-          exportButton={exportButton}
-          remainingSeconds={remainingSeconds}
-          advanceExperimentPhase={this.advanceExperimentPhase}
-          onChangeExperimentPhase={this.props.onChangeExperimentPhase}
-          tutorial={tutorial}
-          testQuestions={testQuestions}
-        />
+      experimentComponent = (interfaceName === 'suggestions'
+        ? (
+          <SuggestionsInterface
+            oracle={oracle}
+            countdown={countdown}
+            exportButton={exportButton}
+            remainingSeconds={remainingSeconds}
+            advanceExperimentPhase={this.advanceExperimentPhase}
+            onChangeExperimentPhase={this.props.onChangeExperimentPhase}
+          />
+        )
+        : (
+          <Combined
+            labels={labels}
+            oracle={oracle}
+            countdown={countdown}
+            exportButton={exportButton}
+            remainingSeconds={remainingSeconds}
+            advanceExperimentPhase={this.advanceExperimentPhase}
+            onChangeExperimentPhase={this.props.onChangeExperimentPhase}
+            tutorial={tutorial}
+          />
+        )
       );
     } else if (experimentState === States.LABELING) {
       experimentComponent = (
         <Grid fluid>
           <Col sm={6}>
-            <Well bsSize="sm">{initialInstructions}</Well>
-            <UnlabeledColumn master={masterView} />
+            <UnlabeledColumn />
           </Col>
           <Col sm={6}>
             <LabeledColumn labels={labels} />
@@ -246,7 +250,6 @@ class App extends React.Component {
           <Col sm={6}>
             <h3>Customer Instructions</h3>
             <p>You may ask for clarifications of these instructions:</p>
-            <Well bsSize="sm">{initialInstructions}</Well>
             <Oracle />
             <Button
               bsStyle="primary"
@@ -266,7 +269,6 @@ class App extends React.Component {
           <Col sm={6}>
             <h3>Customer Instructions</h3>
             <p>Your task is to improve these instructions:</p>
-            <Well bsSize="sm">{initialInstructions}</Well>
             <Oracle />
             <Instructions />
             <Countdown
@@ -358,7 +360,6 @@ const mapStateToProps = state => ({
   tutorial: state.config.tutorial,
   waitForImagesFrac: state.config.waitForImagesFrac,
   items: itemDataSelector(state).byId,
-  initialInstructions: state.config.initialInstructions,
   experimentPosition: state.config.experimentPosition,
   experimentId: state.config.experimentId,
   participantId: state.config.participantId,
@@ -366,14 +367,13 @@ const mapStateToProps = state => ({
   currentItemId: currentItemIdSelector(state),
   clusterView: state.config.clusterView,
   rawView: state.config.rawView,
-  masterView: state.config.master,
   multiPhase: state.config.multiPhase,
   prefetchAll: state.config.prefetchAll,
   exportButton: state.config.exportButton,
   countdown: state.config.countdown,
   oracle: state.config.oracle,
   warnings: state.config.warnings,
-  testQuestions: state.config.testQuestions,
+  interfaceName: state.config.interface,
 });
 
 const mapDispatchToProps = dispatch => ({

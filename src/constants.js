@@ -1,3 +1,5 @@
+import React from 'react';
+
 export const DragItemTypes = {
   ITEM: 'item',
   GROUP: 'group',

@@ -79,7 +79,7 @@ class AppLoader extends React.Component {
     ];
     const boolParams = [
       'tutorial', 'clusters', 'master', 'multiPhase', 'exemplarsFirst',
-      'testQuestions', 'rawView', 'clusterView',
+      'rawView', 'clusterView',
     ];
     numberParams.forEach((key) => {
       if (params[key] != null) {

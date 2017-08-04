@@ -30,37 +30,24 @@ def get_word_vectors(words):
     return dict((v['word'], v['vector']) for v in resp['vecFromWord'])
 
 
-def _concatenate_df_reasons(df):
-    """Return text from unclear reasons."""
-    words = df.unclear_type.fillna('').str.cat(sep=' ') or ''
-    more_words = df.unclear_reason.fillna('').str.cat(sep=' ') or ''
-    if more_words:
-        words += ' {}'.format(more_words)
-    return words.strip()
-
-
-def cluster_questions(df, cache=True, cached_filename=None):
-    """Cluster questions.
+def cluster_docs(docs, cached_filename=None):
+    """Get clusters.
 
     Args:
-        df (pd.DataFrame):
+        docs (pd.Series): Series with index.
         cached_filename (Optional[str]): Path to file for caching word vectors.
 
     Returns:
-        clusters ([[int]]): Clusters of questionids.
-        exemplars ([int]): Representative questionids (one per cluster).
-        other ([int]): Unclustered questionids.
-        embeddings (dict): Mapping from questionid (int) to vector ([float]).
+        clusters ([[Object]]): Clusters of ids.
+        exemplars ([Object]): Representative ids (one per cluster).
+        embeddings (dict): Mapping from id (Object) to vector ([float]).
 
     """
-    questions = df.groupby(
-        'questionid').apply(_concatenate_df_reasons).sort_index()
-    questions = questions.where(questions.map(lambda x: len(x) > 0)).dropna()
     vectorizor = TfidfVectorizer(
         input='content',
         stop_words='english',
     )
-    doc_word_matrix = vectorizor.fit_transform(questions)
+    doc_word_matrix = vectorizor.fit_transform(docs)
     words = vectorizor.get_feature_names()
 
     cached = cached_filename and os.path.exists(cached_filename)
@@ -86,48 +73,104 @@ def cluster_questions(df, cache=True, cached_filename=None):
            for v in doc_feature_matrix.tolist()):
         raise Exception('No embedding for a question. What to do?')
 
-    questionids = questions.index
-    questionids_other = set(df.questionid.unique()).difference(questionids)
+    ids = docs.index
     clusters = collections.defaultdict(list)
-    k = 5
-    model = cluster.KMeans(n_clusters=min(k, doc_feature_matrix.shape[0]))
+    # k = 20
+    # model = cluster.KMeans(n_clusters=min(k, doc_feature_matrix.shape[0]))
     model = cluster.AffinityPropagation()
     Y = model.fit_predict(doc_feature_matrix)
-    for questionid, y in zip(questionids, Y):
-        clusters[y].append(questionid)
-    print(clusters)
-    exemplars = [questionids[x] for x in model.cluster_centers_indices_]
+    for id, y in zip(ids, Y):
+        clusters[y].append(id)
+    try:
+        exemplars = [ids[x] for x in model.cluster_centers_indices_]
+    except AttributeError:
+        exemplars = []
 
-    question_embeddings = dict()
-    for questionid, vector in zip(questionids, doc_feature_matrix.tolist()):
-        question_embeddings[questionid] = vector
+    embeddings = dict()
+    for id, vector in zip(ids, doc_feature_matrix.tolist()):
+        embeddings[id] = vector
 
     return (
         [clusters[x] for x in sorted(clusters)],
         exemplars,
+        embeddings,
+    )
+
+
+def _concatenate_df_reasons(df):
+    """Return text from unclear reasons."""
+    all_words = ''
+
+    def concat_series(ser):
+        return ser.fillna('').str.cat(sep=' ') or ''
+    for ser in [
+        df.unclear_type,
+        df.unclear_reason,
+        df.data.map(lambda d: d.get('instructions') or d.get('test') or '')
+    ]:
+        words = concat_series(ser)
+        if words:
+            all_words += ' {}'.format(words.strip())
+    return all_words.strip()
+
+
+def cluster_questions(df, cached_filename=None):
+    """Cluster questions.
+
+    Args:
+        df (pd.DataFrame):
+        cached_filename (Optional[str]): Path to file for caching word vectors.
+
+    Returns:
+        clusters ([[int]]): Clusters of questionids.
+        exemplars ([int]): Representative questionids (one per cluster).
+        other ([int]): Unclustered questionids.
+        embeddings (dict): Mapping from questionid (int) to vector ([float]).
+
+    """
+    questions = df.groupby(
+        'questionid').apply(_concatenate_df_reasons).sort_index()
+    questions = questions.where(questions.map(lambda x: len(x) > 0)).dropna()
+    clusters, exemplars, embeddings = cluster_docs(
+        questions, cached_filename=cached_filename
+    )
+    questionids = questions.index
+    questionids_other = set(df.questionid.unique()).difference(questionids)
+    return (
+        clusters,
+        exemplars,
         questionids_other,
-        question_embeddings,
+        embeddings,
     )
 
 
 def main(answers_path, experiment_path, out_path, cached_filename=None):
     """Create new experiment file with item cluster information.
 
+    Simply copies file if no information in 'unclear_reason' or 'unclear_type'.
+
     Args:
         answers_path (str): Path to answers data file.
         experiment_path (str): Path to experiment file.
         out_path (str): Path to augmented experiment file.
-        cached_filename (Optional[str])
+        cached_filename (Optional[str]): Path to cached vocabulary file.
+            Defaults to '{raw_path}.pickle.CACHED'
 
     """
     if cached_filename is None:
         cached_filename = os.path.basename(answers_path) + '.pickle.CACHED'
     df = pd.read_json(answers_path, orient='records')
-
+    def has_string(v):
+        return pd.notnull(v) and v
     def filter1(row):
-        """Select answers with reasons for clustering."""
-        return bool(row['unclear_reason'] or row['unclear_type'])
-    df_filtered = df[df.apply(filter1, axis=1)]
+        """Select questions with reasons for clustering."""
+        return bool(
+            has_string(row.get('unclear_reason'))
+            or has_string(row.get('unclear_type'))
+            or has_string(row['data'].get('instructions'))
+        )
+    questions = df[df.apply(filter1, axis=1)]['questionid'].unique()
+    df_filtered = df[df.questionid.isin(questions)]
     clusters, exemplars, questionids_other, embeddings = cluster_questions(
         df_filtered, cached_filename=cached_filename)
     question_to_cluster = dict()
@@ -150,18 +193,74 @@ def main(answers_path, experiment_path, out_path, cached_filename=None):
         json.dump(experiment, f)
 
 
+def main_simple(raw_path, out_path=None, cached_filename=None):
+    """Simple interface for clustering arbitrary text.
+
+    Args:
+        raw_path (str): Path to csv-formatted file, with the following
+            columns:
+            - id (Optional[str]): Ids.
+            - doc (str): Documents.
+        out_path (Optional[str]): Path to output csv file with 'cluster'
+            column.
+            Defaults to '{raw_path}.clustered.csv'
+        cached_filename (Optional[str]): Path to cached vocabulary file.
+            Defaults to '{raw_path}.pickle.CACHED'
+
+    """
+    if cached_filename is None:
+        cached_filename = os.path.join(
+            os.path.dirname(raw_path),
+            os.path.basename(raw_path) + '.pickle.CACHED',
+        )
+    if out_path is None:
+        out_path = os.path.join(
+            os.path.dirname(raw_path),
+            os.path.basename(raw_path) + '.clustered.csv',
+        )
+    df = pd.read_csv(raw_path)
+    docs = df['doc']
+    clusters, _, _ = cluster_docs(
+        docs,
+        cached_filename=cached_filename,
+    )
+    for i, ids in enumerate(clusters):
+        for id in ids:
+            df.ix[id, 'cluster'] = i
+    df['cluster'] = df['cluster'].astype(int)
+    for _, df2 in df.groupby('cluster'):
+        print(df2)
+
+    df.to_csv(out_path)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--experiment',
-        type=str)
+        type=str,
+    )
     parser.add_argument(
         '--answers',
-        type=str)
+        type=str,
+    )
+    parser.add_argument(
+        '--raw',
+        type=str,
+        help='Alternative to --experiment and --answers',
+    )
     parser.add_argument(
         '--out',
-        type=str)
+        type=str,
+    )
     args = parser.parse_args()
-    main(answers_path=args.answers,
-         experiment_path=args.experiment,
-         out_path=args.out)
+    if args.raw is not None:
+        main_simple(
+            raw_path=args.raw,
+            out_path=args.out,
+        )
+    else:
+        main(
+            answers_path=args.answers,
+            experiment_path=args.experiment,
+            out_path=args.out,
+        )

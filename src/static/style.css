@@ -101,7 +101,7 @@
    * left column positioning
    */
 
-  .current-item-preview {
+  .absolute .current-item-preview {
     position: absolute;
     top: 50px;
     bottom: 280px;
@@ -109,25 +109,25 @@
     right: 0;
   }
 
-  .unlabeled-items {
+  .absolute .unlabeled-items {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
   }
 
-  .current-item-preview .similar-items {
+  .absolute .current-item-preview .similar-items {
     position: absolute;
     bottom: 0px;
     left: 0px;
     right: 0px;
   }
 
-  .current-item-preview .similar-items {
+  .absolute .current-item-preview .similar-items {
     min-height: 215px;
   }
 
-  .current-item-preview .item-large {
+  .absolute .current-item-preview .item-large {
     position: absolute;
     top: 23px;
     bottom: 220px;
@@ -135,11 +135,11 @@
     right: 0px;
   }
 
-  .current-item-preview .no-similar-items .item-large {
+  .absolute .current-item-preview .no-similar-items .item-large {
     bottom: 0px;
   }
 
-  .current-item-preview .item-large .item-details {
+  .absolute .current-item-preview .item-large .item-details {
     position: absolute;
     bottom: 0px;
     left: 0px;
@@ -221,23 +221,35 @@
 
 
 .label-yes {
-  border: #a1d76a 2px solid;
+  /* border: #a1d76a 2px solid; */
+  border: #276419 2px solid;
 }
 
 .label-yes > div > .panel-heading, .label-yes > .panel-heading {
-  color: #3c763d;
+  /*color: #3c763d; */
+  color: white;
+  /*
   background-color: #a1d76a;
   border-color: #a1d76a;
+  */
+  background-color: #276419;
+  border-color: #276419;
 }
 
 .label-no {
-  border: #e9a3c9 2px solid;
+  /* border: #e9a3c9 2px solid; */
+  border: #8e0152 2px solid;
 }
 
 .label-no > div > .panel-heading, .label-no > .panel-heading {
-  color: #a94442;
+  /* color: #a94442; */
+  color: white;
+  /*
   background-color: #e9a3c9;
   border-color: #e9a3c9;
+  */
+  border-color: #8e0152;
+  background-color: #8e0152;
 }
 
 /*
@@ -291,7 +303,15 @@ div[tabindex="-1"]:focus {
 }
 
 .item-btn {
-  width: 3em;
+  width: 50px;
+}
+
+.item-btn .btn {
+  border-width: 2px;
+}
+
+.item-btn .btn.active {
+  border: 2px solid black;
 }
 
 .item-thumb {
@@ -353,6 +373,7 @@ div[tabindex="-1"]:focus {
 
 .target.over > .panel-heading, .target.over > div > .panel-heading, .target > div.over > .panel-heading, .target.over.btn, .target.over.fixed-target {
   background-color: yellow !important;
+  color: #333;
 }
 
 .label-section .fixed-target {

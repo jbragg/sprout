@@ -8,7 +8,10 @@ const currentItemId = (state = null, action) => {
       return action.payload.currentItemId;
     }
     case ASSIGN_ITEMS: {
-      return action.itemIds.indexOf(state) >= 0 ? null : state;
+      return (action.clearCurrent && action.itemIds.indexOf(state) >= 0
+        ? null
+        : state
+      );
     }
     default: {
       return state;

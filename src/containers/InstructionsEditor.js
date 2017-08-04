@@ -8,49 +8,77 @@ import { editGeneralInstructions } from '../actions';
 const propTypes = {
   onEditGeneralInstructions: PropTypes.func.isRequired,
   generalInstructions: PropTypes.string.isRequired,
-  defaultActiveKey: PropTypes.number,
   help: PropTypes.bool,
+  initialInstructions: PropTypes.string.isRequired,
+  preview: PropTypes.bool,
 };
 
 const defaultProps = {
-  defaultActiveKey: 0,
   help: true,
+  preview: true,
 };
 
 const itemRe = /@([0-9]+)/g;
 
-const instructions = 'Your instructions for workers go here. Use twitter mention notation to reference items, for example, `@10` refers to item 10 and will preview as [](10). You may also use other types of [Markdown](http://commonmark.org/help/) to format your instructions, like `-` for bullet lists.';
+const editorInstructions = `
+Your instructions for workers go here.
+Use twitter mention notation to reference items, for example, \`@10\` refers to item 10 and will preview as [](10).
+You may also use other types of [Markdown](http://commonmark.org/help/) to format your instructions, like
+- \`- This \`will be a list item
+- This will be \`**bold**\`
+`;
 
 const InstructionsEditor = ({
-  generalInstructions, onEditGeneralInstructions, defaultActiveKey, help,
-}) => (
-  <div className="instructions-editor">
-    {help ? <Markdown source={instructions} /> : null}
-    <Tabs defaultActiveKey={defaultActiveKey} id="instructions-editor">
-      <Tab eventKey={0} title="Write">
-        <FormGroup>
-          <FormControl
-            componentClass="textarea"
-            rows="12"
-            value={generalInstructions}
-            onChange={(e) => { onEditGeneralInstructions(e.target.value); }}
-          />
-        </FormGroup>
-      </Tab>
-      <Tab eventKey={1} title="Preview">
-        <Well bsSize="sm">
-          <Markdown source={generalInstructions.replace(itemRe, '[]($1)')} />
-        </Well>
-      </Tab>
-    </Tabs>
-  </div>
-);
+  generalInstructions, onEditGeneralInstructions, help,
+  initialInstructions, preview,
+}) => {
+  const versions = {
+    0: initialInstructions,
+    1: generalInstructions,
+  };
+  const editor = (
+    <FormGroup>
+      <Tabs defaultActiveKey={'1'} id="instructions-versions">
+        {Object.keys(versions).map(i => (
+          <Tab key={i} eventKey={i} title={`v${i}`}>
+            <FormControl
+              componentClass="textarea"
+              rows="12"
+              value={versions[i]}
+              readOnly={i === '0'}
+              onChange={i === '0' ? null : (
+                (e) => { onEditGeneralInstructions(e.target.value); })
+              }
+            />
+            {preview && (
+              <div>
+                <h3>Preview</h3>
+                <Well bsSize="small">
+                  <Markdown
+                    source={versions[i].replace(itemRe, '[]($1)')}
+                  />
+                </Well>
+              </div>
+            )}
+          </Tab>
+        ))}
+      </Tabs>
+    </FormGroup>
+  );
+  return (
+    <div className="instructions-editor">
+      {help ? <Markdown source={editorInstructions} /> : null}
+      {editor}
+    </div>
+  );
+};
 
 InstructionsEditor.propTypes = propTypes;
 InstructionsEditor.defaultProps = defaultProps;
 
 const mapStateToProps = state => ({
   generalInstructions: state.generalInstructions,
+  initialInstructions: state.config.initialInstructions,
 });
 
 const mapDispatchToProps = dispatch => ({
