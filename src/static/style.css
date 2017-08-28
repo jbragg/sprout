@@ -28,12 +28,35 @@
   20% { transform: rotate(0deg); }
 }
 
+.recommendation-enter {
+  opacity: 0.01;
+}
+
+.recommendation-enter.recommendation-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+  animation: wiggleSmall 2s 3;
+}
+
+.recommendation-leave {
+  opacity: 1;
+}
+
+.recommendation-leave.recommendation-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms ease-in;
+}
+
 /*
  * Hide the experiment progress bar during the tutorial because
  * react-joyride positioning is messed up.
  */
 .experiment-tutorial .experiment-progress {
   display: none;
+}
+
+.dragging {
+  opacity: 0.5;
 }
 
 .experiment .combined {
@@ -294,7 +317,7 @@ div[tabindex="-1"]:focus {
   -webkit-box-orient: vertical;
 }
 
-.panel-heading-less-padding {
+.less-padding > .panel-heading {
   padding: 4px !important;
 }
 
@@ -315,7 +338,7 @@ div[tabindex="-1"]:focus {
 }
 
 .item-thumb {
-  max-width: 6em;
+  width: 6em;
   max-height: 150px;
   padding: 0px;
   overflow: hidden;
@@ -527,12 +550,41 @@ div[tabindex="-1"]:focus {
 }
 
 /*
+ * for react-image-lightbox
+ */
+.ReactModalPortal img {
+  background-color: white;
+}
+
+/*
 .instructions {
   border-radius: 25px;
   border: 3px solid lightpink;
   padding-bottom: 20px;
 }
 */
+
+.answers-summary-distribution {
+  display: inline-block;
+  width: 80px;
+  float: right;
+  border-right: 2px solid #333;
+  border-top: 2px solid #333;
+  border-bottom: 2px solid #333;
+  border-left: 1px solid #333;
+  margin-right: 2px;
+}
+
+/*.answers-summary-distribution > .unit {*/
+.answers-summary-distribution > .unit {
+  display: inline-block;
+  /*border-left: 1px solid white;*/
+  border-left: 1px solid #333;
+  /*
+  width: 5px;
+  background-color: yellow;
+  */
+}
 
 /*
  * Always show scrollbars

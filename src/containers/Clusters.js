@@ -30,8 +30,8 @@ const mapStateToProps = state => ({
     .groupBy(item => `${item.subgroup}:${item.cls}`)
     .sortBy(([item]) => item.subgroup),
   clustersQuery: List([...state.entities.itemData.byId.values()])
-    .groupBy(item => JSON.stringify(item.data.query))
-    .sortBy(([item]) => JSON.stringify(item.data.query)),
+    .groupBy(item => JSON.stringify(item.data.query || item.data.bingdata.data.category_short))
+    .sortBy(([item]) => JSON.stringify(item.data.query || item.data.bingdata.data.category_short)),
   clusters: List([...state.entities.itemData.byId.values()])
     .groupBy(item => item.cluster)
     .sortBy(([item]) => item.cluster),

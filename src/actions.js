@@ -27,10 +27,39 @@ export const FETCH_EXPERIMENT = 'FETCH_EXPERIMENT';
 export const CHANGE_EXPERIMENT_PHASE = 'CHANGE_EXPERIMENT_PHASE';
 export const SET_LIGHTBOX = 'SET_LIGHTBOX';
 export const SET_AUTOADVANCE = 'SET_AUTOADVANCE';
+export const EDIT_TAG = 'EDIT_TAG';
+export const RECOMMEND_TEST_ITEMS = 'RECOMMEND_TEST_ITEMS';
 
 /*
  * action creators
  */
+
+export function recommendTestItems(itemExamples) {
+  return (dispatch, getState) => {
+    const id = itemExamples[0];
+    const state = getState();
+    const similarItems = itemSimilaritiesSelector(state).get(id);
+    const [recommendedId] = similarItems.entrySeq().first();
+    return dispatch({
+      type: RECOMMEND_TEST_ITEMS,
+      payload: {
+        recommendations: [
+          {
+            id: recommendedId,
+            reason: `because you mentioned [](${id}) in the instructions`,
+          },
+        ],
+      },
+    });
+  };
+}
+
+export function editTag(payload) {
+  return {
+    type: EDIT_TAG,
+    payload,
+  };
+}
 
 export function setAutoAdvance(payload) {
   return {
@@ -225,7 +254,7 @@ const answerKey = new Map([
   [5, 'Definitely Yes'],
 ]);
 
-const resolveAnswerKey = {
+export const resolveAnswerKey = {
   Yes: 5,
   No: 1,
 };

@@ -36,7 +36,7 @@ const mapStateToProps = (state, { itemId, useReasons, useAnswers, metric }) => {
   const useAnswersVal = useAnswers == null
     ? state.config.useAnswers
     : useAnswers;
-  const metricVal = metric != null ? defaultMetrics.color : metric;
+  const metricVal = metric == null ? defaultMetrics.color : metric;
   const allAnswers = itemAnswersSelector(state).get(itemId);
   const answers = allAnswers.filter(answer => answer.data.answer != null);
   const scores = answers.length > 0

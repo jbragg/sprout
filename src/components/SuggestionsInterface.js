@@ -4,6 +4,7 @@ import { Row, Col } from 'react-bootstrap';
 import CurrentItemPreview from '../containers/CurrentItemPreview';
 import InstructionsColumn from './InstructionsColumn';
 import InstructionsSuggestionsColumn from '../containers/InstructionsSuggestionsColumn';
+import Progress from '../containers/Progress';
 import { States } from '../constants';
 
 const propTypes = {
@@ -27,6 +28,7 @@ const SuggestionsInterface = ({
   <div className="combined">
     <div id="left">
       <div>
+        <Progress instructions />
         <h2>Confusions</h2>
         <img
           src="/static/PiYG.png"

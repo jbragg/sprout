@@ -1,10 +1,9 @@
 import { OrderedMap as Map, OrderedSet as Set } from 'immutable';
-import { createSelector } from 'reselect';
-import { defaults } from '../constants';
 import {
   EDIT_ITEM, EDIT_GROUP, MERGE_GROUP, CREATE_GROUP, ASSIGN_ITEMS,
-  RECEIVE_EXPERIMENT,
+  RECEIVE_EXPERIMENT, EDIT_TAG,
 } from '../actions';
+import { defaults } from '../constants';
 
 const defaultState = {
   groups: { byId: new Map() },
@@ -12,6 +11,7 @@ const defaultState = {
   items: { byId: new Map() },
   answers: { byId: new Map() },
   labels: new Map(defaults.labels.map(label => [label, { itemIds: new Set() }])),
+  tags: { byId: new Map() },
 };
 
 const entities = (state = defaultState, action) => {
@@ -211,6 +211,19 @@ const entities = (state = defaultState, action) => {
         ),
       };
     }
+    case EDIT_TAG: {
+      const { id, ...rest } = action.payload;
+      return {
+        ...state,
+        tags: {
+          ...state.tags,
+          byId: new Map([
+            ...state.tags.byId.entries(),
+            [id, { ...rest }],
+          ]),
+        },
+      };
+    }
     default: {
       return state;
     }
@@ -218,40 +231,3 @@ const entities = (state = defaultState, action) => {
 };
 
 export default entities;
-
-/*
- * reducers
- */
-
-const answersSelector = state => state.entities.answers.byId;
-export const itemDataSelector = state => state.entities.itemData;
-
-export const answersByInstruction = createSelector(
-  answersSelector,
-  answers => (answers
-    .filter(answer => answer.data.instructions)
-    .groupBy(answer => answer.data.instructions)
-  ),
-);
-
-export const itemsByInstruction = createSelector(
-  answersByInstruction,
-  groupedAnswers => new Map([...groupedAnswers].map(
-    ([instruction, answers]) => [
-      instruction,
-      answers.toIndexedSeq().countBy(answer => answer.data.questionid),
-    ],
-  )),
-);
-
-export const itemsNoInstruction = createSelector(
-  answersSelector,
-  itemDataSelector,
-  (answers, items) => {
-    const itemsWithInstructions = answers
-      .filter(answer => answer.data.instructions)
-      .map(answer => answer.data.questionid)
-      .toSet();
-    return items.byId.keySeq().toSet().subtract(itemsWithInstructions);
-  },
-);

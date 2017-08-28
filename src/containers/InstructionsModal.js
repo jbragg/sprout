@@ -66,7 +66,7 @@ class InstructionsModal extends React.Component {
                 <p>Your explanation will be used to teach workers after they answer this question. You may also edit your instructions here if you choose.</p>
                 <h1>Task</h1>
                 <Panel header={<h4>Instructions</h4>}>
-                  <InstructionsEditor help={false} preview={false} />
+                  <InstructionsEditor help={false} previewDefault />
                 </Panel>
                 <Row>
                   <Col sm={6}>

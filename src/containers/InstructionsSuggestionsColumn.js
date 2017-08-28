@@ -1,16 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ImmutablePropTypes from 'react-immutable-proptypes';
+import { PanelGroup, Clearfix, Badge } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import ItemGroup from '../components/ItemGroup';
-import { itemsByInstruction, itemsNoInstruction } from '../reducers/entities';
-import { itemAnswerScoresSelector } from '../reducers/index';
+import InstructionItemGroup from '../containers/InstructionItemGroup';
+import {
+  itemsNoInstruction, instructionsTree1, instructionsTree2,
+  disagreementOrderScore, itemAnswerScoresSelector,
+} from '../reducers/index';
 
 const propTypes = {
-  instructionsToItems: ImmutablePropTypes.mapOf(
+  instructionsTree: ImmutablePropTypes.mapOf(
     ImmutablePropTypes.mapOf(
-      PropTypes.number.isRequired,
-      PropTypes.number.isRequired,
+      PropTypes.number.isRequired, // Similarity score
+      PropTypes.string.isRequired,
     ),
     PropTypes.string.isRequired,
   ).isRequired,
@@ -23,55 +27,71 @@ const propTypes = {
   ).isRequired,
 };
 
+const defaultProps = {
+  collapsible: true,
+};
+
 const InstructionsSuggestionsColumn = ({
-  instructionsToItems, otherItems, itemScores,
+  otherItems, itemScores, instructionsTree,
 }) => (
-  <div className="label-section">
+  <PanelGroup accordion >
     {
-      [...instructionsToItems
-        .sortBy(values => (-1000 * values.size)
-          + (100 * [...values.keys()]
-            .map(id => Math.abs(0.5 - itemScores.get(id)))
-            .reduce((acc, v) => acc + v, 0)
-          )
-          + (-1 * [...values.keys()]
-            .map(id => itemScores.get(id))
-            .reduce((acc, v) => acc + v, 0)
-          ),
-        )
-        .entries(),
-      ].map(([key, values]) => (
-        <ItemGroup
+      [...instructionsTree.map((similarities, key) => (
+        <InstructionItemGroup
           key={key}
-          itemIds={[...values.sortBy(
-            (count, id) => (
-              (-1000 * count)
-              + (100 * Math.abs(0.5 - itemScores.get(id)))
-              + (-1 * itemScores.get(id))
-            )).keys(),
-          ]}
-          summary={key}
-          draggable={false}
-          lessPadding={false}
-        />
-      ))
+          instruction={key}
+          eventKey={key}
+        >
+          {similarities.size > 0 && (
+            <div>
+              <strong>Related</strong>
+              <PanelGroup accordion >
+                {
+                  [...similarities.map((v, k) => (
+                    <InstructionItemGroup
+                      similarity={v}
+                      key={k}
+                      eventKey={k}
+                      instruction={k}
+                      collapsible
+                    />
+                  )).values()]
+                }
+              </PanelGroup>
+            </div>
+          )}
+        </InstructionItemGroup>
+      )).values()]
     }
     <ItemGroup
-      itemIds={[...otherItems.sortBy(id => (
-        (100 * Math.abs(0.5 - itemScores.get(id))) + (-1 * itemScores.get(id))),
+      header={
+        <Clearfix>
+          Other (Uncategorized)
+          <Badge pullRight >{otherItems.size}</Badge>
+        </Clearfix>
+      }
+      eventKey="Uncategorized"
+      itemIds={[...otherItems.sortBy(
+        id => disagreementOrderScore(itemScores.get(id)),
       )]}
       draggable={false}
-      lessPadding={false}
+      lessPadding
     />
-  </div>
+  </PanelGroup>
 );
 
 InstructionsSuggestionsColumn.propTypes = propTypes;
+InstructionsSuggestionsColumn.defaultProps = defaultProps;
 
-const mapStateToProps = state => ({
-  instructionsToItems: itemsByInstruction(state),
-  otherItems: itemsNoInstruction(state),
-  itemScores: itemAnswerScoresSelector(state),
-});
+const mapStateToProps = (state) => {
+  const hideNested = state.config.hideNestedSuggestions;
+  return {
+    instructionsTree: hideNested
+      ? instructionsTree2(state)
+      : instructionsTree1(state),
+    otherItems: itemsNoInstruction(state),
+    itemScores: itemAnswerScoresSelector(state),
+  };
+};
 
 export default connect(mapStateToProps)(InstructionsSuggestionsColumn);

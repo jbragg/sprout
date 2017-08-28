@@ -1,20 +1,20 @@
 import { createSelector, createSelectorCreator, defaultMemoize } from 'reselect';
 import { combineReducers } from 'redux';
 import isEqual from 'lodash/isEqual';
-import { OrderedMap as Map, OrderedSet as Set } from 'immutable';
+import meanBy from 'lodash/meanBy';
+import { OrderedMap as Map, OrderedSet as Set, List } from 'immutable';
 import getScore from '../score';
 import { defaults } from '../constants';
 import config from './config';
 import autoAdvance from './autoAdvance';
-import entities, { itemDataSelector } from './entities';
+import entities from './entities';
 import currentItem, { currentItemIdSelector } from './currentItem';
 import clusterId from './clusterId';
 import lightboxId from './lightboxId';
 import generalInstructions from './generalInstructions';
 import experimentPhase from './experimentPhase';
 import oracle from './oracle';
-
-export { itemDataSelector };
+import recommendations from './recommendations';
 
 /*
  * utilities
@@ -42,6 +42,7 @@ const createDeepEqualSelector = createSelectorCreator(
  */
 
 export const itemsSelector = state => state.entities.items;
+export const itemDataSelector = state => state.entities.itemData;
 export const groupsSelector = state => state.entities.groups;
 export const answersSelector = state => state.entities.answers;
 export const clusterIdsSelector = createSelector(
@@ -211,6 +212,126 @@ export const recommendedGroupSelector = createSelector(
   },
 );
 
+/*
+ * Instructions-related selectors
+ */
+export const answersByInstruction = createSelector(
+  answersSelector,
+  answers => (answers
+    .byId
+    .filter(answer => answer.data.instructions)
+    .groupBy(answer => answer.data.instructions)
+  ),
+);
+
+export const itemsByInstruction = createSelector(
+  answersByInstruction,
+  groupedAnswers => new Map([...groupedAnswers].map(
+    ([instruction, answers]) => [
+      instruction,
+      answers.toIndexedSeq().countBy(answer => answer.data.questionid),
+    ],
+  )),
+);
+
+/* Answers for all items with at least one vote for an instruction */
+export const itemAnswersByInstruction = createSelector(
+  itemAnswersSelector,
+  itemsByInstruction,
+  (answers, instructionItems) => instructionItems.map(
+    items => [...items.keySeq().map(item => new List(answers.get(item))).flatten(0)],
+  ),
+);
+
+export const instructionsSimilarity = createSelector(
+  itemsByInstruction,
+  allItems => allItems.map(items => (
+    allItems.map(otherItems => items.keySeq().toSet().intersect(otherItems.keySeq()).size)
+  )),
+);
+
+export const disagreementOrderScore = score => (
+  (100 * Math.abs(0.5 - score)) + (-1 * score)
+);
+
+export const instructionsSorted = createSelector(
+  itemsByInstruction,
+  itemAnswerScoresSelector,
+  (instructions, itemScores) => (
+    instructions
+      .sortBy(values => (
+        (-1000 * values.size)
+        + meanBy(
+          [...values.keys()],
+          id => disagreementOrderScore(itemScores.get(id)),
+        )
+      ))
+      .keySeq()
+  ),
+);
+
+export const instructionsTree1 = createSelector(
+  instructionsSorted,
+  instructionsSimilarity,
+  (instructions, similarities) => (
+    new Map(instructions.map(key => ([
+      key,
+      new Map(instructions.map(k => ([
+        k,
+        similarities.get(key).get(k),
+      ])))
+        .filterNot((_, k) => k === key)
+        .filter(v => v)
+        .sortBy(v => -1 * v),
+    ])))
+  ),
+);
+
+/*
+ * Like instructionsTree1, but hides instructions from the top level if they
+ * already appear nested under an instruction higher in the list.
+ */
+export const instructionsTree2 = createSelector(
+  instructionsSorted,
+  instructionsSimilarity,
+  (instructions, similarities) => {
+    let tree = new Map();
+    let remaining = [...instructions];
+    let current = null;
+    while (remaining.length) {
+      [current, ...remaining] = remaining;
+      const remainingSimilarities = new Map(
+        remaining.map(k => ([ // eslint-disable-line no-loop-func
+          k,
+          similarities.get(current).get(k),
+        ])),
+      );
+      tree = tree.set(
+        current,
+        tree
+          .get(current, new Map())
+          .merge(remainingSimilarities.filter(v => v)),
+      );
+      remaining = [...remainingSimilarities.filterNot(v => v).keys()];
+    }
+    return tree;
+  },
+);
+
+export const itemsNoInstruction = createSelector(
+  answersSelector,
+  itemDataSelector,
+  (answers, items) => {
+    const itemsWithInstructions = answers
+      .byId
+      .filter(answer => answer.data.instructions)
+      .map(answer => answer.data.questionid)
+      .toSet();
+    return items.byId.keySeq().toSet().subtract(itemsWithInstructions);
+  },
+);
+
+
 export const getItemsSummary = (itemIds, state) => (
   []
   .concat(...itemIds
@@ -221,6 +342,8 @@ export const getItemsSummary = (itemIds, state) => (
   .filter(s => s)
   .join(' ... ')
 );
+
+export const getTestRecommendations = state => state.recommendations;
 
 /*
  * reducers
@@ -236,4 +359,5 @@ export default combineReducers({
   generalInstructions,
   experimentPhase,
   oracle,
+  recommendations,
 });

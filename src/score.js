@@ -1,9 +1,11 @@
+import mean from 'lodash/mean';
+import meanBy from 'lodash/meanBy';
 import { scaleLinear } from 'd3-scale';
 
 // Average answer value (0 is "Definitely No" 1 is "Definitely Yes")
 const answerScore = (...vals) => {
   const score = scaleLinear().domain([1, 5]).range([0, 1])(
-    vals.reduce((a, b) => a + b, 0) / vals.length);
+    mean(vals));
   const humanScore = scaleLinear().domain([0, 1]).range([-1, 1])(score);
   return {
     color: score,
@@ -15,7 +17,7 @@ const answerScore = (...vals) => {
 // Distance of average answer value from 0 or 1
 const agreementScore = (...vals) => {
   const score = scaleLinear().domain([0, 2]).range([0, 1])(
-    Math.abs(3 - (vals.reduce((a, b) => a + b, 0) / vals.length)),
+    Math.abs(3 - (mean(vals))),
   );
   return {
     color: score,
@@ -26,7 +28,7 @@ const agreementScore = (...vals) => {
 // Confusion: Average distance of each answer from nearest "Definitely No" or "Definitely Yes"
 const confusionScore = (...vals) => {
   const score = scaleLinear().domain([0, 2]).range([1, 0])(
-    vals.map(v => Math.abs(3 - v)).reduce((a, b) => a + b, 0) / vals.length);
+    meanBy(vals, v => Math.abs(3 - v)));
   return {
     color: score,
     human: score,
@@ -43,8 +45,8 @@ const getScore = (metric) => {
 };
 
 const defaultMetrics = {
-  'sort': 'agreement',
-  'color': 'answer',
+  sort: 'agreement',
+  color: 'answer',
 };
 
 export { defaultMetrics as defaults };

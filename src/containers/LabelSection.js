@@ -24,7 +24,7 @@ const propTypes = {
   onGroupDelete: PropTypes.func.isRequired,
   itemIds: ImmutablePropTypes.orderedSetOf(PropTypes.number.isRequired).isRequired,
   label: PropTypes.string.isRequired,
-  fixedTarget: PropTypes.bool,
+  fixedTarget: PropTypes.bool, // Additional fixed-position targets.
   autoAdvance: PropTypes.bool.isRequired,
   draggable: PropTypes.bool.isRequired,
 };
