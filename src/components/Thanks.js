@@ -5,8 +5,10 @@ import Loading from './Loading';
 
 const propTypes = {
   params: PropTypes.shape({
-    tutorial: PropTypes.bool,
+    tutorialIndex: PropTypes.number,
     taskIndex: PropTypes.number,
+    nTutorials: PropTypes.number.isRequired,
+    nTasks: PropTypes.number.isRequired,
   }),
   redirectTime: PropTypes.number,
 };
@@ -33,17 +35,22 @@ class Thanks extends React.Component {
 
   shouldRedirect() {
     const { params } = this.props;
-    return params && (
-      params.tutorial || params.taskIndex === 0 || params.taskIndex === 1
-    );
+    return params && (params.taskIndex !== params.nTasks - 1);
   }
 
   redirectUrl() {
-    const { params } = this.props;
+    const params = this.props.params;
     const queryString = stringify({
-      ...params,
-      tutorial: undefined,
-      taskIndex: params.taskIndex == null ? 0 : params.taskIndex + 1,
+      tutorialIndex: (
+        params.tutorialIndex == null
+        || params.tutorialIndex === params.nTutorials - 1
+          ? undefined
+          : params.tutorialIndex + 1
+      ),
+      taskIndex: (params.tutorialIndex === params.nTutorials - 1
+        ? 0
+        : params.taskIndex + 1
+      ),
     });
     return `/?${queryString}`;
   }

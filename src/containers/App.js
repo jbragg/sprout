@@ -7,7 +7,7 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
-import { Grid, Col, Well, Button } from 'react-bootstrap';
+import { Grid, Col, Button } from 'react-bootstrap';
 import AlertContainer from 'react-alert';
 import Instructions from '../components/Instructions';
 import Loading from '../components/Loading';
@@ -36,7 +36,9 @@ const propTypes = {
   }).isRequired,
   experimentPosition: PropTypes.shape({
     taskIndex: PropTypes.number,
-    tutorial: PropTypes.bool,
+    tutorialIndex: PropTypes.number,
+    nTutorials: PropTypes.number,
+    nTasks: PropTypes.number,
   }),
   experimentId: PropTypes.string,
   participantId: PropTypes.string,
@@ -308,11 +310,11 @@ class App extends React.Component {
           className={classNames({
             experiment: (
               this.props.experimentPosition
-              && !this.props.experimentPosition.tutorial
+              && this.props.experimentPosition.taskIndex != null
             ),
             'experiment-tutorial': (
               this.props.experimentPosition
-              && this.props.experimentPosition.tutorial
+              && this.props.experimentPosition.tutorialIndex != null
             ),
           })}
         >
@@ -330,11 +332,10 @@ class App extends React.Component {
           <CustomDragLayer />
           {this.props.experimentPosition && (
             <ExperimentProgress
-              currentIndex={
-                this.props.experimentPosition.tutorial
-                  ? 0
-                  : this.props.experimentPosition.taskIndex + 1
-              }
+              tutorialIndex={this.props.experimentPosition.tutorialIndex}
+              taskIndex={this.props.experimentPosition.taskIndex}
+              nTutorials={this.props.experimentPosition.nTutorials}
+              nTasks={this.props.experimentPosition.nTasks}
             />
           )}
           {experimentComponent}

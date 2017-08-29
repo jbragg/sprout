@@ -14,7 +14,7 @@ import conditions from '../experiment';
 
 const getTreatment = (participantIndex, taskIndex) => {
   if (participantIndex == null || taskIndex == null) {
-    return 2;  // full system
+    return 2; // full system
   }
   const participant = Number(participantIndex);
   const task = Number(taskIndex);
@@ -26,16 +26,18 @@ const getAllParams = (params) => {
   let taskId = params.taskId;
   let relevantParams = { ...params };
   if (params.experimentId) {
-    taskId = params.tutorial
-      ? config.experiments[params.experimentId].tutorial
+    taskId = params.tutorialIndex != null
+      ? config.experiments[params.experimentId].tutorials[params.tutorialIndex]
       : config.experiments[params.experimentId].tasks[params.taskIndex];
     relevantParams.experimentPosition = {
-      tutorial: params.tutorial,
+      tutorialIndex: params.tutorialIndex,
       taskIndex: params.taskIndex,
+      nTutorials: config.experiments[params.experimentId].tutorials.length,
+      nTasks: config.experiments[params.experimentId].tasks.length,
     };
-    delete relevantParams.tutorial;  // tutorial is overloaded.
+    delete relevantParams.tutorialIndex;
     delete relevantParams.taskIndex;
-    if (params.participantIndex != null && !params.tutorial) {
+    if (params.participantIndex != null && params.tutorialIndex != null) {
       relevantParams.systemVersion = getTreatment(
         params.participantIndex, params.taskIndex,
       );
@@ -75,7 +77,7 @@ class AppLoader extends React.Component {
       ...parse(this.props.location.search),
     };
     const numberParams = [
-      'participantIndex', 'taskIndex', 'systemVersion',
+      'participantIndex', 'taskIndex', 'systemVersion', 'tutorialIndex',
     ];
     const boolParams = [
       'tutorial', 'clusters', 'master', 'multiPhase', 'exemplarsFirst',

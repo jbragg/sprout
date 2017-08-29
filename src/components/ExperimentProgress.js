@@ -3,29 +3,39 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 const propTypes = {
-  phases: PropTypes.arrayOf(PropTypes.string.isRequired),
-  currentIndex: PropTypes.number.isRequired,
+  tutorialIndex: PropTypes.number,
+  taskIndex: PropTypes.number,
+  nTutorials: PropTypes.number.isRequired,
+  nTasks: PropTypes.number.isRequired,
 };
 
 const defaultProps = {
-  phases: ['Tutorial', 'Task 1', 'Task 2', 'Task 3'],
+  tutorialIndex: null,
+  taskIndex: null,
 };
 
-const ExperimentProgress = ({ phases, currentIndex }) => (
+const ExperimentProgress = ({
+  tutorialIndex, taskIndex, nTutorials, nTasks,
+}) => (
   <div className="experiment-progress">
-    {phases.map((phase, index) => (
+    {Array(nTutorials + nTasks).fill().map((_, index) => (
       <div
-        key={phase}
+        key={index}
         className={classNames(
           'text-center',
-          { selected: currentIndex === index },
+          {
+            selected: (tutorialIndex != null
+              ? index === tutorialIndex
+              : index === taskIndex + nTutorials
+            ),
+          },
         )}
         style={{
           display: 'inline-block',
-          width: `${100 / phases.length}%`,
+          width: `${100 / (nTutorials + nTasks)}%`,
         }}
       >
-        <span>{phase}</span>
+        <span>{index < nTutorials ? 'Tutorial ' : 'Task '} {index < nTutorials ? index + 1 : index - nTutorials + 1}</span>
       </div>
     ))}
   </div>
