@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Row, Col, Panel, FormGroup, ControlLabel, Modal, Button } from 'react-bootstrap';
 import InstructionsEditor from '../containers/InstructionsEditor';
+import AnswerFormControl from '../containers/AnswerFormControl';
 import ReasonFormControl from '../containers/ReasonFormControl';
 import { ItemLargeContainer } from '../containers/ItemContainer';
 import { itemLabelsSelector } from '../reducers/index';
@@ -22,6 +23,7 @@ const propTypes = {
   finalLabels: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
   onEditItem: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
+  labelOutside: PropTypes.bool.isRequired,
 };
 
 const defaultProps = {
@@ -49,8 +51,10 @@ class InstructionsModal extends React.Component {
   }
 
   render() {
-    const { show, item, itemLabel, onSubmit, finalLabels } = this.props;
-    const canEdit = finalLabels.indexOf(itemLabel) >= 0;
+    const {
+      show, item, itemLabel, onSubmit, finalLabels, labelOutside,
+    } = this.props;
+    const canEdit = item != null && (!labelOutside || finalLabels.indexOf(itemLabel) >= 0);
     return (
       <Modal show={show}>
         <Modal.Body>
@@ -60,7 +64,9 @@ class InstructionsModal extends React.Component {
             )
             : (
               <div>
-                <p>Explain to a worker why this item should be labeled <strong>{itemLabel}</strong>.</p>
+                {labelOutside && (
+                  <p>Explain to a worker why this item should be labeled <strong>{itemLabel}</strong>.</p>
+                )}
                 <p>Suggestions for good explanations:</p>
                 <ExplanationTips />
                 <p>Your explanation will be used to teach workers after they answer this question. You may also edit your instructions here if you choose.</p>
@@ -78,12 +84,21 @@ class InstructionsModal extends React.Component {
                     />
                   </Col>
                   <Col sm={6}>
+                    {!labelOutside && (
+                      <FormGroup>
+                        <ControlLabel>Your answer:</ControlLabel>
+                        <AnswerFormControl itemId={item.id} />
+                      </FormGroup>
+                    )}
                     <FormGroup>
                       <ControlLabel>Your explanation:</ControlLabel>
                       <ReasonFormControl
                         itemId={item.id}
-                        placeholder={`Explain why the answer is ${itemLabel}`}
-                        editableAnswer={false}
+                        placeholder={
+                          labelOutside
+                            ? `Explain why the answer is ${itemLabel}`
+                            : 'Explain your answer'
+                        }
                       />
                     </FormGroup>
                   </Col>

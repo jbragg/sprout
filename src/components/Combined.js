@@ -43,8 +43,7 @@ const Combined = ({
         oracle={oracle}
         exportButton={exportButton}
         onChangeExperimentPhase={onChangeExperimentPhase}
-        testQuestions
-        testQuestionsModalEditor
+        testQuestionsLabelOutside
       />
     </div>
   </div>

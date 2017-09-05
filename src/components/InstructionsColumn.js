@@ -21,21 +21,23 @@ const propTypes = {
   testQuestions: PropTypes.bool,
   testQuestionsModalEditor: PropTypes.bool,
   testQuestionsAlwaysShowFinalLabels: PropTypes.bool,
+  testQuestionsLabelOutside: PropTypes.bool,
 };
 
 const defaultProps = {
   oracle: false,
   tutorial: false,
-  testQuestions: false,
-  testQuestionsModalEditor: false,
-  testQuestionsAlwaysShowFinalLabels: false,
+  testQuestions: true,
+  testQuestionsModalEditor: true,
+  testQuestionsAlwaysShowFinalLabels: true,
+  testQuestionsLabelOutside: false,
 };
 
 const InstructionsColumn = ({
   tutorial, countdown, remainingSeconds,
   advanceExperimentPhase, currentState, oracle, exportButton,
   onChangeExperimentPhase, testQuestions, testQuestionsModalEditor,
-  testQuestionsAlwaysShowFinalLabels,
+  testQuestionsAlwaysShowFinalLabels, testQuestionsLabelOutside,
 }) => (
   <div>
     {oracle && (
@@ -48,6 +50,7 @@ const InstructionsColumn = ({
       <TestQuestions
         modalEditor={testQuestionsModalEditor}
         alwaysShowFinalLabels={testQuestionsAlwaysShowFinalLabels}
+        labelOutside={testQuestionsLabelOutside}
       />
     )}
     {countdown && (

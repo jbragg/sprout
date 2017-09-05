@@ -14,6 +14,7 @@ import ConfusionsTable from '../components/ConfusionsTable';
 import AnswersSummary from '../components/AnswersSummary';
 import ExplanationTips from '../components/ExplanationTips';
 import ReasonFormControl from './ReasonFormControl';
+import AnswerFormControl from './AnswerFormControl';
 import ItemList from '../components/ItemList';
 import Loading from '../components/Loading';
 import {
@@ -63,7 +64,7 @@ const defaultProps = ({
   confusionsTable: false,
   answersTable: true,
   answersSummary: false,
-  editReason: true,
+  editReason: false,
   draggable: false,
   recommendedGroup: null,
   master: false,
@@ -156,7 +157,14 @@ class ItemLarge extends React.Component {
                 </tr>
               </thead>
               <tbody>
-                <ReasonFormControl itemId={item.id} />
+                <tr>
+                  <td>
+                    <AnswerFormControl itemId={item.id} />
+                  </td>
+                  <td>
+                    <ReasonFormControl itemId={item.id} />
+                  </td>
+                </tr>
               </tbody>
             </table>
           </ListGroupItem>

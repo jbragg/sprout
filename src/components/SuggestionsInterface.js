@@ -75,8 +75,6 @@ const SuggestionsInterface = ({
           currentState={States.COMBINED}
           exportButton={exportButton}
           onChangeExperimentPhase={onChangeExperimentPhase}
-          testQuestions
-          testQuestionsAlwaysShowFinalLabels
         />
       </div>
     </div>

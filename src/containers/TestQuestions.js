@@ -45,12 +45,13 @@ const propTypes = {
     }),
   ).isRequired,
   maxRecommendations: PropTypes.number,
+  labelOutside: PropTypes.bool.isRequired,
 };
 
 const defaultProps = {
   // dropResult: null,
   modalEditor: false,
-  alwaysShowFinalLabels: false,
+  alwaysShowFinalLabels: true,
   maxRecommendations: 3,
 };
 
@@ -90,6 +91,7 @@ class TestQuestions extends React.Component {
       connectDropTarget, uncertainLabel, finalLabels, onEditTest,
       modalEditor, alwaysShowFinalLabels,
       showRecommendations, recommendations, maxRecommendations,
+      labelOutside,
     } = this.props;
     const unlabeledItemIds = [...items.values()]
       .filter(item => item.label == null && item.group == null)
@@ -138,6 +140,7 @@ class TestQuestions extends React.Component {
                 show={this.state.current != null}
                 itemId={this.state.current}
                 onSubmit={() => { this.setState({ current: null }); }}
+                labelOutside={labelOutside}
               />
             )}
             <RemoveTarget
