@@ -65,7 +65,7 @@ class InstructionsEditor extends React.Component {
         const newExamples = examples
           .subtract(prevState.examples);
         if (newExamples.size > 0) {
-          props.onNewExamples([...newExamples]);
+          props.onNewExamples([...newExamples.values()]);
         }
         return { examples };
       });

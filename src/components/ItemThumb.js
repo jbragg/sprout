@@ -19,6 +19,7 @@ const propTypes = {
   isLabeled: PropTypes.bool,
   textColor: PropTypes.string,
   backgroundColor: PropTypes.string,
+  useReasons: PropTypes.bool.isRequired,
 };
 
 const defaultProps = ({
@@ -42,13 +43,13 @@ class ItemThumb extends React.Component {
   render() {
     const {
       item, selected, onClick, connectDragSource, isDragging, isLabeled,
-      textColor, backgroundColor,
+      textColor, backgroundColor, useReasons,
     } = this.props;
     return connectDragSource(
       <button
         className={classNames(
           'item-thumb btn btn-default',
-          { labeled: isLabeled, exemplar: item.exemplar },
+          { labeled: isLabeled, exemplar: useReasons && item.exemplar },
         )}
         onClick={(e) => { onClick(item.id); e.preventDefault(); }}
         style={{

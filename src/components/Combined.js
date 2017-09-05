@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import UnlabeledColumn from '../containers/UnlabeledColumn';
 import LabeledColumn from './LabeledColumn';
 import InstructionsColumn from './InstructionsColumn';
-import { States } from '../constants';
+import { States, tutorialSteps } from '../constants';
 import withTutorial from '../withTutorial';
 
 const propTypes = {
@@ -53,4 +53,6 @@ const Combined = ({
 Combined.propTypes = propTypes;
 Combined.defaultProps = defaultProps;
 
-export default withTutorial(Combined);
+export default withTutorial(
+  Combined, tutorialSteps.structuredLabeling,
+);

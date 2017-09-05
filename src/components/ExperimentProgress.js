@@ -25,8 +25,8 @@ const ExperimentProgress = ({
           'text-center',
           {
             selected: (tutorialIndex != null
-              ? index === tutorialIndex
-              : index === taskIndex + nTutorials
+              ? index % 2 === 0 && Math.floor(index / 2) === tutorialIndex
+              : index % 2 === 1 && Math.floor(index / 2) === taskIndex
             ),
           },
         )}
@@ -35,7 +35,7 @@ const ExperimentProgress = ({
           width: `${100 / (nTutorials + nTasks)}%`,
         }}
       >
-        <span>{index < nTutorials ? 'Tutorial ' : 'Task '} {index < nTutorials ? index + 1 : index - nTutorials + 1}</span>
+        <span>{index % 2 === 0 ? 'Practice' : 'Task '} {Math.floor(index / 2) + 1}</span>
       </div>
     ))}
   </div>

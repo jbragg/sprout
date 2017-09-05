@@ -1,29 +1,36 @@
 #!/usr/bin/env python
 """Generate randomized 3x3 latin squares javascript module."""
-import random
 import copy
+import random
 
-COPIES = 10
+COPIES = 100
 
-latin3x3s = [
-    [[1, 2, 3], [2, 3, 1], [3, 1, 2]],
-    [[1, 2, 3], [3, 1, 2], [2, 3, 1]],
-    [[1, 3, 2], [2, 1, 3], [3, 2, 1]],
-    [[1, 3, 2], [3, 2, 1], [2, 1, 3]],
-    [[2, 1, 3], [1, 3, 2], [3, 2, 1]],
-    [[2, 1, 3], [3, 2, 1], [1, 3, 2]],
-    [[2, 3, 1], [1, 2, 3], [3, 1, 2]],
-    [[2, 3, 1], [3, 1, 2], [1, 2, 3]],
-    [[3, 2, 1], [1, 3, 2], [2, 1, 3]],
-    [[3, 2, 1], [2, 1, 3], [1, 3, 2]],
-    [[3, 1, 2], [1, 2, 3], [2, 3, 1]],
-    [[3, 1, 2], [2, 3, 1], [1, 2, 3]]]
+latin_squares = {
+    'latin3x3': [
+        [[1, 2, 3], [2, 3, 1], [3, 1, 2]],
+        [[1, 2, 3], [3, 1, 2], [2, 3, 1]],
+        [[1, 3, 2], [2, 1, 3], [3, 2, 1]],
+        [[1, 3, 2], [3, 2, 1], [2, 1, 3]],
+        [[2, 1, 3], [1, 3, 2], [3, 2, 1]],
+        [[2, 1, 3], [3, 2, 1], [1, 3, 2]],
+        [[2, 3, 1], [1, 2, 3], [3, 1, 2]],
+        [[2, 3, 1], [3, 1, 2], [1, 2, 3]],
+        [[3, 2, 1], [1, 3, 2], [2, 1, 3]],
+        [[3, 2, 1], [2, 1, 3], [1, 3, 2]],
+        [[3, 1, 2], [1, 2, 3], [2, 3, 1]],
+        [[3, 1, 2], [2, 3, 1], [1, 2, 3]],
+    ],
+    'latin2x2': [
+        [[1, 2], [2, 1]],
+        [[2, 1], [1, 2]],
+    ],
+}
 
-random.seed(0)
-matrices = []
-for i in xrange(COPIES):
-    random.shuffle(latin3x3s)
-    matrices += copy.deepcopy(latin3x3s)
-
-with open('latin3x3.js', 'w') as f_out:
-    f_out.write('export default {0};\n'.format(matrices))
+for k in latin_squares:
+    random.seed(0)
+    matrices = []
+    for i in xrange(COPIES):
+        random.shuffle(latin_squares[k])
+        matrices += copy.deepcopy(latin_squares[k])
+    with open('{0}.js'.format(k), 'w') as f_out:
+        f_out.write('export default {0};\n'.format(matrices))

@@ -36,7 +36,7 @@ const AnswersTable = ({ answers, useReasons, overlay }) => {
     return <div className="text-center">No answers to show</div>;
   }
   return (
-    <table className="table table-condensed">
+    <table className="answers-table table table-condensed">
       <thead>
         <tr>
           <th />

@@ -39,6 +39,9 @@ export function recommendTestItems(itemExamples) {
     const id = itemExamples[0];
     const state = getState();
     const similarItems = itemSimilaritiesSelector(state).get(id);
+    if (similarItems.size === 0) {
+      return;
+    }
     const [recommendedId] = similarItems.entrySeq().first();
     return dispatch({
       type: RECOMMEND_TEST_ITEMS,
@@ -263,12 +266,13 @@ function formatAnswerData(answerData) {
   // answerData.answer is either a key or value in answerKey, or unavailable.
   let answerValue = null;
   let answerString = null;
+  const isInstructionsAnswer = answerData.instructions_answer && answerData.instructions;
   if (answerData.answer != null) {
     const answerKeyIndex = [...answerKey.values()].indexOf(answerData.answer);
     answerValue = (answerKeyIndex >= 0) ? answerKeyIndex + 1 : Number(answerData.answer);
     answerString = answerKey.get(answerValue);
   } else {
-    answerValue = (answerData.instructions
+    answerValue = (isInstructionsAnswer
       ? 3
       : resolveAnswerKey[answerData.test_answer]
     );
@@ -281,6 +285,11 @@ function formatAnswerData(answerData) {
     ...answerData,
     answer: answerValue,
     answerString,
+    // questionid: answerData.questiondata.id, // Was not written properly in experiments answers from partial datasets
+    instructions: isInstructionsAnswer ? answerData.instructions && answerData.instructions.toLowerCase() : null,
+    instructions_answer: isInstructionsAnswer ? answerData.instructions_answer : null,
+    test_answer: !isInstructionsAnswer ? answerData.test_answer : null, // Assume an instructions answer if entered (form.vars.multiple was not written properly in experiments answers)
+    test: !isInstructionsAnswer ? answerData.test : null, // Assume an instructions answer if entered (form.vars.multiple was not written properly in experiments answers)
   };
 }
 

@@ -76,7 +76,7 @@ const InstructionsColumn = ({
           className="btn-ready"
           bsStyle="primary"
         >
-          Ready for experiment
+          Done with practice task
         </Button>
       </Confirm>
     )}

@@ -131,7 +131,7 @@ class ItemLarge extends React.Component {
           </ListGroupItem>
         )}
         {editReason && (
-          <ListGroupItem>
+          <ListGroupItem className="edit-reason">
             <table className="table table-condensed">
               <thead>
                 <tr>
@@ -199,7 +199,7 @@ class ItemLarge extends React.Component {
           <div
             className={classNames(
               'panel panel-default item-large',
-              { recommended: imageStatus === 'loaded' && recommendedGroup >= 0 },
+              { recommended: imageStatus === 'loaded' && recommendedGroup >= 0 && useReasons },
             )}
             style={{
               opacity: isDragging ? 0.5 : null,

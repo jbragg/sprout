@@ -51,10 +51,10 @@ def fetch_all(query, limit=100):
 
 def filter_to_str(filter):
     return '{}.{}.{}.{}.json'.format(
-        filter.experiment_id or '',
-        filter.task_id or '',
-        filter.participant_id or '',
-        filter.participant_index or '',
+        filter.experiment_id if filter.experiment_id is not None else '',
+        filter.task_id if filter.task_id is not None else '',
+        filter.participant_id if filter.participant_id is not None else '',
+        filter.participant_index if filter.participant_index is not None else '',
     )
 
 
@@ -97,10 +97,10 @@ def main(project_id, data_dir=DATA_DIR, separate=True):
             print('about to fetch {}'.format(map(filter_to_str, filters)))
             for filter in filters:
                 name = '{}.{}.{}.{}.json'.format(
-                    filter.experiment_id or '',
-                    filter.task_id or '',
-                    filter.participant_id or '',
-                    filter.participant_index or '',
+                    filter.experiment_id if filter.experiment_id is not None else '',
+                    filter.task_id if filter.task_id is not None else '',
+                    filter.participant_id if filter.participant_id is not None else '',
+                    filter.participant_index if filter.participant_index is not None else '',
                 )
                 path = os.path.join(data_dir, name)
                 if not os.path.exists(path):

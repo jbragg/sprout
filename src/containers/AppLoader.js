@@ -9,17 +9,26 @@ import App from './App';
 import { fetchExperiment } from '../actions';
 import { States } from '../constants';
 import config from '../config';
+import latin2x2 from '../rand/latin/latin2x2';
 import latin3x3 from '../rand/latin/latin3x3';
 import conditions from '../experiment';
 
-const getTreatment = (participantIndex, taskIndex) => {
+const getTreatment = (participantIndex, taskIndex, nTasks) => {
   if (participantIndex == null || taskIndex == null) {
     return 2; // full system
   }
+  let squares = null;
+  if (nTasks === 3) {
+    squares = latin3x3;
+  } else if (nTasks === 2) {
+    squares = latin2x2;
+  } else {
+    throw new Error('Undefined latin square size');
+  }
   const participant = Number(participantIndex);
   const task = Number(taskIndex);
-  const squareIndex = Math.floor(participant / 3) % latin3x3.length;
-  return latin3x3[squareIndex][participant % 3][task] - 1;
+  const squareIndex = Math.floor(participant / nTasks) % squares.length;
+  return squares[squareIndex][participant % nTasks][task] - 1;
 };
 
 const getAllParams = (params) => {
@@ -37,16 +46,23 @@ const getAllParams = (params) => {
     };
     delete relevantParams.tutorialIndex;
     delete relevantParams.taskIndex;
-    if (params.participantIndex != null && params.tutorialIndex != null) {
+    if (params.participantIndex != null) {
       relevantParams.systemVersion = getTreatment(
-        params.participantIndex, params.taskIndex,
+        params.participantIndex,
+        params.taskIndex != null ? params.taskIndex : params.tutorialIndex,
+        relevantParams.experimentPosition.nTasks,
       );
     }
   }
   if (relevantParams.systemVersion != null) {
     relevantParams = {
       ...relevantParams,
-      ...conditions[relevantParams.systemVersion],
+      ...conditions[
+        (
+          relevantParams.experimentPosition
+          && relevantParams.experimentPosition.nTasks
+        ) || 3
+      ][relevantParams.systemVersion],
     };
   }
   const task = config.tasks[taskId];
@@ -82,6 +98,7 @@ class AppLoader extends React.Component {
     const boolParams = [
       'tutorial', 'clusters', 'master', 'multiPhase', 'exemplarsFirst',
       'rawView', 'clusterView', 'hideNestedSuggestions',
+      'prefetchAll',
     ];
     numberParams.forEach((key) => {
       if (params[key] != null) {

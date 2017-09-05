@@ -5,7 +5,8 @@ import CurrentItemPreview from '../containers/CurrentItemPreview';
 import InstructionsColumn from './InstructionsColumn';
 import InstructionsSuggestionsColumn from '../containers/InstructionsSuggestionsColumn';
 import Progress from '../containers/Progress';
-import { States } from '../constants';
+import { States, tutorialSteps } from '../constants';
+import withTutorial from '../withTutorial';
 
 const propTypes = {
   onChangeExperimentPhase: PropTypes.func.isRequired,
@@ -25,7 +26,7 @@ const SuggestionsInterface = ({
   advanceExperimentPhase, onChangeExperimentPhase,
   remainingSeconds,
 }) => (
-  <div className="combined">
+  <div className="suggestions absolute">
     <div id="left">
       <div>
         <Progress instructions />
@@ -85,4 +86,6 @@ const SuggestionsInterface = ({
 SuggestionsInterface.propTypes = propTypes;
 SuggestionsInterface.defaultProps = defaultProps;
 
-export default SuggestionsInterface;
+export default withTutorial(
+  SuggestionsInterface, tutorialSteps.suggestions,
+);

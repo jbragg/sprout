@@ -9,6 +9,9 @@ const propTypes = {
     taskIndex: PropTypes.number,
     nTutorials: PropTypes.number.isRequired,
     nTasks: PropTypes.number.isRequired,
+    experimentId: PropTypes.string.isRequired,
+    participantIndex: PropTypes.number,
+    participantId: PropTypes.string,
   }),
   redirectTime: PropTypes.number,
 };
@@ -41,16 +44,17 @@ class Thanks extends React.Component {
   redirectUrl() {
     const params = this.props.params;
     const queryString = stringify({
-      tutorialIndex: (
-        params.tutorialIndex == null
-        || params.tutorialIndex === params.nTutorials - 1
-          ? undefined
-          : params.tutorialIndex + 1
-      ),
-      taskIndex: (params.tutorialIndex === params.nTutorials - 1
-        ? 0
+      tutorialIndex: (params.tutorialIndex != null
+        ? undefined
         : params.taskIndex + 1
       ),
+      taskIndex: (params.taskIndex != null
+        ? undefined
+        : params.tutorialIndex
+      ),
+      experimentId: params.experimentId,
+      participantId: params.participantId != null ? params.participantId : undefined,
+      participantIndex: params.participantIndex != null ? params.participantIndex : undefined,
     });
     return `/?${queryString}`;
   }

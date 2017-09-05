@@ -30,12 +30,15 @@ def get_word_vectors(words):
     return dict((v['word'], v['vector']) for v in resp['vecFromWord'])
 
 
-def cluster_docs(docs, cached_filename=None):
+def cluster_docs(docs, cached_filename=None, cluster_method='affinity',
+                 connectivity=None, k=20):
     """Get clusters.
 
     Args:
         docs (pd.Series): Series with index.
         cached_filename (Optional[str]): Path to file for caching word vectors.
+        cluster_method (Optional[str]): Cluster method. Can be one of:
+            'kmeans' or 'affinity'.
 
     Returns:
         clusters ([[Object]]): Clusters of ids.
@@ -75,9 +78,13 @@ def cluster_docs(docs, cached_filename=None):
 
     ids = docs.index
     clusters = collections.defaultdict(list)
-    # k = 20
-    # model = cluster.KMeans(n_clusters=min(k, doc_feature_matrix.shape[0]))
-    model = cluster.AffinityPropagation()
+    if cluster_method == 'kmeans':
+        model = cluster.KMeans(n_clusters=min(k, doc_feature_matrix.shape[0]))
+    elif cluster_method == 'affinity':
+        model = cluster.AffinityPropagation()
+    else:
+        model = cluster.AgglomerativeClustering()
+        raise NotImplementedError
     Y = model.fit_predict(doc_feature_matrix)
     for id, y in zip(ids, Y):
         clusters[y].append(id)
@@ -168,6 +175,7 @@ def main(answers_path, experiment_path, out_path, cached_filename=None):
             has_string(row.get('unclear_reason'))
             or has_string(row.get('unclear_type'))
             or has_string(row['data'].get('instructions'))
+            or has_string(row['data'].get('test'))
         )
     questions = df[df.apply(filter1, axis=1)]['questionid'].unique()
     df_filtered = df[df.questionid.isin(questions)]

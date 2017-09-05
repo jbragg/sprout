@@ -2,9 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Joyride from 'react-joyride';
 import ReactMarkdown from 'react-markdown';
-import { tutorialSteps } from './constants';
 
-export default (WrappedComponent) => {
+export default (WrappedComponent, tutorialSteps) => {
   const propTypes = { tutorial: PropTypes.bool };
   const defaultProps = { tutorial: false };
   class WithTutorial extends React.Component {

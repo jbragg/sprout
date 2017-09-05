@@ -172,17 +172,19 @@ class App extends React.Component {
     });
   }
 
-  advanceExperimentPhase(currentPhase) {
-    if (currentPhase === States.LOADED && !this.props.multiPhase) {
-      this.props.onChangeExperimentPhase(States.COMBINED);
-    } else if (currentPhase === States.LOADED) {
-      this.props.onChangeExperimentPhase(States.LABELING);
+  advanceExperimentPhase(currentPhase, payload = null) {
+    if (currentPhase === States.LOADED && this.props.experimentPosition != null) {
+      this.props.onChangeExperimentPhase(States.WELCOME, payload);
+    } else if ((currentPhase === States.LOADED || currentPhase === States.WELCOME) && !this.props.multiPhase) {
+      this.props.onChangeExperimentPhase(States.COMBINED, payload);
+    } else if (currentPhase === States.LOADED || currentPhase === States.WELCOME) {
+      this.props.onChangeExperimentPhase(States.LABELING, payload);
     } else if (currentPhase === States.COMBINED || currentPhase === States.INSTRUCTIONS) {
-      this.props.onChangeExperimentPhase(States.SURVEY);
+      this.props.onChangeExperimentPhase(States.SURVEY, payload);
     } else if (currentPhase === States.LABELING) {
-      this.props.onChangeExperimentPhase(States.ORACLE);
+      this.props.onChangeExperimentPhase(States.ORACLE, payload);
     } else if (currentPhase === States.ORACLE) {
-      this.props.onChangeExperimentPhase(States.INSTRUCTIONS);
+      this.props.onChangeExperimentPhase(States.INSTRUCTIONS, payload);
     }
   }
 
@@ -202,7 +204,25 @@ class App extends React.Component {
     }
     let experimentComponent = null;
     const remainingSeconds = this.remainingTime() / 1000;
-    if (experimentState === States.COMBINED) {
+    if (experimentState === States.WELCOME) {
+      experimentComponent = (
+        <Grid>
+          <p>You are about to begin {this.props.experimentPosition.tutorialIndex != null ? 'practice task' : 'real task'} {this.props.experimentPosition.tutorialIndex != null ? `${this.props.experimentPosition.tutorialIndex + 1} / ${this.props.experimentPosition.nTutorials}` : `${this.props.experimentPosition.taskIndex + 1} / ${this.props.experimentPosition.nTasks}`}.</p>
+          {this.props.experimentPosition.tutorialIndex != null && (
+            <div>
+              <p>In the practice task, please follow the tutorial by clicking on each flashing red dot you see and following the instructions. You should ask the experimenter about anything that is confusing in the practice task.</p>
+              <p>After this practice task, there will be a timed task in a different domain using this interface.</p>
+            </div>
+          )}
+          <Button
+            bsStyle="primary"
+            onClick={() => { this.advanceExperimentPhase(experimentState); }}
+          >
+            Ready to begin
+          </Button>
+        </Grid>
+      );
+    } else if (experimentState === States.COMBINED) {
       experimentComponent = (interfaceName === 'suggestions'
         ? (
           <SuggestionsInterface
@@ -212,6 +232,7 @@ class App extends React.Component {
             remainingSeconds={remainingSeconds}
             advanceExperimentPhase={this.advanceExperimentPhase}
             onChangeExperimentPhase={this.props.onChangeExperimentPhase}
+            tutorial={tutorial}
           />
         )
         : (
@@ -377,13 +398,9 @@ const mapStateToProps = state => ({
   interfaceName: state.config.interface,
 });
 
-const mapDispatchToProps = dispatch => ({
-  onChangeExperimentPhase: (phase) => {
-    dispatch(changeExperimentPhase(phase));
-  },
-  onSetLightbox: (payload) => {
-    dispatch(setLightbox(payload));
-  },
-});
+const mapDispatchToProps = {
+  onChangeExperimentPhase: changeExperimentPhase,
+  onSetLightbox: setLightbox,
+};
 
 export default DragDropContext(HTML5Backend)(connect(mapStateToProps, mapDispatchToProps)(App));

@@ -14,6 +14,13 @@ import pandas as pd
 import seaborn as sns
 
 
+def get_nested(d, keys):
+    try:
+        return reduce(operator.getitem, keys, d)
+    except KeyError:
+        return None
+
+
 def unnormalize(prefixes, df, df_normalized, sep='.'):
     """Return a new dataframe that is normalized except for the prefixes."""
     out = df_normalized
@@ -22,7 +29,7 @@ def unnormalize(prefixes, df, df_normalized, sep='.'):
         out = out.drop(cols_to_drop, axis=1)
         cols = prefix.split(sep)
         out[prefix] = df[cols[0]].map(
-            lambda d: reduce(operator.getitem, cols[1:], d)
+            lambda d: get_nested(d, cols[1:])
         )
     return out
 
@@ -37,6 +44,7 @@ class Session(object):
             [
                 'next_state.entities',
                 'prev_state.entities',
+                'action.payload',
             ],
             df,
             df_normalized,
@@ -91,7 +99,7 @@ class Session(object):
             return df[
                 (df['action.type'] == 'CHANGE_EXPERIMENT_PHASE')
                 & (df['action.phase'] == 'thanks')
-            ].iloc[0]['action.payload.comments']
+            ].iloc[0]['action.payload']
         except IndexError:
             return None
 
@@ -140,8 +148,8 @@ class Session(object):
 
         feedback = self.feedback()
         if feedback is not None:
-            with open(os.path.join(output_dir, 'feedback.txt'), 'w') as f:
-                f.write(feedback)
+            with open(os.path.join(output_dir, 'feedback.json'), 'w') as f:
+                json.dump(feedback, f)
 
 
 def main(fp, output_dir):
