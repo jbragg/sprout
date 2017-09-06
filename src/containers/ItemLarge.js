@@ -127,7 +127,6 @@ class ItemLarge extends React.Component {
             <AnswersTable
               useReasons={useReasons}
               answers={answers}
-              overlay={!editReason}
             />
           </ListGroupItem>
         )}

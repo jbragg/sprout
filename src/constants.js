@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const DragItemTypes = {
   ITEM: 'item',
   GROUP: 'group',
@@ -37,7 +35,8 @@ export const defaults = {
   finalLabels: [Labels.YES, Labels.NO],
   uncertainLabel: Labels.MAYBE,
   durations: {
-    [States.COMBINED]: 20 * 60 * 1000,  // minutes to milliseconds
+    // [States.COMBINED]: 20 * 60 * 1000, // minutes to milliseconds
+    [States.COMBINED]: 18 * 60 * 1000, // minutes to milliseconds
     [States.LABELING]: 5 * 60 * 1000,
     [States.INSTRUCTIONS]: 5 * 60 * 1000,
   },
@@ -45,28 +44,32 @@ export const defaults = {
     [States.COMBINED]: [
       [
         6 * 60 * 1000,
-        "It's been a few minutes. Remember your goal is to improve the instructions and include at least 4 test questions (2 'yes' and 2 'no').", // You should **ask for clarifications**, **edit the instructions**, and **create test questions**.",
+        "It's been a few minutes. Remember your goal is to improve the instructions and make at least 3 test questions.", // You should **ask for clarifications**, **edit the instructions**, and **create test questions**.",
       ],
       [
         12 * 60 * 1000,
-        "You have only a few minutes remaining. You should have edited the instructions by now and added some of the 4 minimum test questions (2 'yes' and 2 'no').", // Remember to **ask for clarifications**, **edit the instructions**, and **create test questions**.',
+        'You have only a few minutes remaining. Remember your goal is to improve the instructions and make at least 3 test questions.', // Remember to **ask for clarifications**, **edit the instructions**, and **create test questions**.',
       ],
     ],
   },
 };
 
+const firstSteps = [
+  {
+    text: "Imagine you want some people (workers) to help you to answer this question for a large set of items. You have written these initial instructions, but the people helping you don't know how to answer this question for all the items because you haven't fully described what you want. **Important**: Your goal is to make sure the people helping you know what you want for as many items as possible.",
+    selector: '.instructions-editor',
+  },
+  {
+    text: 'You should also create at least 3 test questions here that workers will need to answer correctly. This will make sure they understand your instructions before they are allowed to answer questions.',
+    selector: '.instructions .test-questions',
+  },
+];
+
 export const tutorialSteps = {
   structuredLabeling: [
+    ...firstSteps,
     {
-      text: 'Your goal is to write instructions for crowd workers so they will label new items according to *your* understanding of this concept.',
-      selector: '.instructions-editor',
-    },
-    {
-      text: "It is important that you include questions that test whether workers understand your instructions. Items you drag here will be used as test questions. You should include a minimum of 4 test questions (2 'yes' and 2 'no').",
-      selector: '.instructions .test-questions',
-    },
-    {
-      text: 'All the items are here, in no particular order. **Action required before next red dot**: Click on a thumbnail now.',
+      text: 'This is a sample of items, in no particular order. **Action required before next red dot**: Click on a thumbnail now.',
       selector: '.items-nav',
     },
     {
@@ -89,16 +92,18 @@ export const tutorialSteps = {
       text: "Drag an item to one of these targets to create a new group. **Action required before next red dot**: Drag an item here to assign it to a new group in the 'maybe' category.",
       selector: '.labeled-column .label-section.label-maybe .new-group',
     },
+    /*
     {
       text: 'This bar shows your progress towards labeling all items (the number shows how many you have labeled). But your goal is to improve the instructions, not label all items.',
       selector: '.labeling-progress',
     },
+    */
     {
       text: '**Action required before next red dot**: Now edit the instructions, refer to an example item, and preview your edits.',
       selector: '.instructions .instructions-editor',
     },
     {
-      text: '**Action required before next red dot**: Drag a labeled item here that tests your instructions and click on it to explain your label to workers.',
+      text: '**Action required before next red dot**: Create a test question by dragging an item here and clicking on it to explain your answer to workers.',
       selector: '.instructions .test-questions',
     },
     {
@@ -107,16 +112,9 @@ export const tutorialSteps = {
     },
   ],
   suggestions: [
+    ...firstSteps,
     {
-      text: 'Your goal is to write instructions for crowd workers so they will label new items according to *your* understanding of this concept.',
-      selector: '.instructions-editor',
-    },
-    {
-      text: "It is important that you include questions that test whether workers understand your instructions. Items you drag here will be used as test questions. You should include a minimum of 4 test questions (2 'yes' and 2 'no').",
-      selector: '.instructions .test-questions',
-    },
-    {
-      text: 'All the items are here, organized into categories that were confusing to workers. **Action required before next red dot**: Click on an item button in one of the categories.',
+      text: 'This is a sample of items, organized into categories that were confusing to workers based on the first version of your instructions. **Action required before next red dot**: Click on an item button in one of the categories.',
       selector: '#left',
     },
     {
@@ -129,9 +127,9 @@ export const tutorialSteps = {
       position: 'top',
     },
     {
-      text: 'If you make this item a test question, you should enter your answer and explanation here.',
-      selector: '.item-large .edit-reason',
-      position: 'top',
+      text: '**Action required before next red dot**: Try zooming into the item now by clicking here and scrolling the mouse (or using the magnification buttons).',
+      selector: '.item-large .item',
+      position: 'right',
     },
     {
       text: 'Items that may be similar to the current item appear here.',
@@ -154,7 +152,7 @@ export const tutorialSteps = {
       selector: '.instructions .instructions-editor',
     },
     {
-      text: 'You can drag any item here, including the recommended test questions (above). **Action required before next red dot**: Drag a recommended test question here and explain your label to workers using the item preview (click on the item to open).',
+      text: 'You can drag any item here, including the recommended test questions (above). **Action required before next red dot**: Drag a recommended test question here and explain your answer to workers by clicking on it.',
       selector: '.instructions .test-questions',
     },
     {

@@ -23,7 +23,7 @@ const propTypes = {
 
 const defaultProps = ({
   useReasons: true,
-  overlay: true,
+  overlay: false,
 });
 
 const AnswersTable = ({ answers, useReasons, overlay }) => {

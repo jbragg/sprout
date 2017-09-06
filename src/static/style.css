@@ -47,6 +47,11 @@
   transition: opacity 300ms ease-in;
 }
 
+.test-question-recommendations {
+  max-height: 350px;
+  overflow-y: scroll;
+}
+
 /*
  * Hide the experiment progress bar during the tutorial because
  * react-joyride positioning is messed up.

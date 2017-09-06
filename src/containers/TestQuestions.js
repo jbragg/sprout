@@ -44,7 +44,6 @@ const propTypes = {
       reason: PropTypes.string,
     }),
   ).isRequired,
-  maxRecommendations: PropTypes.number,
   labelOutside: PropTypes.bool.isRequired,
 };
 
@@ -52,7 +51,6 @@ const defaultProps = {
   // dropResult: null,
   modalEditor: false,
   alwaysShowFinalLabels: true,
-  maxRecommendations: 3,
 };
 
 const errors = {
@@ -84,13 +82,20 @@ class TestQuestions extends React.Component {
   }
   */
 
+  componentWillReceiveProps(nextProps) {
+    const { recommendations, showRecommendations } = this.props;
+    if (showRecommendations && nextProps.recommendations.length > recommendations.length) {
+      this.node.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
   render() {
     const {
       items, itemLabels, labels,
       isOver, canDrop,
       connectDropTarget, uncertainLabel, finalLabels, onEditTest,
       modalEditor, alwaysShowFinalLabels,
-      showRecommendations, recommendations, maxRecommendations,
+      showRecommendations, recommendations,
       labelOutside,
     } = this.props;
     const unlabeledItemIds = [...items.values()]
@@ -104,11 +109,19 @@ class TestQuestions extends React.Component {
     return (
       <div className="panel-group">
         {showRecommendations && (
-          <Panel header={<h4>Recommended test questions</h4>}>
+          <Panel
+            className="test-question-recommendations"
+            header={
+              <h4
+                ref={(c) => { this.node = c; }}
+              >
+                Recommended test questions
+              </h4>
+            }
+          >
             {recommendations.length > 0 && (
               <TransitionGroup>
                 {[...recommendations
-                  .slice(0, maxRecommendations)
                   .map(({ id, reason }) => (
                     <CSSTransition
                       key={`${id}${reason}`}
@@ -250,7 +263,7 @@ class TestQuestions extends React.Component {
             </div>
           </div>,
         )}
-    </div>
+      </div>
     );
   }
 }
