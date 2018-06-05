@@ -226,7 +226,12 @@ def main_simple(raw_path, out_path=None, cached_filename=None):
             os.path.dirname(raw_path),
             os.path.basename(raw_path) + '.clustered.csv',
         )
-    df = pd.read_csv(raw_path)
+    if raw_path.endswith('txt'):
+        with open(raw_path, 'r') as f:
+            df = pd.DataFrame()
+            df['doc'] = f.readlines()
+    else:
+        df = pd.read_csv(raw_path)
     docs = df['doc']
     clusters, _, _ = cluster_docs(
         docs,
