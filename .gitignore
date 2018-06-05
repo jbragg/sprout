@@ -8,3 +8,4 @@ src/config.js
 lib/
 node_modules/
 experiment_data/
+util/*.png
