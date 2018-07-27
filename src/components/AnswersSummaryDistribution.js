@@ -57,7 +57,7 @@ const AnswersSummaryDistribution = ({ answers, includeInstructionsAnswer, classN
           className="unit"
           style={{
             backgroundColor: c,
-            width: `${100 / colors.size}%`,
+            width: `${100 / colors.size}px`,
           }}
         >
           &nbsp;

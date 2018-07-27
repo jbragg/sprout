@@ -581,26 +581,30 @@ div[tabindex="-1"]:focus {
 
 .answers-summary-distribution {
   display: inline-block;
-  width: 100px;
+  /*width: 100px; */
   float: right;
+  /*
   border-right: 2px solid #333;
   border-top: 2px solid #333;
   border-bottom: 2px solid #333;
   border-left: 1px solid #333;
+  */
   margin-right: 2px;
 }
 
-/*.answers-summary-distribution > .unit {*/
 .answers-summary-distribution > .unit {
   display: inline-block;
-  /*border-left: 1px solid white;*/
-  border-left: 1px solid #333;
-  /*
-  width: 5px;
-  background-color: yellow;
-  */
+  border-top: 2px solid #333;
+  border-bottom: 2px solid #333;
 }
 
+.answers-summary-distribution > .unit:first-child {
+  border-left: 2px solid #333;
+}
+
+.answers-summary-distribution > .unit:last-child {
+  border-right: 2px solid #333;
+}
 /*
  * Always show scrollbars
  */

@@ -257,9 +257,15 @@ export const disagreementOrderScore = score => (
 export const instructionsSorted = createSelector(
   itemsByInstruction,
   itemAnswerScoresSelector,
-  (instructions, itemScores) => (
+  itemAnswersByInstruction,
+  (instructions, itemScores, itemAnswers) => (
     instructions
-      .sortBy(values => (
+      .sortBy((values, k) => (
+        /*
+         * criterion to weight by number of workers who voted for an instructions category
+         * (-10000 * (new Set(itemAnswers.get(k).filter(v => v.data.instructions === k).map(v => v.workerid))).size)
+         * +
+         */
         (-1000 * values.size)
         + meanBy(
           [...values.keys()],

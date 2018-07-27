@@ -34,6 +34,10 @@ const defaultProps = {
   visited: null,
 };
 
+/*
+ * Badge with number of workers who specified those instructions
+ * <Badge pullRight >{(new Set(answers.filter(v => v.data.instructions === instruction).map(v => v.workerid))).size}</Badge>
+ */
 const InstructionItemGroup = ({
   itemCounts, itemScores, instruction, children, similarity, dispatch,
   onVisit, visited, answers, ...rest
