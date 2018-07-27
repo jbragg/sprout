@@ -7,6 +7,10 @@ import os
 DATA_DIR = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), 'experiment_data')
 
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default JSON code."""
@@ -58,8 +62,17 @@ def filter_to_str(filter):
     )
 
 
-def main(project_id, data_dir=DATA_DIR, separate=True):
+def main(project_id, participants=None, tasks=None, data_dir=DATA_DIR,
+         separate=True, overwrite=False):
     """Fetch experiment data.
+
+    Args:
+        participants (Optional[[int]]): List of participant ids for
+            study. Necessary because projection query is not behaving
+            correctly.
+        tasks (Optional[[str]]): List of task names.
+        separate (Optional[bool]): Separate into tasks / participants.
+            Defaults to True.
 
     Creates data_dir with the following files (JSON-serialized lists of
     entities):
@@ -75,7 +88,7 @@ def main(project_id, data_dir=DATA_DIR, separate=True):
 
     for entity_type, fname in [(model.Actions, 'actions.json')]:
         filters = []
-        if fname == 'actions.json':
+        if fname == 'actions.json' and not participants:
             filters = entity_type.query(
                 projection=[
                     entity_type.experiment_id,
@@ -94,7 +107,20 @@ def main(project_id, data_dir=DATA_DIR, separate=True):
                 ]
                 json.dump(records, f, cls=Encoder, default=json_serial)
         else:
-            print('about to fetch {}'.format(map(filter_to_str, filters)))
+            if not participants:
+                print('about to fetch {}'.format(map(filter_to_str, filters)))
+            elif tasks:
+                filters = []
+                for task in tasks:
+                    for p in participants:
+                        d = AttrDict()
+                        d['experiment_id'] = 'study'
+                        d['task_id'] = task
+                        d['participant_index'] = p
+                        d['participant_id'] = None
+                        filters.append(d)
+            else:
+                raise Exception('Participants specified but not tasks.')
             for filter in filters:
                 name = '{}.{}.{}.{}.json'.format(
                     filter.experiment_id if filter.experiment_id is not None else '',
@@ -103,7 +129,7 @@ def main(project_id, data_dir=DATA_DIR, separate=True):
                     filter.participant_index if filter.participant_index is not None else '',
                 )
                 path = os.path.join(data_dir, name)
-                if not os.path.exists(path):
+                if not os.path.exists(path) or overwrite:
                     print('fetching {}...'.format(name))
                     with open(path, 'w') as f:
                         records = [
@@ -131,7 +157,13 @@ if __name__ == '__main__':
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('project_id', help='Your Project ID.')
+    parser.add_argument('--participants', '-p', type=int, nargs='*')
+    parser.add_argument('--tasks', '-t', type=str, nargs='*')
 
     args = parser.parse_args()
 
-    main(args.project_id)
+    main(
+        args.project_id,
+        participants=args.participants or None,
+        tasks=args.tasks or None
+    )
