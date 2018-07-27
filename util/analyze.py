@@ -7,12 +7,16 @@ from functools import reduce
 import json
 import operator
 import os
+import re
 
 import dateutil.parser
+import matplotlib as mpl
+mpl.use('agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
+MENTION_RE = re.compile('@([0-9]+)')
 
 def get_nested(d, keys):
     try:
@@ -35,8 +39,9 @@ def unnormalize(prefixes, df, df_normalized, sep='.'):
 
 
 class Session(object):
-    def __init__(self, fp):
-        self.records = json.load(fp)
+    def __init__(self, records, experiment_data):
+        self.records = records
+        self.experiment_data = experiment_data
         df = pd.DataFrame(self.records)
         df_normalized = pd.io.json.json_normalize(self.records)
 
@@ -88,9 +93,61 @@ class Session(object):
         """Get final state."""
         return self.records[-1]['next_state']
 
-    def save_final_state(self, fp):
-        """Save final state."""
-        json.dump(self.to_application_state(self.final_state()), fp)
+    def get_final_application_state(self):
+        """Get final application state."""
+        return self.to_application_state(self.final_state())
+
+    def get_config(self):
+        """Get config."""
+        return self.final_state()['config']
+
+    @staticmethod
+    def get_test_questions(state):
+        """Get test questions from state."""
+        return [
+            v for v in state['entities']['items']['byId'].itervalues()
+            if 'test' in v and v['test'] is True
+        ]
+
+    def replace_item_mentions(self, instructions, indices=None):
+        if indices is None:
+            indices = dict()
+
+        counter = max([0] + indices.values())
+        for o in MENTION_RE.finditer(instructions):
+            id = int(o.group(1))
+            if id not in indices:
+                counter += 1
+                indices[id] = counter
+
+        def replace(o):
+            id = int(o.group(1))
+            return '[example {0} ![example {0}]({1})]({1}){{: .example target="_blank" }}'.format(
+                indices[id],
+                self.experiment_data[id]['data']['path'],
+            )
+
+        s = MENTION_RE.sub(
+            replace,
+            instructions,
+        )
+        return s, indices
+
+    def get_final_instructions(self):
+        """Get instructions in format to be consumed by external application."""
+        # config = self.get_config()
+        last = self.final_state()
+        test_questions = self.get_test_questions(last)
+        instructions, indices = self.replace_item_mentions(last['generalInstructions'])
+        for item in test_questions:
+            item.update(self.experiment_data[item['id']])
+            if 'reason' in item and 'text' in item['reason']:
+                item['reason']['text'], _ = self.replace_item_mentions(item['reason']['text'], indices)
+        return {
+            'instructions': instructions,
+            'examples': [{'id': id, 'index': indices[id]} for id in indices],
+            'tests': test_questions,
+        }
 
     def feedback(self):
         """Get participant feedback."""
@@ -110,6 +167,7 @@ class Session(object):
             'instructions': state['generalInstructions'],
             'groups': state['entities']['groups']['byId'].values(),
             'items': state['entities']['items']['byId'].values(),
+            'recommendations': state['recommendations'],  # Not loaded by Sprout
         }
 
     def analyze(self, output_dir):
@@ -144,7 +202,13 @@ class Session(object):
             plt.clf()
 
         with open(os.path.join(output_dir, 'last_state.json'), 'w') as f:
-            self.save_final_state(f)
+            json.dump(self.get_final_application_state(), f)
+
+        with open(os.path.join(output_dir, 'instructions.json'), 'w') as f:
+            json.dump(self.get_final_instructions(), f)
+
+        with open(os.path.join(output_dir, 'config.json'), 'w') as f:
+            json.dump(self.get_config(), f)
 
         feedback = self.feedback()
         if feedback is not None:
@@ -152,8 +216,17 @@ class Session(object):
                 json.dump(feedback, f)
 
 
-def main(fp, output_dir):
-    session = Session(fp)
+def main(records_fp, experiment_fp, output_dir, item_root_dir=None):
+    experiment_data = {
+        v['id']: v for v in json.load(experiment_fp)['data']
+    }
+    if item_root_dir is not None:
+        for k in experiment_data:
+            experiment_data[k]['data']['path'] = os.path.join(item_root_dir, experiment_data[k]['data']['path'])
+    session = Session(
+        records=json.load(records_fp),
+        experiment_data=experiment_data,
+    )
     session.analyze(output_dir=output_dir)
 
 
@@ -161,8 +234,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('input_file', type=argparse.FileType('r'))
+    parser.add_argument('input_file', type=argparse.FileType('r'),
+                        help='Experiment records')
+    parser.add_argument('experiment_file', type=argparse.FileType('r'),
+                        help='Experiment definition')
     parser.add_argument('-o', '--output_dir', type=str)
+    parser.add_argument('--item_root_dir', type=str)
 
     args = parser.parse_args()
     if args.output_dir is None:
@@ -178,4 +255,4 @@ if __name__ == '__main__':
         if e.errno != errno.EEXIST:
             raise
 
-    main(args.input_file, args.output_dir)
+    main(args.input_file, args.experiment_file, args.output_dir, args.item_root_dir)
