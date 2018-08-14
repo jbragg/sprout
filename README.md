@@ -1,8 +1,13 @@
+# Sprout
+
+For more details about the interface configurations and their evalutions, see the related paper:
+Jonathan Bragg, Mausam, and Daniel S. Weld. [Sprout: Crowd-Powered Task Design for Crowdsourcing](https://aiweb.cs.washington.edu/ai/pubs/bragg-uist18.pdf). In Proceedings of the 31st ACM User Interface Software and Technology Symposium (UIST '18). 2018. To appear.
+
 ## Installation
 
 To install the front-end dependencies:
 ```
-npm run install
+npm install
 ```
 
 To install the back-end dependencies (for experiment logging):
@@ -46,8 +51,17 @@ dev_appserver.py .
 ```
 Visit the application at [http://localhost:8080/](http://localhost:8080/). See [the documentation](https://cloud.google.com/appengine/docs/standard/python/tools/local-devserver-command) for other options for `dev_appserver.py`.
 
+
+### Getting started
+Four sample starting configurations are included (and defined in `src/config.js`). Two of these are tutorials:
+- [http://localhost:8080/?taskId=sampleStructuredLabeling](http://localhost:8080/?taskId=sampleStructuredLabeling)
+- [http://localhost:8080/?taskId=sampleStructuredLabelingTutorial](http://localhost:8080/?taskId=sampleStructuredLabelingTutorial)
+- [http://localhost:8080/?taskId=sampleSprout](http://localhost:8080/?taskId=sampleSprout)
+- [http://localhost:8080/?taskId=sampleSproutTutorial](http://localhost:8080/?taskId=sampleSproutTutorial)
+
+
 ### Config
-Specify `src/config.js` to define your tasks. For example:
+Specify `src/config.js` to define your own tasks. For example:
 ```javascript
 export default {
   tasks: [

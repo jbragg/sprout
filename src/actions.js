@@ -314,7 +314,7 @@ const setUpExperiment = (
     ...item,
     data: {
       ...item.data,
-      path: `${itemRootPath}/${item.data.path}`,
+      path: itemRootPath ? `${itemRootPath}/${item.data.path}` : item.data.path,
     },
     labelGT: oracleLabels.get(item.id != null ? item.id : id),
   }));
