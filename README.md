@@ -1,7 +1,7 @@
 # Sprout
 
 For more details about the interface configurations and their evalutions, see the related paper:
-- Jonathan Bragg, Mausam, and Daniel S. Weld. [Sprout: Crowd-Powered Task Design for Crowdsourcing](https://aiweb.cs.washington.edu/ai/pubs/bragg-uist18.pdf). In Proceedings of the 31st ACM User Interface Software and Technology Symposium (UIST '18). 2018. To appear.
+> Jonathan Bragg, Mausam, and Daniel S. Weld. [Sprout: Crowd-Powered Task Design for Crowdsourcing](https://aiweb.cs.washington.edu/ai/pubs/bragg-uist18.pdf). In Proceedings of the 31st ACM User Interface Software and Technology Symposium (UIST '18). 2018. To appear.
 
 ## Installation
 
